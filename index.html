@@ -597,10 +597,17 @@ async function testModel(){
   const badge = document.getElementById('ai-model-badge');
   badge.textContent='Testing…'; badge.style.color='var(--warn)';
   try{
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${aiKey}`;
+    const isOAuthKey = aiKey.startsWith('AQ.') || aiKey.startsWith('ya29.');
+    const modelId = isOAuthKey ? 'gemini-2.0-flash-001' : aiModel;
+    const geminiUrl = isOAuthKey
+      ? `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent`
+      : `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${aiKey}`;
+    const geminiHeaders = isOAuthKey
+      ? {'Content-Type':'application/json', 'Authorization': `Bearer ${aiKey}`}
+      : {'Content-Type':'application/json'};
     const resp = await fetch(geminiUrl,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: geminiHeaders,
       body:JSON.stringify({contents:[{role:'user',parts:[{text:'Reply with just the word OK.'}]}],generationConfig:{maxOutputTokens:5}})
     });
     const data = await resp.json();
@@ -647,10 +654,17 @@ When the user wants to EDIT an entry, include:
 
 Always include a friendly plain-text response. Keep it concise. Today is ${today()}.`;
   try{
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${aiKey}`;
+    const isOAuthKey = aiKey.startsWith('AQ.') || aiKey.startsWith('ya29.');
+    const modelId = isOAuthKey ? 'gemini-2.0-flash-001' : aiModel;
+    const geminiUrl = isOAuthKey
+      ? `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent`
+      : `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${aiKey}`;
+    const geminiHeaders = isOAuthKey
+      ? {'Content-Type':'application/json', 'Authorization': `Bearer ${aiKey}`}
+      : {'Content-Type':'application/json'};
     const resp = await fetch(geminiUrl,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: geminiHeaders,
       body:JSON.stringify({
         systemInstruction:{parts:[{text: systemPrompt}]},
         contents:[{role:'user', parts:[{text:`My work log:\n${context}\n\nRequest: ${text}`}]}],
