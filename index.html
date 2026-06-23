@@ -809,7 +809,7 @@ function render(){
 }
 
 function entryHTML(e, isArchived=false){
-  const cardColor = e.color || typeColors[e.type] || null;
+  const cardColor = typeColors[e.type] || null;
   const status = isArchived ? '' : deadlineStatus(e.deadline, e.deadlineEnd);
   const isEditing = editingId === e.id;
   const types = allTypes();
