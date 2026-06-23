@@ -855,7 +855,7 @@ function entryHTML(e, isArchived=false){
     const rangeStr = e.deadlineEnd ? `${fmtDate(e.deadline)} → ${fmtDate(e.deadlineEnd)}` : fmtDate(e.deadline);
     const timeStr = e.time ? ' · '+fmtTime(e.time) : '';
     const statusLabel = status===' overdue' ? ' · overdue' : status===' today' ? ' · I am due <b>TODAY!!!</b>. Don\'t forget to do me. <b>YAY!!!</b>' : status===' soon' ? ' · soon' : '';
-    return `<span class="chip deadline${status}">${rangeStr}${timeStr}${statusLabel}</span>`;
+    return `<span class="chip deadline${status}">${rangeStr}${timeStr}${statusLabel.includes('<b>') ? statusLabel : esc(statusLabel)}</span>`;
   })() : '';
 
   return `
