@@ -1,0 +1,19 @@
+# Office and PDF documents
+*.pdf
+*.xlsx
+*.docx
+*.pptx
+*.doc
+
+# Project folder — ignore everything except worklog.html
+Project/*
+!Project/worklog.html
+
+# Reference folder
+REF/
+
+# Test Project folder
+Test Project/
+
+# Settings
+.claude/settings.local.json
