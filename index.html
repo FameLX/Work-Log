@@ -73,6 +73,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .filter-chip{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;}
 .filter-chip:hover{border-color:var(--border2);}
 .filter-chip.active{background:var(--text);color:#fff;border-color:var(--text);}
+.btn-sync-all{background:#D8F3DC;color:#2D6A4F;border-color:rgba(45,106,79,.25);}
+.btn-sync-all:hover{background:#c0eac6;border-color:rgba(45,106,79,.4);}
 .entries{padding:16px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;}
 .empty-state{text-align:center;padding:60px 24px;color:var(--text3);}
 .empty-icon{font-size:36px;margin-bottom:12px;opacity:.3;}
@@ -361,13 +363,12 @@ svg.icon.sm{width:13px;height:13px;}
 <div class="modal-overlay" id="gcal-modal">
   <div class="modal">
     <h2>Connect Google Calendar</h2>
-    <p style="color:var(--success);background:var(--success-bg);padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:12px;">✓ The Google Calendar API is completely free — no subscription needed. You only need a free Google account.</p>
-    <p>One-time setup (about 5 minutes). After this, connecting is just: <strong>1. Paste Client ID → 2. Click Authorise → 3. Approve in popup</strong> (that's it!):</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">To get started, request the OAuth Client ID from the app owner, then follow these steps:</p>
     <ol class="modal-steps">
-      <li>Go to <a href="https://console.cloud.google.com" target="_blank" style="color:var(--info)">console.cloud.google.com</a> and sign in with any Google account. Click <strong>Select a project → New Project</strong>, give it any name, click Create.</li>
-      <li>In the search bar type <strong>Google Calendar API</strong>, click it, then click <strong>Enable</strong>. Then do the same for <strong>Google Tasks API</strong>.</li>
-      <li>Go to <strong>APIs &amp; Services → Credentials → Create Credentials → OAuth client ID</strong>. Choose <em>Web application</em>. Under "Authorised JavaScript origins" add <span class="mono">https://famelx.github.io</span> and under "Authorised redirect URIs" add <span class="mono">https://famelx.github.io/Work-Log/</span>. Click Create.</li>
-      <li>Copy the <strong>Client ID</strong> (the long string ending in <span class="mono">.apps.googleusercontent.com</span>) and paste it below, then click <strong>Authorise with Google</strong>.</li>
+      <li>Paste the Client ID in the field below</li>
+      <li>Click <strong>Authorise with Google</strong></li>
+      <li>A Google sign-in popup will appear — approve the access</li>
+      <li>Done! Your calendar will connect automatically</li>
     </ol>
     <div class="form-group"><label class="field-label">OAuth Client ID</label><input type="text" id="gcal-client-id" placeholder="xxxx.apps.googleusercontent.com"/></div>
     <div id="gcal-token-section" style="display:none;">
@@ -790,7 +791,11 @@ function render(){
   const source = viewMode==='active' ? entries : archived;
   const types = ['All', ...new Set(source.map(e=>e.type).filter(Boolean))];
   const fb = document.getElementById('filter-bar');
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('');
+  const syncAllBtn = (gcalToken && viewMode==='active') ? `<button class="btn btn-sm btn-sync-all" onclick="syncAllToGCal()" style="margin-left:auto;flex-shrink:0;">
+    <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    Sync All to GCal
+  </button>` : '';
+  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + syncAllBtn;
 
   // Update archive count badge
   const archiveBadge = document.getElementById('archive-count');
@@ -982,7 +987,23 @@ function gcalApplyToken(t){
   gcalToken=t; localStorage.setItem('wl2_gcal_token',t);
   document.getElementById('gcal-pill').classList.add('connected');
   document.getElementById('gcal-pill-text').textContent='Calendar connected';
-  closeGCalModal(); toast('Google Calendar connected!'); render();
+  closeGCalModal(); render();
+  toast('Google Calendar connected! Syncing all entries…', 3000);
+  setTimeout(() => syncAllToGCal(true), 800);
+}
+
+async function syncAllToGCal(silent=false){
+  if(!gcalToken){ toast('Connect Google Calendar first.'); return; }
+  const toSync = entries.filter(e => e.deadline);
+  if(!toSync.length){ toast('No entries with deadlines to sync.'); return; }
+  if(!silent) toast(`Syncing ${toSync.length} entries…`, 3000);
+  let synced = 0;
+  for(const e of toSync){
+    if(e.syncMode==='task') await pushToGTask(e);
+    else await pushToGCal(e);
+    synced++;
+  }
+  toast(`Done! ${synced} entries synced to Google Calendar.`);
 }
 
 function buildGCalEvent(entry){
