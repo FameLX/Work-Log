@@ -90,7 +90,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);}
 .chip.type{background:var(--info-bg);color:var(--info);border-color:rgba(30,64,175,.2);}
 .chip.overdue{background:var(--danger-bg);color:var(--danger);border-color:rgba(153,27,27,.25);}
-.chip.soon{background:#FF7F50;color:#FFFFFF;border-color:#FF7F50;}
+.chip.soon{background:var(--warn-bg);color:var(--warn);border-color:rgba(146,64,14,.25);}
+.chip.today{background:#fcc0a3;color:#1A1917;border-color:#fcc0a3;}
 .entry-actions{display:flex;gap:4px;flex-shrink:0;}
 .icon-btn{width:30px;height:30px;border-radius:8px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all .12s;}
 .icon-btn:hover{background:var(--surface2);color:var(--text);}
@@ -853,7 +854,7 @@ function entryHTML(e, isArchived=false){
   const deadlineChip = e.deadline ? (() => {
     const rangeStr = e.deadlineEnd ? `${fmtDate(e.deadline)} → ${fmtDate(e.deadlineEnd)}` : fmtDate(e.deadline);
     const timeStr = e.time ? ' · '+fmtTime(e.time) : '';
-    const statusLabel = status===' overdue' ? ' · overdue' : status===' soon' ? ' · I am due <b>TODAY!!!</b>. Don\'t forget to do me. <b>YAY!!!</b>' : '';
+    const statusLabel = status===' overdue' ? ' · overdue' : status===' today' ? ' · I am due <b>TODAY!!!</b>. Don\'t forget to do me. <b>YAY!!!</b>' : status===' soon' ? ' · soon' : '';
     return `<span class="chip deadline${status}">${rangeStr}${timeStr}${statusLabel}</span>`;
   })() : '';
 
@@ -894,6 +895,7 @@ function deadlineStatus(d, dEnd){
   const dl = new Date(check); dl.setHours(0,0,0,0);
   const diff = Math.round((dl-now)/(86400000));
   if(diff<0) return ' overdue';
+  if(diff===0) return ' today';
   if(diff<=3) return ' soon';
   return '';
 }
