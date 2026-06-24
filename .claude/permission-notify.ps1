@@ -46,19 +46,9 @@ try {
     if ($detail.Length -gt 100) { $detail = $detail.Substring(0, 97) + "..." }
 } catch { }
 
-# Auto-allow all read-only and routine tools silently
-$safelist = @("Read","Glob","Grep","TodoWrite","TodoRead","LS","ListFiles",
-              "WebSearch","WebFetch","Edit","Write","Bash","PowerShell")
-if ($safelist -contains $toolName) {
-    # For Bash/PowerShell, only interrupt on genuinely destructive patterns
-    if ($toolName -in @("Bash","PowerShell")) {
-        $cmd = "$($info.tool_input.command)$($info.tool_input.script)"
-        $dangerous = $cmd -match '(?i)(\brm\s+-[rRfF]|\brmdir\b|\bdel\s+/[sS]|\bgit\s+push.*--force|\bgit\s+reset\s+--hard|\bgit\s+clean\s+-[fd]|\bgit\s+branch\s+-[dD]\b|Remove-Item.*-Recurse|\bdrop\s+table\b|\btruncate\s+table\b|\btaskkill\b|\bkill\s+-9\b|npm\s+install\s+-g\b|pip\s+install\b|--force\b)'
-        if (-not $dangerous) { exit 0 }
-    } else {
-        exit 0
-    }
-}
+# Auto-allow only truly silent read-only tools (no notification needed)
+$silentlist = @("Read","Glob","Grep")
+if ($silentlist -contains $toolName) { exit 0 }
 
 # --- Build the form ---
 $TIMEOUT = 30   # seconds before auto-deny

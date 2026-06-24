@@ -416,20 +416,12 @@ svg.icon.sm{width:13px;height:13px;}
     <!-- Task Types -->
     <div class="settings-section">
       <h3>Task Types</h3>
-      <div class="desc">Add or remove types available in the entry form. Built-in types cannot be removed.</div>
+      <div class="desc">Add or remove types available in the entry form. Built-in types cannot be removed. Select a Google Calendar colour (1–11) to use when syncing.</div>
       <div id="settings-types-list"></div>
       <div class="add-type-row">
         <input type="text" id="new-type-input" placeholder="New type name…" onkeydown="if(event.key==='Enter')addCustomType()"/>
         <button class="btn btn-sm btn-primary" onclick="addCustomType()">Add</button>
       </div>
-    </div>
-
-    <!-- Type Colours -->
-    <div class="settings-section">
-      <h3>Type Colours</h3>
-      <div class="desc">Set a colour for each type. This colour appears on entry cards and is used when syncing to Google Calendar.<br>
-      Google Calendar colour IDs: 1 Lavender · 2 Sage · 3 Grape · 4 Flamingo · 5 Banana · 6 Tangerine · 7 Peacock · 8 Graphite · 9 Blueberry · 10 Basil · 11 Tomato</div>
-      <div id="settings-colors-list"></div>
     </div>
 
     <!-- UI Colours -->
@@ -1180,12 +1172,27 @@ const GCAL_COLOR_OPTIONS = [
   {id:'7',label:'7 · Peacock'},{id:'8',label:'8 · Graphite'},{id:'9',label:'9 · Blueberry'},
   {id:'10',label:'10 · Basil'},{id:'11',label:'11 · Tomato'}
 ];
+const GCAL_COLOR_MAP = {
+  '':'transparent',
+  '1':'#B39DDB','2':'#A4BDFC','3':'#D7AEFB','4':'#F691B2','5':'#FBBC04',
+  '6':'#FF887C','7':'#46BED8','8':'#616161','9':'#3C47DC','10':'#51B749','11':'#E67C73'
+};
 
 function openSettings(){
   buildSettingsUI();
   document.getElementById('settings-overlay').classList.add('open');
 }
 function closeSettings(){ document.getElementById('settings-overlay').classList.remove('open'); }
+
+function updateGCalColorPreview(type){
+  const select = document.getElementById('tc-gcal-'+type);
+  const swatch = document.getElementById('tc-swatch-'+type);
+  const gcalId = select.value;
+  const color = GCAL_COLOR_MAP[gcalId] || 'transparent';
+  swatch.style.background = color;
+  swatch.style.opacity = gcalId ? '1' : '0.3';
+  typeGCalIds[type] = gcalId;
+}
 
 function buildSettingsUI(){
   // Types list
@@ -1195,13 +1202,15 @@ function buildSettingsUI(){
     const color = typeColors[t] || '#888888';
     const gcalId = typeGCalIds[t] || '';
     const gcalOpts = GCAL_COLOR_OPTIONS.map(o=>`<option value="${o.id}"${gcalId===o.id?' selected':''}>${esc(o.label)}</option>`).join('');
+    const gcalColor = GCAL_COLOR_MAP[gcalId] || 'transparent';
     return `<div class="type-row" id="type-row-${esc(t)}">
       <div class="color-input-wrap" style="gap:4px;">
         <input type="color" id="tc-color-${esc(t)}" value="${color}" oninput="document.getElementById('tc-hex-${esc(t)}').value=this.value;" onchange="syncTypeColorHex('${esc(t)}')">
         <input type="text" id="tc-hex-${esc(t)}" value="${color}" style="width:78px;font-size:11px;" oninput="(function(v,id){if(/^#[0-9a-fA-F]{6}$/.test(v))document.getElementById('tc-color-'+id).value=v;})( this.value,'${esc(t)}'  )">
       </div>
       <span class="type-label">${esc(t)}${isBuiltin?'':' <span style="font-size:10px;color:var(--text3);">(custom)</span>'}</span>
-      <select class="type-gcal-select" id="tc-gcal-${esc(t)}">${gcalOpts}</select>
+      <select class="type-gcal-select" id="tc-gcal-${esc(t)}" onchange="updateGCalColorPreview('${esc(t)}')">${gcalOpts}</select>
+      <div class="gcal-color-swatch" id="tc-swatch-${esc(t)}" style="width:18px;height:18px;border-radius:4px;border:1px solid var(--border);background:${gcalColor};flex-shrink:0;${gcalId?'':'opacity:.3;'}"></div>
       ${isBuiltin?'<span style="width:26px;"></span>':`<button class="icon-btn del" onclick="removeCustomType('${esc(t)}')" title="Remove type" style="width:26px;">${trashIcon()}</button>`}
     </div>`;
   }).join('');
