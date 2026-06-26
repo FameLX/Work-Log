@@ -165,13 +165,30 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .add-type-row input{flex:1;}
 
 /* Changelog modal */
-.changelog-body{max-height:60vh;overflow-y:auto;margin:16px 0;}
+.changelog-body{max-height:55vh;overflow-y:auto;margin:12px 0;}
 .cl-version{margin-bottom:18px;}
 .cl-version-header{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
 .cl-version-tag{font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;background:var(--success-bg);color:var(--success);border:1px solid rgba(45,106,79,.2);}
 .cl-version-tag.old{background:var(--surface2);color:var(--text3);border-color:var(--border);}
 .cl-items{font-size:12px;color:var(--text2);line-height:1.9;padding-left:0;list-style:none;}
 .cl-items li::before{content:'·  ';color:var(--text3);}
+.cl-nav-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;}
+.cl-nav-btn:hover:not(:disabled){border-color:var(--border2);color:var(--text);}
+.cl-nav-btn:disabled{opacity:.3;cursor:not-allowed;}
+
+/* Trash overlay */
+.trash-overlay{position:fixed;inset:0;background:var(--bg);z-index:155;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.trash-overlay.open{transform:translateX(0);}
+.trash-topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;}
+.trash-topbar h2{font-size:15px;font-weight:500;flex:1;}
+.trash-body{flex:1;overflow-y:auto;padding:32px 24px;max-width:720px;margin:0 auto;width:100%;}
+.trash-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.trash-item-body{flex:1;min-width:0;}
+.trash-item-name{font-size:14px;font-weight:500;margin-bottom:2px;}
+
+/* Search input */
+.search-input{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:150px;transition:border-color .15s,width .2s;font-family:var(--font);}
+.search-input:focus{border-color:var(--border2);width:190px;}
 
 /* Due/Overdue alert modal */
 .due-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:120;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
@@ -183,6 +200,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .due-item{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;}
 .due-item.overdue{border-color:rgba(153,27,27,.3);background:var(--danger-bg);}
 .due-item.today{border-color:rgba(146,64,14,.3);background:var(--warn-bg);}
+.due-item.in-progress{border-color:rgba(45,106,79,.3);background:var(--success-bg);}
 .due-item-name{font-size:14px;font-weight:500;margin-bottom:4px;}
 .due-item-meta{font-size:12px;color:var(--text2);margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .due-item-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
@@ -218,7 +236,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v2.1</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.0</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -385,6 +403,18 @@ svg.icon.sm{width:13px;height:13px;}
   </div>
 </div>
 
+<!-- Trash Overlay -->
+<div class="trash-overlay" id="trash-overlay">
+  <div class="trash-topbar">
+    <button class="icon-btn" onclick="closeTrash()" title="Back">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <h2>Trash</h2>
+    <span id="trash-count" style="font-size:12px;color:var(--text3);"></span>
+  </div>
+  <div class="trash-body" id="trash-body"></div>
+</div>
+
 <!-- Due / Overdue Alert Modal -->
 <div class="due-modal-overlay" id="due-modal">
   <div class="due-modal">
@@ -424,6 +454,16 @@ svg.icon.sm{width:13px;height:13px;}
       </div>
     </div>
 
+    <!-- Trash -->
+    <div class="settings-section">
+      <h3>Trash</h3>
+      <div class="desc">Deleted entries are stored for 5 days before being permanently removed.</div>
+      <button class="btn btn-sm" onclick="openTrash()" style="gap:6px;">
+        <svg class="icon sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Open Trash <span id="trash-badge" style="color:var(--text3);margin-left:2px;"></span>
+      </button>
+    </div>
+
     <!-- UI Colours -->
     <div class="settings-section">
       <h3>Interface Colour</h3>
@@ -461,36 +501,16 @@ svg.icon.sm{width:13px;height:13px;}
 <div class="modal-overlay" id="changelog-modal">
   <div class="modal" style="max-width:500px;width:calc(100vw - 32px);">
     <h2>Changelog</h2>
-    <div class="changelog-body">
-      <div class="cl-version">
-        <div class="cl-version-header">v2.1 — June 2025 <span class="cl-version-tag">Latest</span></div>
-        <ul class="cl-items">
-          <li>Settings page: customise task types, per-type colours with GCal colour ID mapping, and UI accent/background colours</li>
-          <li>Deadline date ranges: set a start and end date for multi-day tasks; GCal events span the full range</li>
-          <li>Sort direction toggle: flip any sort mode between ascending and descending with one click</li>
-          <li>Changelog now embedded in-app (this modal)</li>
-        </ul>
-      </div>
-      <div class="cl-version">
-        <div class="cl-version-header">v2.0 <span class="cl-version-tag old">Previous</span></div>
-        <ul class="cl-items">
-          <li>Google Calendar sync — push, patch on edit, delete on permanent delete, duplicate check</li>
-          <li>AI assistant via Groq (Llama 3.3 70B / 3.1 8B) with model switcher and test button</li>
-          <li>Archive system: entries move to archive instead of permanent delete, restorable</li>
-          <li>Export to CSV (UTF-8 BOM for Thai), Excel (.xlsx via SheetJS), and JSON</li>
-          <li>Filter by type chips, sort by newest/oldest/deadline/name</li>
-          <li>View Archive toggle with entry count badge</li>
-        </ul>
-      </div>
-      <div class="cl-version">
-        <div class="cl-version-header">v1.0 <span class="cl-version-tag old">Initial</span></div>
-        <ul class="cl-items">
-          <li>Add, edit, delete entries with name, type, deadline, time, remark fields</li>
-          <li>localStorage persistence — private per browser</li>
-          <li>Responsive two-column layout (sidebar + main)</li>
-        </ul>
-      </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <button class="cl-nav-btn" id="cl-prev-btn" onclick="changelogNav(1)" title="Older version">
+        <svg class="icon sm" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span id="cl-page-info" style="font-size:12px;color:var(--text3);"></span>
+      <button class="cl-nav-btn" id="cl-next-btn" onclick="changelogNav(-1)" title="Newer version">
+        <svg class="icon sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
+    <div class="changelog-body" id="changelog-content"></div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="closeChangelog()">Close</button>
     </div>
@@ -503,10 +523,19 @@ svg.icon.sm{width:13px;height:13px;}
 // ── State ──────────────────────────────────────────────────────────────────
 let entries = JSON.parse(localStorage.getItem('wl2_entries') || '[]');
 let archived = JSON.parse(localStorage.getItem('wl2_archived') || '[]');
+let trash = JSON.parse(localStorage.getItem('wl2_trash') || '[]');
 // Migration: add updated field to old entries that don't have it
 entries.forEach(e => { if(!e.updated) e.updated = e.created; });
 archived.forEach(e => { if(!e.updated) e.updated = e.created; });
+// Purge trash entries older than 5 days
+(function purgeOldTrash(){
+  const cutoff = Date.now() - 5*86400000;
+  const before = trash.length;
+  trash = trash.filter(e => new Date(e.deletedAt).getTime() > cutoff);
+  if(trash.length !== before) localStorage.setItem('wl2_trash', JSON.stringify(trash));
+})();
 let viewMode = 'active'; // 'active' or 'archive'
+let searchQuery = '';
 let gcalToken = localStorage.getItem('wl2_gcal_token') || null;
 let filterType = 'All';
 let sortMode = 'deadline';
@@ -573,6 +602,7 @@ window.addEventListener('message', function(ev){
   applyUIColors();
   populateTypeSelects();
   render();
+  updateTrashBadge();
   checkDueOverdue();
 })();
 
@@ -611,11 +641,59 @@ function addEntry(){
 }
 
 function deleteEntry(id){
-  if(!confirm('Delete this entry?')) return;
-  const entry = entries.find(e=>e.id===id);
-  if(entry) entry.syncMode==='task' ? deleteFromGTask(entry) : deleteFromGCal(entry);
+  const entry = entries.find(e=>e.id===id); if(!entry) return;
+  if(gcalToken) entry.syncMode==='task' ? deleteFromGTask(entry) : deleteFromGCal(entry);
+  entry.deletedAt = new Date().toISOString();
+  trash.unshift(entry);
   entries = entries.filter(e=>e.id!==id);
-  save(); render(); toast('Entry deleted.');
+  saveTrash(); save(); render(); updateTrashBadge();
+  toast('Moved to Trash. Restore within 5 days from Settings.');
+}
+
+function restoreFromTrash(id){
+  const e = trash.find(x=>x.id===id); if(!e) return;
+  delete e.deletedAt;
+  entries.unshift(e);
+  trash = trash.filter(x=>x.id!==id);
+  saveTrash(); save(); render(); renderTrash(); updateTrashBadge();
+  toast('Entry restored to active.');
+}
+
+function openTrash(){ renderTrash(); document.getElementById('trash-overlay').classList.add('open'); }
+function closeTrash(){ document.getElementById('trash-overlay').classList.remove('open'); }
+
+function updateTrashBadge(){
+  const b = document.getElementById('trash-badge');
+  if(b) b.textContent = trash.length ? `(${trash.length})` : '';
+}
+
+function renderTrash(){
+  const body = document.getElementById('trash-body');
+  const countEl = document.getElementById('trash-count');
+  updateTrashBadge();
+  if(!trash.length){
+    body.innerHTML = '<div class="empty-state"><div class="empty-icon">🗑️</div><p>Trash is empty.</p></div>';
+    if(countEl) countEl.textContent = '';
+    return;
+  }
+  if(countEl) countEl.textContent = `${trash.length} item${trash.length!==1?'s':''}`;
+  const now = Date.now();
+  body.innerHTML = trash.map(e => {
+    const deletedMs = new Date(e.deletedAt).getTime();
+    const daysLeft = Math.max(1, Math.ceil((deletedMs + 5*86400000 - now) / 86400000));
+    const typeChip = e.type ? `<span class="chip type" style="font-size:10px;">${esc(e.type)}</span>` : '';
+    return `<div class="trash-item">
+      <div class="trash-item-body">
+        <div class="trash-item-name">${esc(e.name)}</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap;">
+          ${typeChip}
+          <span style="font-size:12px;color:var(--text3);">Deleted ${fmtDate(e.deletedAt.split('T')[0])}</span>
+          <span style="font-size:12px;color:var(--danger);">· ${daysLeft} day${daysLeft!==1?'s':''} remaining</span>
+        </div>
+      </div>
+      <button class="btn btn-sm" onclick="restoreFromTrash(${e.id})" style="flex-shrink:0;gap:4px;">${restoreIcon()} Restore</button>
+    </div>`;
+  }).join('');
 }
 
 function startEdit(id){
@@ -651,10 +729,11 @@ function saveEdit(id){
   }
 }
 
-function save(){ 
-  localStorage.setItem('wl2_entries', JSON.stringify(entries)); 
+function save(){
+  localStorage.setItem('wl2_entries', JSON.stringify(entries));
   localStorage.setItem('wl2_archived', JSON.stringify(archived));
 }
+function saveTrash(){ localStorage.setItem('wl2_trash', JSON.stringify(trash)); }
 
 function archiveEntry(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
@@ -682,16 +761,31 @@ function deleteArchived(id){
 // ── Due / Overdue Alert Modal ──────────────────────────────────────────────
 function checkDueOverdue(){
   const t = today();
-  const flagged = entries.filter(e => e.deadline && e.deadline <= t);
+  const flagged = entries.filter(e => {
+    if(!e.deadline) return false;
+    const status = deadlineStatus(e.deadline, e.deadlineEnd);
+    return status === ' overdue' || status === ' today' || status === ' last-day' || status === ' in-progress';
+  });
   if(!flagged.length) return;
 
   const list = document.getElementById('due-modal-list');
   list.innerHTML = flagged.map(e => {
-    const isOverdue = e.deadline < t;
-    const label = isOverdue ? `Overdue · ${fmtDate(e.deadline)}` : 'Due today';
+    const status = deadlineStatus(e.deadline, e.deadlineEnd);
+    const isMultiDay = e.deadlineEnd && e.deadlineEnd !== e.deadline;
+    const dateRange = isMultiDay ? `${fmtDate(e.deadline)} → ${fmtDate(e.deadlineEnd)}` : fmtDate(e.deadline);
+    let cssClass, label;
+    if(status === ' overdue'){
+      cssClass = 'overdue'; label = `Overdue · ${dateRange}`;
+    } else if(status === ' today'){
+      cssClass = 'today'; label = 'Due today';
+    } else if(status === ' last-day'){
+      cssClass = 'today'; label = `Last day · ${dateRange}`;
+    } else {
+      cssClass = 'in-progress'; label = `In Progress · ${dateRange}`;
+    }
     const typeChip = e.type ? `<span class="chip type">${esc(e.type)}</span>` : '';
     return `
-    <div class="due-item ${isOverdue?'overdue':'today'}" id="due-item-${e.id}">
+    <div class="due-item ${cssClass}" id="due-item-${e.id}">
       <div class="due-item-name">${esc(e.name)}</div>
       <div class="due-item-meta">${typeChip}<span>${label}</span></div>
       <div class="due-item-actions">
@@ -790,17 +884,19 @@ function render(){
   const source = viewMode==='active' ? entries : archived;
   const types = ['All', ...new Set(source.map(e=>e.type).filter(Boolean))];
   const fb = document.getElementById('filter-bar');
-  const syncAllBtn = (gcalToken && viewMode==='active') ? `<button class="btn btn-sm btn-sync-all" onclick="syncAllToGCal()" style="margin-left:auto;flex-shrink:0;">
+  const syncAllBtn = (gcalToken && viewMode==='active') ? `<button class="btn btn-sm btn-sync-all" onclick="syncAllToGCal()" style="flex-shrink:0;">
     <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     Sync All to GCal
   </button>` : '';
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + syncAllBtn;
+  const searchBox = `<input class="search-input" type="text" id="search-input" placeholder="Search…" value="${esc(searchQuery)}" oninput="setSearch(this.value)" style="margin-left:auto;flex-shrink:0;"/>`;
+  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + searchBox + syncAllBtn;
 
   // Update archive count badge
   const archiveBadge = document.getElementById('archive-count');
   if(archiveBadge) archiveBadge.textContent = '';
 
-  const shown = filterType==='All' ? sorted(source) : sorted(source).filter(e=>e.type===filterType);
+  const filtered = filterType==='All' ? sorted(source) : sorted(source).filter(e=>e.type===filterType);
+  const shown = filtered.filter(e => matchesSearch(e, searchQuery));
   document.getElementById('entry-count').textContent = shown.length;
   const list = document.getElementById('entries-list');
   if(!shown.length){
@@ -866,7 +962,7 @@ function entryHTML(e, isArchived=false){
     <div class="entry-card" id="card-${e.id}"${colorStyle}>
       <div class="entry-top">
         <div class="entry-body">
-          <div class="entry-name">${esc(e.name)}</div>
+          <div class="entry-name">${highlight(e.name, searchQuery)}</div>
           ${e.remark?`<div class="entry-remark">${esc(e.remark)}</div>`:''}
           <div class="entry-meta">
             ${isTaskEntry?`<span class="chip task-mode">Task</span>`:''}
@@ -934,6 +1030,27 @@ function fmtTime(t){
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function setFilter(t){ filterType=t; render(); }
 function setSortAndRender(v){ sortMode=v; pinnedId=null; render(); }
+
+function setSearch(q){
+  searchQuery = q; render();
+  requestAnimationFrame(()=>{ const el=document.getElementById('search-input'); if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);} });
+}
+
+function matchesSearch(e, q){
+  if(!q) return true;
+  const lq = q.toLowerCase();
+  return e.name.toLowerCase().includes(lq) || (e.deadline||'').includes(lq) || (e.deadlineEnd||'').includes(lq);
+}
+
+function highlight(text, query){
+  if(!query) return esc(text);
+  const str = String(text||'');
+  const lq = query.toLowerCase();
+  const lt = str.toLowerCase();
+  const idx = lt.indexOf(lq);
+  if(idx === -1) return esc(str);
+  return esc(str.slice(0,idx)) + '<strong>' + esc(str.slice(idx, idx+query.length)) + '</strong>' + highlight(str.slice(idx+query.length), query);
+}
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 function editIcon(){return`<svg class="icon sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;}
@@ -1339,8 +1456,54 @@ function saveSettings(){
 }
 
 // ── Changelog ──────────────────────────────────────────────────────────────
-function openChangelog(){ document.getElementById('changelog-modal').classList.add('open'); }
+const CHANGELOG = [
+  {
+    version: 'v1.1.0', date: 'June 2026', latest: true,
+    items: [
+      'Trash Can: deleted entries stored for 5 days, restorable from Settings › Trash',
+      'Search: real-time search by name or deadline in filter bar, works with type filters across all views',
+      'Notification fix: Tasks Needing Attention now correctly shows In Progress / Last Day / Overdue for multi-day events',
+      'Versioned changelog with per-version ← → navigation',
+      'Multi-day event status badges: In Progress (green), Last Chance (red), soon (yellow)',
+      'GCal colour preview swatch in Task Types settings',
+      'Updated/Created timestamps in exports; Z replaced with UTC',
+    ]
+  },
+  {
+    version: 'v1.0.0', date: 'June 2025', latest: false,
+    items: [
+      'Initial release: add, edit, delete entries with name, type, deadline, time, remark fields',
+      'Google Calendar sync and Google Tasks sync with per-type colour mapping',
+      'AI assistant via Groq (Llama 3.3 70B / 3.1 8B) with model switcher',
+      'Archive system: entries move to archive instead of permanent delete, restorable',
+      'Export to CSV (UTF-8 BOM for Thai), Excel (.xlsx via SheetJS), and JSON',
+      'Filter by type chips, sort by newest/oldest/deadline/name with direction toggle',
+      'Settings: task types, per-type colours, GCal colour IDs, UI accent/background colours',
+      'Deadline date ranges for multi-day events; Sync All to GCal with auto-sync on connect',
+      'localStorage persistence — private per browser',
+    ]
+  }
+];
+let changelogPage = 0;
+
+function openChangelog(){ changelogPage=0; renderChangelog(); document.getElementById('changelog-modal').classList.add('open'); }
 function closeChangelog(){ document.getElementById('changelog-modal').classList.remove('open'); }
+function changelogNav(dir){
+  changelogPage = Math.max(0, Math.min(CHANGELOG.length-1, changelogPage+dir));
+  renderChangelog();
+}
+function renderChangelog(){
+  const v = CHANGELOG[changelogPage];
+  const total = CHANGELOG.length;
+  document.getElementById('cl-page-info').textContent = `${changelogPage+1} / ${total}`;
+  document.getElementById('cl-prev-btn').disabled = changelogPage >= total-1;
+  document.getElementById('cl-next-btn').disabled = changelogPage <= 0;
+  document.getElementById('changelog-content').innerHTML = `
+    <div class="cl-version">
+      <div class="cl-version-header">${esc(v.version)} — ${esc(v.date)} <span class="cl-version-tag${v.latest?'':' old'}">${v.latest?'Latest':'Previous'}</span></div>
+      <ul class="cl-items">${v.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
+    </div>`;
+}
 
 // ── AI Panel ───────────────────────────────────────────────────────────────
 let aiKey = localStorage.getItem('wl2_ai_key') || '';
