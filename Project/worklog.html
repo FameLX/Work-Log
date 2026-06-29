@@ -187,7 +187,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .trash-item-name{font-size:14px;font-weight:500;margin-bottom:2px;}
 
 /* Search input */
-.search-input{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:200px;transition:border-color .15s;font-family:var(--font);}
+.search-bar-row{padding:8px 24px;border-bottom:1px solid var(--border);}
+.search-input{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none;width:100%;transition:border-color .15s;font-family:var(--font);box-sizing:border-box;}
 .search-input:focus{border-color:var(--border2);}
 
 /* Due/Overdue alert modal */
@@ -326,9 +327,9 @@ svg.icon.sm{width:13px;height:13px;}
       <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="Toggle sort direction">
         <svg class="icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
       </button>
-      <div id="sync-all-container"></div>
     </div>
     <div class="filter-bar" id="filter-bar"></div>
+    <div class="search-bar-row" id="search-bar-row"></div>
     <div class="entries" id="entries-list"></div>
   </main>
 </div>
@@ -891,13 +892,13 @@ function render(){
   const source = viewMode==='active' ? entries : archived;
   const types = ['All', ...new Set(source.map(e=>e.type).filter(Boolean))];
   const fb = document.getElementById('filter-bar');
-  const syncContainer = document.getElementById('sync-all-container');
-  if(syncContainer) syncContainer.innerHTML = (gcalToken && viewMode==='active') ? `<button class="btn btn-sm btn-sync-all" onclick="syncAllToGCal()" style="flex-shrink:0;">
+  const syncAllBtn = (gcalToken && viewMode==='active') ? `<button class="btn btn-sm btn-sync-all" onclick="syncAllToGCal()" style="flex-shrink:0;margin-left:auto;">
     <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     Sync All to GCal
   </button>` : '';
-  const searchBox = `<input class="search-input" type="text" id="search-input" placeholder="Search…" value="${esc(searchQuery)}" oninput="setSearch(this.value)" style="margin-left:auto;flex-shrink:0;"/>`;
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + searchBox;
+  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + syncAllBtn;
+  const searchRow = document.getElementById('search-bar-row');
+  if(searchRow) searchRow.innerHTML = `<input class="search-input" type="text" id="search-input" placeholder="Search…" value="${esc(searchQuery)}" oninput="setSearch(this.value)"/>`;
 
   // Update archive count badge
   const archiveBadge = document.getElementById('archive-count');
