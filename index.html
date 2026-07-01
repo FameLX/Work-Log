@@ -294,7 +294,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.5</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.6</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1307,7 +1307,7 @@ function repeatCalNav(dir){
 }
 
 function renderRepeatCal(startVal, endVal){
-  const generatedDates = new Set(generateRepeatDates(startVal) || []);
+  const generatedDates = new Set(generateRepeatDates(startVal, true) || []);
   const startD = new Date(startVal+'T00:00:00');
   const title = document.getElementById('repeat-cal-title');
   const grid = document.getElementById('repeat-cal-grid');
@@ -1357,12 +1357,12 @@ function updateMonthlyHint(){
   if(hint) hint.textContent = `Day ${dayOfMonth} of month  ·  ${nth} ${weekday} of month`;
 }
 
-function generateRepeatDates(startDate){
-  const endVal = document.getElementById('f-repeat-end').value;
-  if(!endVal){ toast('Set an end date for the repeat.'); return null; }
+function generateRepeatDates(startDate, silent=false){
+  const endVal = document.getElementById('f-repeat-end')?.value;
+  if(!endVal){ if(!silent) toast('Set an end date for the repeat.'); return null; }
   const start = new Date(startDate + 'T00:00:00');
   const end   = new Date(endVal   + 'T00:00:00');
-  if(end <= start){ toast('End date must be after the start date.'); return null; }
+  if(end <= start){ if(!silent) toast('End date must be after the start date.'); return null; }
 
   const dates = [];
   const addDate = d => dates.push(d.toISOString().split('T')[0]);
@@ -1374,7 +1374,7 @@ function generateRepeatDates(startDate){
 
   } else if(repeatType === 'weekly'){
     const activeDays = [...document.querySelectorAll('.repeat-weekday-btn.active')].map(b=>parseInt(b.dataset.day));
-    if(!activeDays.length){ toast('Select at least one weekday.'); return null; }
+    if(!activeDays.length){ if(!silent) toast('Select at least one weekday.'); return null; }
     const cur = new Date(start); cur.setDate(cur.getDate() + 1);
     while(cur <= end){ if(activeDays.includes(cur.getDay())) addDate(cur); cur.setDate(cur.getDate()+1); }
 
@@ -1557,7 +1557,8 @@ function entryHTML(e, isArchived=false){
   const isEditing = editingId === e.id;
   const types = allTypes();
   const typeOpts = types.map(t=>`<option${e.type===t?' selected':''}>${esc(t)}</option>`).join('');
-  const colorStyle = cardColor ? ` style="border-left:3px solid ${esc(cardColor)};padding-left:13px;"` : '';
+  const selectedStyle = (selectMode && !isArchived && selectedIds.has(e.id)) ? 'background:var(--surface2);' : '';
+  const colorStyle = (cardColor || selectedStyle) ? ` style="${cardColor?`border-left:3px solid ${esc(cardColor)};padding-left:13px;`:''}${selectedStyle}"` : '';
 
   const isTaskEntry = e.syncMode === 'task';
   if(isEditing) return `
@@ -1605,7 +1606,7 @@ function entryHTML(e, isArchived=false){
   const cardClick = (selectMode && !isArchived) ? ` onclick="toggleEntrySelect(${e.id})"` : '';
 
   return `
-    <div class="entry-card" id="card-${e.id}"${colorStyle}${cardClick} style="${selectedIds.has(e.id)?'background:var(--surface2);':''}">
+    <div class="entry-card" id="card-${e.id}"${colorStyle}${cardClick}>
       ${selectCb}
       <div class="entry-top">
         <div class="entry-body">
@@ -2151,7 +2152,7 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.1.5', date: 'July 2026', latest: true,
+    version: 'v1.1.6', date: 'July 2026', latest: true,
     items: [
       'Trash Can: deleted entries stored for 5 days, restorable from Settings › Trash',
       'Search: real-time search by name or deadline in filter bar, works with type filters across all views',
