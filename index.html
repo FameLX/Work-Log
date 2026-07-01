@@ -294,7 +294,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.9</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.2.0</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1377,7 +1377,12 @@ function generateRepeatDates(startDate, silent=false){
   if(end <= start){ if(!silent) toast('End date must be after the start date.'); return null; }
 
   const dates = [];
-  const addDate = d => dates.push(d.toISOString().split('T')[0]);
+  const addDate = d => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    dates.push(`${y}-${m}-${day}`);
+  };
 
   if(repeatType === 'daily'){
     const n = parseInt(document.getElementById('f-repeat-days').value) || 1;
@@ -1395,7 +1400,7 @@ function generateRepeatDates(startDate, silent=false){
     const dayOfMonth = start.getDate();
     const targetDay  = start.getDay();
     const nthWeek    = Math.ceil(dayOfMonth / 7);
-    const cur = new Date(start); cur.setDate(1); cur.setMonth(cur.getMonth()+1);
+    const cur = new Date(start.getFullYear(), start.getMonth(), 1);
     while(cur <= end){
       if(useWeekday){
         // Find nth occurrence of targetDay in this month
@@ -2169,7 +2174,11 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.1.9', date: 'July 2026', latest: true,
+    version: 'v1.2.0', date: 'July 2026', latest: true,
+    notes: 'Multi-select, repeat entries (daily/weekly/monthly/yearly/custom), GCal fixes'
+  },
+  {
+    version: 'v1.1.9', date: 'July 2026', latest: false,
     items: [
       'Trash Can: deleted entries stored for 5 days, restorable from Settings › Trash',
       'Search: real-time search by name or deadline in filter bar, works with type filters across all views',
