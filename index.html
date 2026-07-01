@@ -294,7 +294,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.6</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.7</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -771,7 +771,11 @@ function initializeTimePickers(){
   ['f-time', 'f-time-to'].forEach(id=>{
     const input = document.getElementById(id);
     if(!input) return;
-    input.parentElement.replaceChild(createTimePicker(id), input);
+    const parent = input.parentElement;
+    const next = input.nextSibling;
+    const picker = createTimePicker(id);
+    if(next) parent.insertBefore(picker, next);
+    else parent.appendChild(picker);
   });
 }
 
@@ -779,7 +783,11 @@ function initializeEditTimePickers(entryId){
   [`edit-time-${entryId}`, `edit-time-to-${entryId}`].forEach(id=>{
     const input = document.getElementById(id);
     if(!input) return;
-    input.parentElement.replaceChild(createTimePicker(id), input);
+    const parent = input.parentElement;
+    const next = input.nextSibling;
+    const picker = createTimePicker(id);
+    if(next) parent.insertBefore(picker, next);
+    else parent.appendChild(picker);
   });
 }
 
@@ -1940,20 +1948,20 @@ async function deleteFromGTask(entry){
 }
 
 // ── Settings ───────────────────────────────────────────────────────────────
-const GCAL_COLOR_OPTIONS = [
+var GCAL_COLOR_OPTIONS = [
   {id:'',label:'— None —'},
   {id:'1',label:'1 · Lavender'},{id:'2',label:'2 · Sage'},{id:'3',label:'3 · Grape'},
   {id:'4',label:'4 · Flamingo'},{id:'5',label:'5 · Banana'},{id:'6',label:'6 · Tangerine'},
   {id:'7',label:'7 · Peacock'},{id:'8',label:'8 · Graphite'},{id:'9',label:'9 · Blueberry'},
   {id:'10',label:'10 · Basil'},{id:'11',label:'11 · Tomato'}
 ];
-const GCAL_COLOR_MAP = {
+var GCAL_COLOR_MAP = {
   '':'transparent',
   '1':'#a4bdfc','2':'#7ae7bf','3':'#dbadff','4':'#ff887c','5':'#fbd75b',
   '6':'#ffb878','7':'#46d6db','8':'#e1e1e1','9':'#5484ed','10':'#51b749','11':'#dc2127'
 };
 
-const GCAL_COLOR_NAMES = {
+var GCAL_COLOR_NAMES = {
   '1':'Lavender','2':'Sage','3':'Grape','4':'Flamingo','5':'Banana',
   '6':'Tangerine','7':'Peacock','8':'Graphite','9':'Blueberry','10':'Basil','11':'Tomato'
 };
@@ -2152,7 +2160,7 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.1.6', date: 'July 2026', latest: true,
+    version: 'v1.1.7', date: 'July 2026', latest: true,
     items: [
       'Trash Can: deleted entries stored for 5 days, restorable from Settings › Trash',
       'Search: real-time search by name or deadline in filter bar, works with type filters across all views',
