@@ -239,6 +239,38 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 svg.icon{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 svg.icon.sm{width:13px;height:13px;}
 
+/* Multi-select */
+.select-mode .entry-card{cursor:pointer;padding-left:44px;position:relative;}
+.entry-checkbox{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;accent-color:var(--accent);cursor:pointer;}
+.bulk-bar{display:none;align-items:center;gap:10px;padding:10px 24px;background:var(--accent);color:var(--accent-text);font-size:13px;}
+.bulk-bar.visible{display:flex;}
+.bulk-bar .btn{font-size:12px;padding:4px 12px;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:var(--accent-text);}
+.bulk-bar .btn:hover{background:rgba(255,255,255,.25);}
+.bulk-bar .btn-danger{background:rgba(220,33,39,.25);border-color:rgba(220,33,39,.5);}
+
+/* Repeat entry */
+.repeat-section{margin-top:10px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);}
+.repeat-toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;user-select:none;}
+.repeat-toggle input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;}
+.repeat-options{margin-top:10px;display:flex;flex-direction:column;gap:10px;}
+.repeat-type-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.repeat-type-btn{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;}
+.repeat-type-btn.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent);}
+.repeat-weekdays{display:flex;gap:4px;flex-wrap:wrap;}
+.repeat-weekday-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.repeat-weekday-btn.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent);}
+
+/* Repeat confirm modal */
+.repeat-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.repeat-modal-overlay.open{opacity:1;pointer-events:all;}
+.repeat-modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:420px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);}
+.repeat-modal h3{font-size:16px;font-weight:500;}
+.repeat-date-list{overflow-y:auto;max-height:320px;display:flex;flex-direction:column;gap:4px;}
+.repeat-date-item{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;}
+.repeat-date-item:hover{background:var(--surface2);}
+.repeat-date-item input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;}
+.repeat-modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+
 @media(max-width:700px){
   .app{grid-template-columns:1fr;}
   .sidebar{border-right:none;border-bottom:1px solid var(--border);}
@@ -253,7 +285,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.3</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.4</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -305,6 +337,68 @@ svg.icon.sm{width:13px;height:13px;}
         <label class="field-label" for="f-remark">Remark</label>
         <textarea id="f-remark" placeholder="Notes, context, follow-ups…"></textarea>
       </div>
+      <!-- Repeat section -->
+      <div class="repeat-section">
+        <label class="repeat-toggle">
+          <input type="checkbox" id="f-repeat" onchange="toggleRepeatUI()"/>
+          Repeat this entry
+        </label>
+        <div class="repeat-options" id="repeat-options" style="display:none;">
+          <div>
+            <label class="field-label">End date <span style="color:var(--danger);">*</span></label>
+            <input type="date" id="f-repeat-end"/>
+          </div>
+          <div>
+            <label class="field-label">Repeat every</label>
+            <div class="repeat-type-btns">
+              <button class="repeat-type-btn active" data-rtype="daily" onclick="setRepeatType('daily')">Daily</button>
+              <button class="repeat-type-btn" data-rtype="weekly" onclick="setRepeatType('weekly')">Weekly</button>
+              <button class="repeat-type-btn" data-rtype="monthly" onclick="setRepeatType('monthly')">Monthly</button>
+              <button class="repeat-type-btn" data-rtype="yearly" onclick="setRepeatType('yearly')">Yearly</button>
+              <button class="repeat-type-btn" data-rtype="custom" onclick="setRepeatType('custom')">Custom</button>
+            </div>
+          </div>
+          <!-- Daily: every N days -->
+          <div id="repeat-daily-opts">
+            <label class="field-label">Every</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" id="f-repeat-days" value="1" min="1" max="365" style="width:70px;"/>
+              <span style="font-size:13px;color:var(--text2);">day(s)</span>
+            </div>
+          </div>
+          <!-- Weekly: pick weekdays -->
+          <div id="repeat-weekly-opts" style="display:none;">
+            <label class="field-label">On these days</label>
+            <div class="repeat-weekdays">
+              <button class="repeat-weekday-btn" data-day="0" onclick="toggleWeekday(this)">Su</button>
+              <button class="repeat-weekday-btn" data-day="1" onclick="toggleWeekday(this)">Mo</button>
+              <button class="repeat-weekday-btn" data-day="2" onclick="toggleWeekday(this)">Tu</button>
+              <button class="repeat-weekday-btn" data-day="3" onclick="toggleWeekday(this)">We</button>
+              <button class="repeat-weekday-btn" data-day="4" onclick="toggleWeekday(this)">Th</button>
+              <button class="repeat-weekday-btn" data-day="5" onclick="toggleWeekday(this)">Fr</button>
+              <button class="repeat-weekday-btn" data-day="6" onclick="toggleWeekday(this)">Sa</button>
+            </div>
+          </div>
+          <!-- Monthly: auto-detected from start date -->
+          <div id="repeat-monthly-opts" style="display:none;">
+            <label class="field-label">Monthly pattern</label>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;cursor:pointer;">
+                <input type="radio" name="monthly-type" value="day" id="monthly-day" checked style="accent-color:var(--accent);"/> Same day of month
+              </label>
+              <label style="font-size:13px;display:flex;gap:8px;align-items:center;cursor:pointer;">
+                <input type="radio" name="monthly-type" value="weekday" id="monthly-weekday" style="accent-color:var(--accent);"/> Same weekday of month
+              </label>
+              <span id="monthly-pattern-hint" style="font-size:11px;color:var(--text3);"></span>
+            </div>
+          </div>
+          <!-- Custom: info text -->
+          <div id="repeat-custom-opts" style="display:none;">
+            <p style="font-size:12px;color:var(--text2);">Specific dates will be shown in the preview. Uncheck any you don't want.</p>
+          </div>
+        </div>
+      </div>
+
       <div class="sidebar-actions">
         <button class="btn btn-primary" onclick="addEntry()">
           <svg class="icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -330,6 +424,10 @@ svg.icon.sm{width:13px;height:13px;}
       <h1 id="main-title">Entries</h1>
       <span class="entry-count" id="entry-count">0</span>
       <div class="main-header-spacer"></div>
+      <button class="btn btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="gap:5px;">
+        <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
+        Select
+      </button>
       <button class="btn btn-sm" id="view-toggle-btn" onclick="toggleView()" style="gap:5px;background:var(--surface);">
         <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>
         <span id="view-toggle-label">View Archive</span><span id="archive-count" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:1px 7px;margin-left:2px;"></span>
@@ -344,10 +442,31 @@ svg.icon.sm{width:13px;height:13px;}
         <svg class="icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
       </button>
     </div>
+    <div class="bulk-bar" id="bulk-bar">
+      <span id="bulk-count">0 selected</span>
+      <div style="flex:1;"></div>
+      <button class="btn" onclick="bulkArchive()">Archive selected</button>
+      <button class="btn btn-danger" onclick="bulkDelete()">Delete selected</button>
+      <button class="btn" onclick="toggleSelectMode()">Cancel</button>
+    </div>
     <div class="filter-bar" id="filter-bar"></div>
     <div class="search-bar-row" id="search-bar-row"></div>
     <div class="entries" id="entries-list"></div>
   </main>
+</div>
+
+<!-- Repeat Confirm Modal -->
+<div class="repeat-modal-overlay" id="repeat-modal-overlay">
+  <div class="repeat-modal">
+    <h3>Confirm repeated entries</h3>
+    <p style="font-size:13px;color:var(--text2);">Uncheck any dates you don't want to create.</p>
+    <div class="repeat-date-list" id="repeat-date-list"></div>
+    <div style="font-size:12px;color:var(--text3);" id="repeat-selected-count"></div>
+    <div class="repeat-modal-actions">
+      <button class="btn" onclick="closeRepeatModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmRepeatEntries()">Create entries</button>
+    </div>
+  </div>
 </div>
 
 <!-- AI Panel -->
@@ -669,7 +788,21 @@ function addEntry(){
   const color = typeColors[type] || null;
   const gcalColorId = typeGCalIds[type] || undefined;
   const now = new Date().toISOString();
-  const entry = {id: Date.now(), name, type, deadline, deadlineEnd, time, timeTo, remark, color, gcalColorId, syncMode: isTask?'task':'event', created: now, updated: now};
+  const entry = {id: Date.now(), name, type, deadline, deadlineEnd, time, timeTo, remark, color, gcalColorId, syncMode: isTask?'task':'event', createdAt: now, updatedAt: now};
+
+  // If repeat is checked, show confirm modal instead of adding directly
+  if(document.getElementById('f-repeat')?.checked){
+    if(!deadline){ toast('Set a start date before repeating.'); return; }
+    const dates = generateRepeatDates(deadline);
+    if(!dates) return;
+    if(!dates.length){ toast('No dates generated — check your end date and repeat settings.'); return; }
+    // Add the original entry first, then open modal for repeats
+    entries.unshift(entry); pinnedId = entry.id; save(); render();
+    if(gcalToken && deadline){ isTask ? pushToGTask(entry,true) : pushToGCal(entry,true); }
+    openRepeatModal(entry, dates);
+    return;
+  }
+
   entries.unshift(entry);
   pinnedId = entry.id;
   save(); render(); clearForm();
@@ -1033,11 +1166,223 @@ function syncPickerToValue(inputId, timeStr){
   });
 }
 
+// ── Multi-select ──────────────────────────────────────────────────────────────
+let selectMode = false;
+let selectedIds = new Set();
+
+function toggleSelectMode(){
+  selectMode = !selectMode;
+  selectedIds.clear();
+  const btn = document.getElementById('select-mode-btn');
+  const list = document.getElementById('entries-list');
+  const bar = document.getElementById('bulk-bar');
+  if(selectMode){
+    btn.style.background = 'var(--accent)';
+    btn.style.color = 'var(--accent-text)';
+    btn.style.borderColor = 'var(--accent)';
+    list.classList.add('select-mode');
+    bar.classList.add('visible');
+  } else {
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    list.classList.remove('select-mode');
+    bar.classList.remove('visible');
+  }
+  updateBulkBar();
+  render();
+}
+
+function toggleEntrySelect(id){
+  if(selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  updateBulkBar();
+  const card = document.getElementById('card-'+id);
+  if(card){
+    const cb = card.querySelector('.entry-checkbox');
+    if(cb) cb.checked = selectedIds.has(id);
+    card.style.background = selectedIds.has(id) ? 'var(--surface2)' : '';
+  }
+}
+
+function updateBulkBar(){
+  const count = selectedIds.size;
+  document.getElementById('bulk-count').textContent = `${count} selected`;
+}
+
+function bulkDelete(){
+  if(!selectedIds.size) return;
+  const count = selectedIds.size;
+  if(!confirm(`Delete ${count} ${count===1?'entry':'entries'} permanently?`)) return;
+  selectedIds.forEach(id=>{
+    const idx = entries.findIndex(e=>e.id===id);
+    if(idx!==-1){ trash.unshift({...entries[idx], trashedAt: new Date().toISOString()}); entries.splice(idx,1); }
+  });
+  selectedIds.clear();
+  save(); saveTrash(); updateTrashBadge();
+  toggleSelectMode();
+  toast(`${count} ${count===1?'entry':'entries'} deleted.`);
+}
+
+function bulkArchive(){
+  if(!selectedIds.size) return;
+  const count = selectedIds.size;
+  selectedIds.forEach(id=>{
+    const idx = entries.findIndex(e=>e.id===id);
+    if(idx!==-1){ archived.unshift(entries[idx]); entries.splice(idx,1); }
+  });
+  selectedIds.clear();
+  save();
+  toggleSelectMode();
+  toast(`${count} ${count===1?'entry':'entries'} archived.`);
+}
+
+// ── Repeat Entry ──────────────────────────────────────────────────────────────
+let repeatType = 'daily';
+let pendingRepeatEntries = [];
+
+function toggleRepeatUI(){
+  const checked = document.getElementById('f-repeat').checked;
+  document.getElementById('repeat-options').style.display = checked ? 'flex' : 'none';
+  if(checked) updateMonthlyHint();
+}
+
+function setRepeatType(type){
+  repeatType = type;
+  document.querySelectorAll('.repeat-type-btn').forEach(b=>b.classList.toggle('active', b.dataset.rtype===type));
+  document.getElementById('repeat-daily-opts').style.display  = type==='daily'   ? 'block' : 'none';
+  document.getElementById('repeat-weekly-opts').style.display = type==='weekly'  ? 'block' : 'none';
+  document.getElementById('repeat-monthly-opts').style.display= type==='monthly' ? 'block' : 'none';
+  document.getElementById('repeat-custom-opts').style.display = type==='custom'  ? 'block' : 'none';
+  if(type==='monthly') updateMonthlyHint();
+}
+
+function toggleWeekday(btn){ btn.classList.toggle('active'); }
+
+function updateMonthlyHint(){
+  const startDate = document.getElementById('f-deadline')?.value || document.getElementById('f-deadline-task')?.value;
+  if(!startDate) return;
+  const d = new Date(startDate + 'T00:00:00');
+  const dayOfMonth = d.getDate();
+  const weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const weekday = weekdays[d.getDay()];
+  const nthWeek = Math.ceil(dayOfMonth / 7);
+  const nth = ['','1st','2nd','3rd','4th','5th'][nthWeek];
+  const hint = document.getElementById('monthly-pattern-hint');
+  if(hint) hint.textContent = `Day ${dayOfMonth} of month  ·  ${nth} ${weekday} of month`;
+}
+
+function generateRepeatDates(startDate){
+  const endVal = document.getElementById('f-repeat-end').value;
+  if(!endVal){ toast('Set an end date for the repeat.'); return null; }
+  const start = new Date(startDate + 'T00:00:00');
+  const end   = new Date(endVal   + 'T00:00:00');
+  if(end <= start){ toast('End date must be after the start date.'); return null; }
+
+  const dates = [];
+  const addDate = d => dates.push(d.toISOString().split('T')[0]);
+
+  if(repeatType === 'daily'){
+    const n = parseInt(document.getElementById('f-repeat-days').value) || 1;
+    const cur = new Date(start); cur.setDate(cur.getDate() + n);
+    while(cur <= end){ addDate(cur); cur.setDate(cur.getDate() + n); }
+
+  } else if(repeatType === 'weekly'){
+    const activeDays = [...document.querySelectorAll('.repeat-weekday-btn.active')].map(b=>parseInt(b.dataset.day));
+    if(!activeDays.length){ toast('Select at least one weekday.'); return null; }
+    const cur = new Date(start); cur.setDate(cur.getDate() + 1);
+    while(cur <= end){ if(activeDays.includes(cur.getDay())) addDate(cur); cur.setDate(cur.getDate()+1); }
+
+  } else if(repeatType === 'monthly'){
+    const useWeekday = document.getElementById('monthly-weekday').checked;
+    const dayOfMonth = start.getDate();
+    const targetDay  = start.getDay();
+    const nthWeek    = Math.ceil(dayOfMonth / 7);
+    const cur = new Date(start); cur.setDate(1); cur.setMonth(cur.getMonth()+1);
+    while(cur <= end){
+      if(useWeekday){
+        // Find nth occurrence of targetDay in this month
+        const firstOfMonth = new Date(cur.getFullYear(), cur.getMonth(), 1);
+        let count = 0; let d = new Date(firstOfMonth);
+        while(d.getMonth() === cur.getMonth()){
+          if(d.getDay() === targetDay){ count++; if(count === nthWeek){ addDate(d); break; } }
+          d.setDate(d.getDate()+1);
+        }
+      } else {
+        const candidate = new Date(cur.getFullYear(), cur.getMonth(), dayOfMonth);
+        if(candidate.getMonth() === cur.getMonth() && candidate <= end) addDate(candidate);
+      }
+      cur.setMonth(cur.getMonth()+1);
+    }
+
+  } else if(repeatType === 'yearly'){
+    const cur = new Date(start);
+    cur.setFullYear(cur.getFullYear()+1);
+    while(cur <= end){
+      const candidate = new Date(cur.getFullYear(), start.getMonth(), start.getDate());
+      if(candidate <= end) addDate(candidate);
+      cur.setFullYear(cur.getFullYear()+1);
+    }
+
+  } else if(repeatType === 'custom'){
+    // Show all dates between start+1 and end — user picks in modal
+    const cur = new Date(start); cur.setDate(cur.getDate()+1);
+    while(cur <= end){ addDate(cur); cur.setDate(cur.getDate()+1); }
+  }
+
+  return dates;
+}
+
+function openRepeatModal(baseEntry, dates){
+  pendingRepeatEntries = dates.map(d => ({...baseEntry, id: Date.now() + Math.random(), deadline: d, deadlineEnd:'', gcalEventId:null, gtaskId:null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()}));
+  const list = document.getElementById('repeat-date-list');
+  list.innerHTML = pendingRepeatEntries.map((e,i)=>`
+    <label class="repeat-date-item">
+      <input type="checkbox" checked data-idx="${i}" onchange="updateRepeatCount()"/>
+      <span>${fmtDate(e.deadline)}</span>
+    </label>`).join('');
+  updateRepeatCount();
+  document.getElementById('repeat-modal-overlay').classList.add('open');
+}
+
+function updateRepeatCount(){
+  const checked = document.querySelectorAll('#repeat-date-list input[type=checkbox]:checked').length;
+  document.getElementById('repeat-selected-count').textContent = `${checked} of ${pendingRepeatEntries.length} dates selected`;
+}
+
+function closeRepeatModal(){
+  document.getElementById('repeat-modal-overlay').classList.remove('open');
+  pendingRepeatEntries = [];
+}
+
+function confirmRepeatEntries(){
+  const selected = [...document.querySelectorAll('#repeat-date-list input[type=checkbox]:checked')].map(cb=>parseInt(cb.dataset.idx));
+  if(!selected.length){ toast('Select at least one date.'); return; }
+  const toAdd = selected.map(i=>pendingRepeatEntries[i]);
+  toAdd.forEach(e=>{ e.id = Date.now() + Math.floor(Math.random()*9999); entries.unshift(e); });
+  save(); render();
+  closeRepeatModal();
+  document.getElementById('f-repeat').checked = false;
+  toggleRepeatUI();
+  clearForm();
+  toast(`${toAdd.length} repeated ${toAdd.length===1?'entry':'entries'} created.`);
+  if(gcalToken){
+    toAdd.forEach(e=>{ if(e.syncMode==='task') pushToGTask(e,true); else pushToGCal(e,true); });
+  }
+}
+
 function clearForm(){
   ['f-name','f-remark','f-time','f-time-to','f-deadline-end'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-type').value='';
   document.getElementById('f-deadline').value=today();
   document.getElementById('f-deadline-task').value=today();
+  // Reset repeat
+  const repeatCb = document.getElementById('f-repeat');
+  if(repeatCb){ repeatCb.checked = false; toggleRepeatUI(); }
+  document.getElementById('f-repeat-end') && (document.getElementById('f-repeat-end').value='');
+  document.getElementById('f-repeat-days') && (document.getElementById('f-repeat-days').value='1');
+  document.querySelectorAll('.repeat-weekday-btn.active').forEach(b=>b.classList.remove('active'));
+  setRepeatType('daily');
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
@@ -1171,8 +1516,12 @@ function entryHTML(e, isArchived=false){
     return `<span class="chip deadline${status}">${rangeStr}${timeStr}${statusLabel.includes('<b>') ? statusLabel : esc(statusLabel)}</span>`;
   })() : '';
 
+  const selectCb = (selectMode && !isArchived) ? `<input type="checkbox" class="entry-checkbox" ${selectedIds.has(e.id)?'checked':''} onclick="event.stopPropagation();toggleEntrySelect(${e.id})"/>` : '';
+  const cardClick = (selectMode && !isArchived) ? ` onclick="toggleEntrySelect(${e.id})"` : '';
+
   return `
-    <div class="entry-card" id="card-${e.id}"${colorStyle}>
+    <div class="entry-card" id="card-${e.id}"${colorStyle}${cardClick} style="${selectedIds.has(e.id)?'background:var(--surface2);':''}">
+      ${selectCb}
       <div class="entry-top">
         <div class="entry-body">
           <div class="entry-name">${highlight(e.name, searchQuery)}</div>
@@ -1335,8 +1684,22 @@ function gcalApplyToken(t){
   document.getElementById('gcal-pill').classList.add('connected');
   document.getElementById('gcal-pill-text').textContent='Calendar connected';
   closeGCalModal(); render();
-  toast('Google Calendar connected! Syncing all entries…', 3000);
-  setTimeout(() => syncAllToGCal(true), 800);
+  // Only push entries that have never been synced — entries with a gcalEventId
+  // already exist in GCal and will be PATCHed on next manual save, so skip them
+  // to avoid duplicates on reconnect.
+  const unsynced = entries.filter(e => e.deadline && !e.gcalEventId && e.syncMode !== 'task');
+  const unsyncedTasks = entries.filter(e => e.deadline && !e.gcalTaskId && e.syncMode === 'task');
+  const total = unsynced.length + unsyncedTasks.length;
+  if(total > 0){
+    toast(`Google Calendar connected! Syncing ${total} new ${total===1?'entry':'entries'}…`, 3000);
+    setTimeout(async ()=>{
+      for(const e of unsynced) await pushToGCal(e, true);
+      for(const e of unsyncedTasks) await pushToGTask(e, true);
+      toast(`Done! ${total} ${total===1?'entry':'entries'} synced to Google Calendar.`);
+    }, 800);
+  } else {
+    toast('Google Calendar connected!');
+  }
 }
 
 async function syncAllToGCal(silent=false){
@@ -1410,6 +1773,12 @@ async function patchGCal(entry, silent=false){
        body:JSON.stringify(buildGCalEvent(entry))}
     );
     if(res.ok){ if(!silent) toast(`Calendar event updated for "${entry.name}".`); }
+    else if(res.status===404){
+      // Event was deleted from GCal manually — clear stale ID and create fresh
+      entry.gcalEventId = null;
+      save();
+      await pushToGCal(entry, silent);
+    }
     else{ if(!silent) toast('Calendar update failed — token may have expired.'); }
   }catch{ if(!silent) toast('Could not reach Google Calendar.'); }
 }
@@ -1697,7 +2066,7 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.1.3', date: 'July 2026', latest: true,
+    version: 'v1.1.4', date: 'July 2026', latest: true,
     items: [
       'Trash Can: deleted entries stored for 5 days, restorable from Settings › Trash',
       'Search: real-time search by name or deadline in filter bar, works with type filters across all views',
