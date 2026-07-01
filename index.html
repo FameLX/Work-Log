@@ -253,7 +253,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.0</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.1.2</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -887,7 +887,7 @@ function createTimePicker(inputId){
   trigger.type = 'text';
   trigger.className = 'time-picker-trigger';
   trigger.placeholder = input.placeholder || 'HH:MM';
-  trigger.readOnly = true;
+  trigger.readOnly = false;
   trigger.value = input.value || '';
 
   const modal = document.createElement('div');
@@ -972,6 +972,21 @@ function createTimePicker(inputId){
   });
 
   input.addEventListener('change', ()=>{ trigger.value = input.value; syncPickerToValue(inputId, input.value); });
+
+  trigger.addEventListener('blur', ()=>{
+    const val = trigger.value.trim();
+    if(/^\d{1,2}:\d{2}$/.test(val)){
+      const [h,m] = val.split(':');
+      const hh = Math.min(23, parseInt(h)||0);
+      const mm = Math.min(59, Math.round((parseInt(m)||0)/5)*5);
+      const timeStr = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+      trigger.value = timeStr;
+      input.value = timeStr;
+      syncPickerToValue(inputId, timeStr);
+    } else if(val === ''){
+      input.value = '';
+    }
+  });
 
   if(input.value) syncPickerToValue(inputId, input.value);
 
@@ -1677,7 +1692,7 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.1.0', date: 'June 2026', latest: true,
+    version: 'v1.1.2', date: 'July 2026', latest: true,
     items: [
       'Trash Can: deleted entries stored for 5 days, restorable from Settings › Trash',
       'Search: real-time search by name or deadline in filter bar, works with type filters across all views',
