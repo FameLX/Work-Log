@@ -295,7 +295,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.2.9</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.3.0</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -436,6 +436,15 @@ svg.icon.sm{width:13px;height:13px;}
         <button class="btn btn-sm" onclick="exportJSON()">Export JSON</button>
       </div>
     </div>
+
+    <div style="padding-top:8px;border-top:1px solid var(--border);">
+      <div class="section-label">Export Archive</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="exportArchiveCSV()">Export CSV</button>
+        <button class="btn btn-sm" onclick="exportArchiveXLSX()">Export Excel</button>
+        <button class="btn btn-sm" onclick="exportArchiveJSON()">Export JSON</button>
+      </div>
+    </div>
   </aside>
 
   <!-- MAIN: Entries -->
@@ -543,19 +552,25 @@ svg.icon.sm{width:13px;height:13px;}
 <!-- Google Calendar Modal -->
 <div class="modal-overlay" id="gcal-modal">
   <div class="modal">
-    <h2>Connect Google Calendar</h2>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">To get started, request the OAuth Client ID from the app owner, then follow these steps:</p>
-    <ol class="modal-steps">
-      <li>Paste the Client ID in the field below</li>
-      <li>Click <strong>Authorise with Google</strong></li>
-      <li>A Google sign-in popup will appear — approve the access</li>
-      <li>Done! Your calendar will connect automatically</li>
-    </ol>
-    <div class="form-group"><label class="field-label">OAuth Client ID</label><input type="text" id="gcal-client-id" placeholder="xxxx.apps.googleusercontent.com"/></div>
-    <div id="gcal-token-section" style="display:none;">
-      <p style="font-size:13px;color:var(--success);background:var(--success-bg);padding:8px 12px;border-radius:8px;margin:12px 0 8px;line-height:1.6;"><strong>✓ Popup opened.</strong> A Google sign-in window appeared. <strong>Just approve access</strong> — this page will automatically detect it and connect. No copy-paste needed!</p>
-      <p style="font-size:12px;color:var(--text3);margin:12px 0 8px;line-height:1.5;"><em>If the popup was blocked or something goes wrong, you can manually paste the token as a fallback:</em></p>
-      <div class="form-group"><label class="field-label">Access token (fallback only)</label><input type="text" id="gcal-token-input" placeholder="ya29.a0…"/></div>
+    <h2 id="gcal-modal-title">Connect Google Calendar</h2>
+    <div id="gcal-connected-section" style="display:none;">
+      <p style="font-size:13px;color:var(--success);background:var(--success-bg);padding:8px 12px;border-radius:8px;margin-bottom:16px;line-height:1.6;"><strong>✓ Google Calendar is connected.</strong> New entries with a deadline sync automatically.</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">If sync stops working (the access token expires after about an hour), click <strong>Reconnect</strong> to sign in again — or <strong>Disconnect</strong> to stop syncing entirely.</p>
+    </div>
+    <div id="gcal-setup-section">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6;">To get started, request the OAuth Client ID from the app owner, then follow these steps:</p>
+      <ol class="modal-steps">
+        <li>Paste the Client ID in the field below</li>
+        <li>Click <strong>Authorise with Google</strong></li>
+        <li>A Google sign-in popup will appear — approve the access</li>
+        <li>Done! Your calendar will connect automatically</li>
+      </ol>
+      <div class="form-group"><label class="field-label">OAuth Client ID</label><input type="text" id="gcal-client-id" placeholder="xxxx.apps.googleusercontent.com"/></div>
+      <div id="gcal-token-section" style="display:none;">
+        <p style="font-size:13px;color:var(--success);background:var(--success-bg);padding:8px 12px;border-radius:8px;margin:12px 0 8px;line-height:1.6;"><strong>✓ Popup opened.</strong> A Google sign-in window appeared. <strong>Just approve access</strong> — this page will automatically detect it and connect. No copy-paste needed!</p>
+        <p style="font-size:12px;color:var(--text3);margin:12px 0 8px;line-height:1.5;"><em>If the popup was blocked or something goes wrong, you can manually paste the token as a fallback:</em></p>
+        <div class="form-group"><label class="field-label">Access token (fallback only)</label><input type="text" id="gcal-token-input" placeholder="ya29.a0…"/></div>
+      </div>
     </div>
     <div class="modal-actions" id="gcal-modal-actions">
       <button class="btn" onclick="closeGCalModal()">Cancel</button>
@@ -698,6 +713,7 @@ archived.forEach(e => { if(!e.updated) e.updated = e.created; });
 let viewMode = 'active'; // 'active' or 'archive'
 let searchQuery = '';
 let gcalToken = localStorage.getItem('wl2_gcal_token') || null;
+let gcalClientId = localStorage.getItem('wl2_gcal_client_id') || '';
 let filterType = 'All';
 let sortMode = 'deadline';
 let sortDir = 'desc'; // deadline default: furthest first
@@ -1769,22 +1785,25 @@ function exportRow(e){
   };
 }
 
-function exportCSV(){
-  const rows = [['ID','Name','Type','Deadline','Time','Remark','Date Created','Time Created','Updated'],...entries.map(e=>{
+function exportCSV(source=entries, filename='worklog.csv'){
+  if(!source.length){ toast('Nothing to export.'); return; }
+  const rows = [['ID','Name','Type','Deadline','Time','Remark','Date Created','Time Created','Updated'],...source.map(e=>{
     const r = exportRow(e);
     return ['="'+r.id+'"', r.name, r.type, r.deadline, r.time, r.remark, r.created, r.timeCreated, r.updated];
   })];
   const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
-  dl('worklog.csv','data:text/csv;charset=utf-8,'+encodeURIComponent('﻿'+csv));
+  dl(filename,'data:text/csv;charset=utf-8,'+encodeURIComponent('﻿'+csv));
 }
-function exportJSON(){
-  const sanitized = entries.map(e=>({...e,created:e.created?.replace('Z',' UTC'),updated:e.updated?.replace('Z',' UTC')}));
-  dl('worklog.json','data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(sanitized,null,2)));
+function exportJSON(source=entries, filename='worklog.json'){
+  if(!source.length){ toast('Nothing to export.'); return; }
+  const sanitized = source.map(e=>({...e,created:e.created?.replace('Z',' UTC'),updated:e.updated?.replace('Z',' UTC')}));
+  dl(filename,'data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(sanitized,null,2)));
 }
-async function exportXLSX(){
+async function exportXLSX(source=entries, filename='worklog.xlsx', sheetName='Work Log'){
   if(typeof ExcelJS === 'undefined'){ toast('Excel library not loaded yet, try again.'); return; }
+  if(!source.length){ toast('Nothing to export.'); return; }
   const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet('Work Log');
+  const ws = wb.addWorksheet(sheetName);
   ws.columns = [
     {header:'ID', key:'id', width:16},
     {header:'Name', key:'name', width:30},
@@ -1796,7 +1815,7 @@ async function exportXLSX(){
     {header:'Time Created', key:'timeCreated', width:14},
     {header:'Updated', key:'updated', width:22},
   ];
-  entries.forEach(e => ws.addRow(exportRow(e)));
+  source.forEach(e => ws.addRow(exportRow(e)));
 
   ws.autoFilter = { from: 'A1', to: { row: 1, column: ws.columns.length } };
 
@@ -1821,9 +1840,12 @@ async function exportXLSX(){
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {type:'application/octet-stream'});
   const url = URL.createObjectURL(blob);
-  dl('worklog.xlsx', url);
+  dl(filename, url);
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
 }
+function exportArchiveCSV(){ exportCSV(archived, 'worklog-archive.csv'); }
+function exportArchiveXLSX(){ return exportXLSX(archived, 'worklog-archive.xlsx', 'Archive'); }
+function exportArchiveJSON(){ exportJSON(archived, 'worklog-archive.json'); }
 function dl(name,href){ const a=document.createElement('a'); a.href=href; a.download=name; a.click(); }
 
 // ── Toast ──────────────────────────────────────────────────────────────────
@@ -1834,17 +1856,45 @@ function toast(msg,dur=2400){
 }
 
 // ── Google Calendar ────────────────────────────────────────────────────────
-function openGCalModal(){ document.getElementById('gcal-modal').classList.add('open'); }
+function openGCalModal(){
+  const connected = !!gcalToken;
+  document.getElementById('gcal-modal-title').textContent = connected ? 'Google Calendar' : 'Connect Google Calendar';
+  document.getElementById('gcal-connected-section').style.display = connected ? 'block' : 'none';
+  document.getElementById('gcal-setup-section').style.display = connected ? 'none' : 'block';
+  document.getElementById('gcal-token-section').style.display = 'none';
+  if(connected){
+    document.getElementById('gcal-modal-actions').innerHTML = `<button class="btn" onclick="closeGCalModal()">Close</button><button class="btn" onclick="gcalDisconnect()" style="color:var(--danger);">Disconnect</button><button class="btn btn-primary" onclick="gcalAuthorise()">Reconnect</button>`;
+  } else {
+    document.getElementById('gcal-client-id').value = gcalClientId;
+    document.getElementById('gcal-modal-actions').innerHTML = `<button class="btn" onclick="closeGCalModal()">Cancel</button><button class="btn btn-primary" onclick="gcalAuthorise()">Authorise with Google</button>`;
+  }
+  document.getElementById('gcal-modal').classList.add('open');
+}
 function closeGCalModal(){ document.getElementById('gcal-modal').classList.remove('open'); }
 
+function gcalDisconnect(){
+  gcalToken = null;
+  localStorage.removeItem('wl2_gcal_token');
+  document.getElementById('gcal-pill').classList.remove('connected');
+  document.getElementById('gcal-pill-text').textContent = 'Connect Google Calendar';
+  closeGCalModal();
+  toast('Google Calendar disconnected.');
+}
+
 function gcalAuthorise(){
-  const cid = document.getElementById('gcal-client-id').value.trim();
-  if(!cid){ toast('Paste your Client ID first.'); return; }
+  // When reconnecting from the connected state, the setup section (with the
+  // Client ID field) is hidden — fall back to the saved Client ID instead.
+  const cidInput = document.getElementById('gcal-client-id');
+  const cid = (cidInput.offsetParent !== null ? cidInput.value.trim() : '') || gcalClientId;
+  if(!cid){ toast('Paste your Client ID first.'); document.getElementById('gcal-setup-section').style.display='block'; document.getElementById('gcal-connected-section').style.display='none'; return; }
+  gcalClientId = cid; localStorage.setItem('wl2_gcal_client_id', cid);
   const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/tasks');
   const redirect = encodeURIComponent('https://famelx.github.io/Work-Log/');
   window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(cid)}&redirect_uri=${redirect}&response_type=token&scope=${scope}&prompt=consent`,'gcal_oauth','width=520,height=620');
   // The popup will auto-send the token back via postMessage; show the manual
   // paste box only as a fallback in case the popup can't reach us.
+  document.getElementById('gcal-setup-section').style.display='block';
+  document.getElementById('gcal-connected-section').style.display='none';
   document.getElementById('gcal-token-section').style.display='block';
   document.getElementById('gcal-modal-actions').innerHTML=`<button class="btn" onclick="closeGCalModal()">Cancel</button><button class="btn btn-primary" onclick="gcalSaveToken()">Connect manually</button>`;
 }
@@ -2221,7 +2271,15 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.2.9', date: 'July 2026', latest: true,
+    version: 'v1.3.0', date: 'July 2026', latest: true,
+    items: [
+      'Google Calendar: added a Disconnect button and a Reconnect button — previously the only way to disconnect was to clear browser storage manually',
+      'Google Calendar: Client ID is now remembered, so Reconnect doesn\'t require re-pasting it',
+      'Export Archive: added Export CSV/Excel/JSON for archived entries, matching the existing active-entries export'
+    ]
+  },
+  {
+    version: 'v1.2.9', date: 'July 2026', latest: false,
     items: [
       'Fix: bulk-delete confirm dialog said "permanently" even though entries were always moved to Trash — wording corrected',
       'Fix: bulk delete now also removes the linked Google Calendar event / Google Task, matching single-entry delete behavior',
