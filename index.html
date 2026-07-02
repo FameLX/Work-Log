@@ -287,7 +287,7 @@ svg.icon.sm{width:13px;height:13px;}
   .ai-panel{width:100%;top:56px;}
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -295,7 +295,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.2.2</span></div>
+    <div class="topbar-logo" style="display:flex;align-items:center;gap:8px;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;" title="View changelog">/ v1.2.3</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1732,14 +1732,29 @@ function calIcon(){return`<svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y
 function taskSyncIcon(){return`<svg class="icon sm" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;}
 
 // ── Export ─────────────────────────────────────────────────────────────────
-function formatExportDate(isoStr){ if(!isoStr) return ''; const d=new Date(isoStr); const day=String(d.getDate()).padStart(2,'0'); const mon=String(d.getMonth()+1).padStart(2,'0'); const yr=d.getFullYear(); return `${day}.${mon}.${yr}`; }
-function formatExportTime(isoStr){ if(!isoStr) return ''; const d=new Date(isoStr); const h=String(d.getHours()).padStart(2,'0'); const m=String(d.getMinutes()).padStart(2,'0'); return `${h}:${m} GMT+7`; }
+// Shift a UTC ISO timestamp by +7h and read it back with getUTC* methods,
+// so the result is GMT+7 wall-clock time regardless of the viewer's local timezone.
+function toGMT7(isoStr){ const utc = new Date(isoStr); return new Date(utc.getTime() + 7*60*60*1000); }
+function formatDateGMT7(isoStr){ if(!isoStr) return ''; const d=toGMT7(isoStr); const day=String(d.getUTCDate()).padStart(2,'0'); const mon=String(d.getUTCMonth()+1).padStart(2,'0'); const yr=d.getUTCFullYear(); return `${day}/${mon}/${yr}`; }
+function formatTimeGMT7(isoStr){ if(!isoStr) return ''; const d=toGMT7(isoStr); const h=String(d.getUTCHours()).padStart(2,'0'); const m=String(d.getUTCMinutes()).padStart(2,'0'); const s=String(d.getUTCSeconds()).padStart(2,'0'); return `${h}:${m}:${s}`; }
+function formatUpdatedGMT7(isoStr){ if(!isoStr) return ''; return `${formatDateGMT7(isoStr)} , ${formatTimeGMT7(isoStr)}`; }
+function formatDeadlineDMY(dateStr){ if(!dateStr) return ''; const [y,m,d] = dateStr.split('-'); return `${d}/${m}/${y}`; }
+
+function exportRow(e){
+  const timeStr = e.time ? (e.timeTo ? `${e.time} - ${e.timeTo}` : e.time) : '';
+  const created = e.createdAt || e.created;
+  const updated = e.updatedAt || e.updated;
+  return {
+    id: String(e.id||''), name: e.name, type: e.type||'', deadline: formatDeadlineDMY(e.deadline),
+    time: timeStr, remark: e.remark||'', created: formatDateGMT7(created), timeCreated: formatTimeGMT7(created),
+    updated: formatUpdatedGMT7(updated)
+  };
+}
+
 function exportCSV(){
   const rows = [['ID','Name','Type','Deadline','Time','Remark','Date Created','Time Created','Updated'],...entries.map(e=>{
-    const timeStr=e.time?(e.timeTo?`${e.time} - ${e.timeTo}`:e.time):'';
-    const created = e.createdAt || e.created;
-    const updated = e.updatedAt || e.updated;
-    return ['="'+(e.id||'')+'"',e.name,e.type||'',e.deadline||'',timeStr,e.remark||'',formatExportDate(created),formatExportTime(created),formatExportDate(updated)];
+    const r = exportRow(e);
+    return ['="'+r.id+'"', r.name, r.type, r.deadline, r.time, r.remark, r.created, r.timeCreated, r.updated];
   })];
   const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
   dl('worklog.csv','data:text/csv;charset=utf-8,'+encodeURIComponent('﻿'+csv));
@@ -1748,28 +1763,46 @@ function exportJSON(){
   const sanitized = entries.map(e=>({...e,created:e.created?.replace('Z',' UTC'),updated:e.updated?.replace('Z',' UTC')}));
   dl('worklog.json','data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(sanitized,null,2)));
 }
-function exportXLSX(){
-  if(typeof XLSX === 'undefined'){ toast('SheetJS not loaded yet, try again.'); return; }
-  const rows = [
-    ['ID','Name','Type','Deadline','Time','Remark','Date Created','Time Created','Updated'],
-    ...entries.map(e=>{
-      const timeStr=e.time?(e.timeTo?`${e.time} - ${e.timeTo}`:e.time):'';
-      const created = e.createdAt || e.created;
-      const updated = e.updatedAt || e.updated;
-      return [String(e.id||''),e.name,e.type||'',e.deadline||'',timeStr,e.remark||'',formatExportDate(created),formatExportTime(created),formatExportDate(updated)];
-    })
+async function exportXLSX(){
+  if(typeof ExcelJS === 'undefined'){ toast('Excel library not loaded yet, try again.'); return; }
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Work Log');
+  ws.columns = [
+    {header:'ID', key:'id', width:16},
+    {header:'Name', key:'name', width:30},
+    {header:'Type', key:'type', width:12},
+    {header:'Deadline', key:'deadline', width:14},
+    {header:'Time', key:'time', width:14},
+    {header:'Remark', key:'remark', width:40},
+    {header:'Date Created', key:'created', width:14},
+    {header:'Time Created', key:'timeCreated', width:14},
+    {header:'Updated', key:'updated', width:22},
   ];
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  // Force ID column to text type so large timestamp IDs don't render as scientific notation
-  for(let r=1;r<rows.length;r++){
-    const cellRef = XLSX.utils.encode_cell({r, c:0});
-    if(ws[cellRef]) ws[cellRef].t = 's';
+  entries.forEach(e => ws.addRow(exportRow(e)));
+
+  const headerRow = ws.getRow(1);
+  headerRow.eachCell(cell=>{
+    cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:'FF60497A'}};
+    cell.font = {color:{argb:'FFFFFFFF'}, bold:true};
+  });
+
+  for(let i=2;i<=ws.rowCount;i++){
+    const row = ws.getRow(i);
+    const bg = (i % 2 === 0) ? 'FFE4DFEC' : 'FFCCC0DA';
+    row.eachCell((cell, colNumber)=>{
+      cell.fill = {type:'pattern', pattern:'solid', fgColor:{argb:bg}};
+      if(colNumber>=3 && colNumber<=5) cell.alignment = {horizontal:'center'};
+      if(colNumber>=7 && colNumber<=9) cell.alignment = {horizontal:'right'};
+    });
   }
-  ws['!cols'] = [{wch:16},{wch:30},{wch:12},{wch:14},{wch:14},{wch:40},{wch:14},{wch:16},{wch:14}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Work Log');
-  XLSX.writeFile(wb, 'worklog.xlsx');
+
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {type:'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  dl('worklog.xlsx', url);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
 }
+function dl(name,href){ const a=document.createElement('a'); a.href=href; a.download=name; a.click(); }
 function gcalAuthorise(){
   const cid = document.getElementById('gcal-client-id').value.trim();
   if(!cid){ toast('Paste your Client ID first.'); return; }
@@ -2177,7 +2210,18 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.2.2', date: 'July 2026', latest: true,
+    version: 'v1.2.3', date: 'July 2026', latest: true,
+    items: [
+      'Switched Excel export from SheetJS to ExcelJS for full cell styling support',
+      'Excel export: header row colored #60497A, body rows alternate #E4DFEC / #CCC0DA',
+      'Excel export: Type/Deadline/Time columns centered, Date Created/Time Created/Updated right-aligned',
+      'Deadline and Date Created now use DD/MM/YYYY format',
+      'Updated column now shows DD/MM/YYYY , HH:mm:ss (full date + time of last edit)',
+      'Time Created explicitly converted from UTC to GMT+7, independent of the viewer\'s system timezone'
+    ]
+  },
+  {
+    version: 'v1.2.2', date: 'July 2026', latest: false,
     items: [
       'Fix multi-select checkbox overlapping entry text — moved to end of card actions row'
     ]
