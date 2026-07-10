@@ -16,7 +16,7 @@ param(
 )
 
 $CHROME   = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$APP_URL  = "file:///C:/Users/Uesr01/Desktop/Work%20Files/AI/Project/worklog.html"
+$APP_URL  = "file:///C:/Users/Uesr01/Desktop/Work%20Files/AI/index.html"
 $DEBUG_PORT = 9222
 $USER_DIR = "C:\Temp\chrome-worklog-debug"
 $CDP_EXE  = "$PSScriptRoot\cdp.exe"
