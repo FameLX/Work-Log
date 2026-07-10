@@ -70,7 +70,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .main-header h1{font-size:18px;font-weight:500;letter-spacing:-.3px;}
 .entry-count{font-size:12px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);padding:2px 9px;border-radius:99px;}
 .main-header-spacer{flex:1;}
-.filter-bar{padding:12px 24px;display:flex;gap:6px;flex-wrap:nowrap;align-items:center;border-bottom:1px solid var(--border);overflow:hidden;}
+.filter-bar{padding:12px 24px;display:flex;gap:12px;flex-wrap:nowrap;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);overflow:hidden;min-height:60px;}
 .filter-chip{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;}
 .filter-chip:hover{border-color:var(--border2);}
 .filter-chip.active{background:var(--text);color:#fff;border-color:var(--text);}
@@ -286,6 +286,12 @@ svg.icon.sm{width:13px;height:13px;}
 .repeat-date-item input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;}
 .repeat-modal-actions{display:flex;gap:8px;justify-content:flex-end;}
 
+/* Stat Cards */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;flex-direction:column;gap:8px;min-width:140px;text-align:center;box-shadow:var(--shadow);}
+.stat-label{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+.stat-value{font-size:20px;font-weight:600;color:var(--text);}
+.stat-cards-row{display:flex;gap:10px;align-items:center;justify-content:center;flex-shrink:0;}
+
 @media(max-width:700px){
   .app{grid-template-columns:1fr;}
   .sidebar{border-right:none;border-bottom:1px solid var(--border);}
@@ -300,7 +306,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.4.7</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.4.8</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1632,15 +1638,55 @@ function toggleView(){
   render();
 }
 
+function calculateStats(source){
+  const now = new Date(); now.setHours(0,0,0,0);
+  let overdue = 0, today = 0, soon = 0;
+  source.forEach(e => {
+    if(!e.deadline) return;
+    const start = new Date(e.deadline); start.setHours(0,0,0,0);
+    const end = e.deadlineEnd ? new Date(e.deadlineEnd) : start;
+    end.setHours(0,0,0,0);
+    const isMultiDay = e.deadlineEnd && e.deadline !== e.deadlineEnd;
+    if(isMultiDay){
+      const endDiff = Math.round((end - now) / 86400000);
+      if(endDiff < 0) overdue++;
+      else if(endDiff === 0) soon++;
+      else if(Math.round((start - now) / 86400000) <= 0) soon++;
+      else if(Math.round((start - now) / 86400000) <= 3) soon++;
+    } else {
+      const diff = Math.round((start - now) / 86400000);
+      if(diff < 0) overdue++;
+      else if(diff === 0) today++;
+      else if(diff <= 3) soon++;
+    }
+  });
+  return { overdue, today, soon, total: source.length };
+}
+
 function render(){
   const source = viewMode==='active' ? entries : archived;
   const types = ['All', ...new Set(source.map(e=>e.type).filter(Boolean))];
   const fb = document.getElementById('filter-bar');
+  const stats = calculateStats(source);
+  const statCard = `<div class="stat-cards-row" style="flex:1;justify-content:center;">
+    <div class="stat-card" style="flex:0 0 auto;">
+      <div class="stat-label">Overdue</div>
+      <div class="stat-value" style="color:var(--danger);">${stats.overdue}</div>
+    </div>
+    <div class="stat-card" style="flex:0 0 auto;">
+      <div class="stat-label">Today</div>
+      <div class="stat-value" style="color:var(--warn);">${stats.today}</div>
+    </div>
+    <div class="stat-card" style="flex:0 0 auto;">
+      <div class="stat-label">Soon</div>
+      <div class="stat-value" style="color:var(--info);">${stats.soon}</div>
+    </div>
+  </div>`;
   const syncAllBtn = (gcalToken && viewMode==='active') ? `<button class="btn btn-sm btn-sync-all" onclick="syncAllToGCal()" style="flex-shrink:0;margin-left:auto;">
     <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     Sync All to GCal
   </button>` : '';
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + syncAllBtn;
+  fb.innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-shrink:0;">${types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('')}</div>${statCard}${syncAllBtn}`;
   const searchRow = document.getElementById('search-bar-row');
   if(searchRow) searchRow.innerHTML = `<input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" value="${esc(searchQuery)}" oninput="setSearch(this.value)"/>`;
 
@@ -2499,9 +2545,15 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.4.7', date: 'July 2026', latest: true,
+    version: 'v1.4.8', date: 'July 2026', latest: true,
     items: [
-      'Custom task types can now be dragged to reorder in Settings — drag handles appear on custom types, built-in types remain fixed'
+      'Summary stat cards added to the filter bar — displays Overdue, Today, and Soon entry counts at a glance'
+    ]
+  },
+  {
+    version: 'v1.4.7', date: 'July 2026', latest: false,
+    items: [
+      'Fix: rearrangeable task types now work for all types (built-in + custom), allow deletion of all types, and immediately update the type dropdown when you save changes'
     ]
   },
   {
