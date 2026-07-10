@@ -308,7 +308,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.5.2</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.5.0</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -2672,68 +2672,25 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.5.2', date: 'July 2026', latest: true,
+    version: 'v1.5.0', date: 'July 2026', latest: true,
     items: [
-      'Settings changes are now a draft until you click "Save changes" — edits to task types, colours, and interface theme no longer apply live; closing without saving reverts everything',
-      'Leaving Settings with unsaved changes now prompts to save or discard instead of silently losing or keeping them',
-      'Fixed a background scrollbar appearing behind the Settings panel — the page behind Settings no longer scrolls independently'
+      'Task types can now be freely rearranged (drag to reorder) and deleted — including built-in types, not just custom ones',
+      'Summary stat cards above the filter bar — All Task, Entries, Archive, Today (due today + in progress), and Overdue counts at a glance',
+      'Multi-select task type filtering — select multiple type chips at once instead of only one',
+      'Settings changes are now a draft until you click "Save changes" — edits to task types, colours, and interface theme no longer apply live; leaving with unsaved changes prompts you to save or discard',
+      'Fixed a background scrollbar appearing behind the Settings panel',
+      'Animated GIF added to the Easter egg (click the logo 4 times)'
     ]
   },
   {
-    version: 'v1.5.1', date: 'July 2026', latest: false,
+    version: 'v1.3.3', date: 'July 2026', latest: false,
     items: [
-      'Multi-select task type filtering — click multiple type chips to filter by several types at once, instead of only one at a time'
-    ]
-  },
-  {
-    version: 'v1.5.0', date: 'July 2026', latest: false,
-    items: [
-      'Summary stat cards above filter bar — displays All Task, Entries, Archive, Today (due today + in progress), and Overdue counts',
-      'Compact stat card design with reduced spacing for better visual integration',
-      'Animated GIF in Easter egg modal (Lizard Hello)',
-      'Version indicator in Easter egg shows current build'
-    ]
-  },
-  {
-    version: 'v1.4.9', date: 'July 2026', latest: false,
-    items: [
-      'Summary stat cards added above filter bar — displays All Task, Entries, Archive, Today (due today + in progress), and Overdue counts at a glance'
-    ]
-  },
-  {
-    version: 'v1.4.8', date: 'July 2026', latest: false,
-    items: [
-      'Summary stat cards added to the filter bar — displays Overdue, Today, and Soon entry counts at a glance'
-    ]
-  },
-  {
-    version: 'v1.4.7', date: 'July 2026', latest: false,
-    items: [
-      'Fix: rearrangeable task types now work for all types (built-in + custom), allow deletion of all types, and immediately update the type dropdown when you save changes'
-    ]
-  },
-  {
-    version: 'v1.4.6', date: 'July 2026', latest: false,
-    items: [
-      'Fix: sorting now automatically resets when toggling between entries and archive views — entries view defaults to descending (newest first), archive defaults to ascending (oldest first)'
-    ]
-  },
-  {
-    version: 'v1.4.5', date: 'July 2026', latest: false,
-    items: [
-      'Entry cards now display end time (timeTo) when set — shows "2:00PM → 5:30PM" for timed meetings/events that span multiple hours'
-    ]
-  },
-  {
-    version: 'v1.4.4', date: 'July 2026', latest: false,
-    items: [
-      'Archive view now defaults to ascending sort (oldest/completed entries first) when you switch to it — makes it more natural to review archived work chronologically'
-    ]
-  },
-  {
-    version: 'v1.4.3', date: 'July 2026', latest: false,
-    items: [
-      'Fix: deadline sorting now sub-sorts by time when multiple entries share the same date — entries on the same day now appear in chronological order (earliest time first)'
+      'Entry cards now display end time (timeTo) when set — shows "2:00PM → 5:30PM" for timed meetings/events that span multiple hours',
+      'Archive view now defaults to ascending sort (oldest/completed entries first) when you switch to it — makes it more natural to review archived work chronologically',
+      'Fix: deadline sorting now sub-sorts by time when multiple entries share the same date — entries on the same day now appear in chronological order (earliest time first)',
+      'Fix: GCal token is now verified on page load instead of trusting stored presence — immediately shows "Reconnect" if the token has expired',
+      'Fix: GCal event colours now use live settings when syncing — changing a type\'s colour in Settings takes effect on existing entries instead of requiring re-edit',
+      'Fix: sorting now automatically resets when toggling between entries and archive views — entries defaults to descending (newest first), archive defaults to ascending (oldest first)'
     ]
   },
   {
