@@ -157,8 +157,11 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .settings-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;}
 .settings-section h3{font-size:13px;font-weight:500;margin-bottom:4px;}
 .settings-section .desc{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6;}
-.type-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.type-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);transition:background .15s;}
 .type-row:last-child{border-bottom:none;}
+.type-row[draggable="true"]{cursor:grab;}
+.type-row[draggable="true"]:active{cursor:grabbing;}
+.type-row[draggable="true"]:hover{background:rgba(0,0,0,.02);}
 .type-color-swatch{width:22px;height:22px;border-radius:5px;border:1px solid var(--border);flex-shrink:0;cursor:pointer;}
 .type-label{flex:1;font-size:13px;}
 .type-gcal-select{font-size:12px;padding:3px 22px 3px 7px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);}
@@ -754,11 +757,18 @@ function buildGTaskTitle(entry){
   return entry.time ? `${fmtTime12(entry.time)} | ${entry.name}` : entry.name;
 }
 let customTypes = JSON.parse(localStorage.getItem('wl2_custom_types') || '[]');
+let customTypeOrder = JSON.parse(localStorage.getItem('wl2_custom_type_order') || '[]');
 let typeColors = JSON.parse(localStorage.getItem('wl2_type_colors') || '{}');
 let typeGCalIds = JSON.parse(localStorage.getItem('wl2_type_gcal_ids') || '{}');
 let uiColors = JSON.parse(localStorage.getItem('wl2_ui_colors') || '{}');
 
-function allTypes(){ return [...BUILTIN_TYPES, ...customTypes]; }
+function allTypes(){
+  const builtins = [...BUILTIN_TYPES];
+  const customs = customTypeOrder.length > 0
+    ? customTypeOrder.filter(t => customTypes.includes(t)).concat(customTypes.filter(t => !customTypeOrder.includes(t)))
+    : [...customTypes];
+  return [...builtins, ...customs];
+}
 
 // ── OAuth token auto-capture ───────────────────────────────────────────────
 // If this page load is the OAuth popup (URL has #access_token=...), grab the
@@ -2262,7 +2272,9 @@ function buildSettingsUI(){
     const gcalId = typeGCalIds[t] || '';
     const gcalOpts = GCAL_COLOR_OPTIONS.map(o=>`<option value="${o.id}"${gcalId===o.id?' selected':''}>${esc(o.label)}</option>`).join('');
     const gcalColor = GCAL_COLOR_MAP[gcalId] || 'transparent';
-    return `<div class="type-row" id="type-row-${esc(t)}">
+    const dragHandle = !isBuiltin ? `<div style="cursor:grab;padding:4px;margin-right:4px;color:var(--text3);">☰</div>` : '';
+    return `<div class="type-row" id="type-row-${esc(t)}" ${!isBuiltin?'draggable="true"':''}>
+      ${dragHandle}
       <div class="color-input-wrap" style="gap:4px;">
         <input type="color" id="tc-color-${esc(t)}" value="${color}" oninput="document.getElementById('tc-hex-${esc(t)}').value=this.value;" onchange="syncTypeColorHex('${esc(t)}')">
         <input type="text" id="tc-hex-${esc(t)}" value="${color}" style="width:78px;font-size:11px;" oninput="(function(v,id){if(/^#[0-9a-fA-F]{6}$/.test(v))document.getElementById('tc-color-'+id).value=v;})( this.value,'${esc(t)}'  )">
@@ -2276,6 +2288,14 @@ function buildSettingsUI(){
       ${isBuiltin?'<span style="width:26px;"></span>':`<button class="icon-btn del" onclick="removeCustomType('${esc(t)}')" title="Remove type" style="width:26px;">${trashIcon()}</button>`}
     </div>`;
   }).join('');
+
+  // Add drag event handlers for custom types
+  document.querySelectorAll('.type-row[draggable="true"]').forEach(el => {
+    el.addEventListener('dragstart', handleTypeRowDragStart);
+    el.addEventListener('dragover', handleTypeRowDragOver);
+    el.addEventListener('drop', handleTypeRowDrop);
+    el.addEventListener('dragend', handleTypeRowDragEnd);
+  });
 
   // UI colors
   const defaults = {accent:'#1A1917', bg:'#F7F6F3', surface:'#FFFFFF'};
@@ -2296,6 +2316,47 @@ function buildSettingsUI(){
       previewUIColors();
     };
   });
+}
+
+let draggedTypeRow = null;
+
+function handleTypeRowDragStart(e){
+  draggedTypeRow = this;
+  this.style.opacity = '0.5';
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleTypeRowDragOver(e){
+  if(e.preventDefault) e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if(this !== draggedTypeRow) this.style.borderTop = '2px solid var(--accent)';
+  return false;
+}
+
+function handleTypeRowDrop(e){
+  if(e.stopPropagation) e.stopPropagation();
+  if(draggedTypeRow && draggedTypeRow !== this){
+    const fromType = draggedTypeRow.id.replace('type-row-', '');
+    const toType = this.id.replace('type-row-', '');
+    reorderCustomTypes(fromType, toType);
+  }
+  return false;
+}
+
+function handleTypeRowDragEnd(e){
+  this.style.opacity = '1';
+  document.querySelectorAll('.type-row').forEach(el => el.style.borderTop = '');
+}
+
+function reorderCustomTypes(fromType, toType){
+  if(!customTypeOrder.includes(fromType)) customTypeOrder.push(fromType);
+  if(!customTypeOrder.includes(toType)) customTypeOrder.push(toType);
+  const fromIdx = customTypeOrder.indexOf(fromType);
+  const toIdx = customTypeOrder.indexOf(toType);
+  customTypeOrder.splice(fromIdx, 1);
+  customTypeOrder.splice(toIdx > fromIdx ? toIdx - 1 : toIdx, 0, fromType);
+  localStorage.setItem('wl2_custom_type_order', JSON.stringify(customTypeOrder));
+  buildSettingsUI();
 }
 
 function syncTypeColorHex(type){
@@ -2365,7 +2426,9 @@ function addCustomType(){
 function removeCustomType(name){
   if(!confirm(`Remove type "${name}"? Entries with this type will keep their value.`)) return;
   customTypes = customTypes.filter(t=>t!==name);
+  customTypeOrder = customTypeOrder.filter(t=>t!==name);
   localStorage.setItem('wl2_custom_types', JSON.stringify(customTypes));
+  localStorage.setItem('wl2_custom_type_order', JSON.stringify(customTypeOrder));
   buildSettingsUI();
   populateTypeSelects();
   toast(`Type "${name}" removed.`);
