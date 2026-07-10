@@ -306,7 +306,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.5.0</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.5.1</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -742,7 +742,7 @@ let viewMode = 'active'; // 'active' or 'archive'
 let searchQuery = '';
 let gcalToken = localStorage.getItem('wl2_gcal_token') || null;
 let gcalClientId = localStorage.getItem('wl2_gcal_client_id') || '';
-let filterType = 'All';
+let selectedFilterTypes = []; // empty = All
 let sortMode = 'deadline';
 let sortDir = 'desc'; // deadline default: furthest first
 let pinnedId = null; // newly added entry shown at top until sort changes
@@ -1614,7 +1614,7 @@ function populateTypeSelects(){
 
 function toggleView(){
   viewMode = viewMode==='active' ? 'archive' : 'active';
-  filterType = 'All';
+  selectedFilterTypes = [];
   document.getElementById('view-toggle-label').textContent = viewMode==='active' ? 'View Archive' : 'Back to Active';
   document.getElementById('main-title').textContent = viewMode==='active' ? 'Entries' : 'Archive';
   document.querySelector('.sidebar').style.opacity = viewMode==='archive' ? '0.4' : '1';
@@ -1745,7 +1745,7 @@ function render(){
     <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     Sync All to GCal
   </button>` : '';
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${filterType===t?' active':''}" onclick="setFilter('${esc(t)}')">${esc(t)}</button>`).join('') + syncAllBtn;
+  fb.innerHTML = types.map(t=>`<button class="filter-chip${(t==='All'?selectedFilterTypes.length===0:selectedFilterTypes.includes(t))?' active':''}" onclick="toggleFilterType('${esc(t)}')">${esc(t)}</button>`).join('') + syncAllBtn;
 
   const searchRow = document.getElementById('search-bar-row');
   if(searchRow) searchRow.innerHTML = `<input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" value="${esc(searchQuery)}" oninput="setSearch(this.value)"/>`;
@@ -1754,7 +1754,7 @@ function render(){
   const archiveBadge = document.getElementById('archive-count');
   if(archiveBadge) archiveBadge.textContent = '';
 
-  const filtered = filterType==='All' ? sorted(source) : sorted(source).filter(e=>e.type===filterType);
+  const filtered = selectedFilterTypes.length===0 ? sorted(source) : sorted(source).filter(e=>selectedFilterTypes.includes(e.type));
   const shown = filtered.filter(e => matchesSearch(e, searchQuery));
   document.getElementById('entry-count').textContent = shown.length;
   const list = document.getElementById('entries-list');
@@ -1902,7 +1902,12 @@ function fmtTime(t){
   return (hr%12||12)+':'+m+(hr<12?'AM':'PM');
 }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function setFilter(t){ filterType=t; render(); }
+function toggleFilterType(t){
+  if(t==='All'){ selectedFilterTypes = []; }
+  else if(selectedFilterTypes.includes(t)){ selectedFilterTypes = selectedFilterTypes.filter(x=>x!==t); }
+  else { selectedFilterTypes = [...selectedFilterTypes, t]; }
+  render();
+}
 function setSortAndRender(v){ sortMode=v; pinnedId=null; render(); }
 
 function setSearch(q){
@@ -2605,7 +2610,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.5.0', date: 'July 2026', latest: true,
+    version: 'v1.5.1', date: 'July 2026', latest: true,
+    items: [
+      'Multi-select task type filtering — click multiple type chips to filter by several types at once, instead of only one at a time'
+    ]
+  },
+  {
+    version: 'v1.5.0', date: 'July 2026', latest: false,
     items: [
       'Summary stat cards above filter bar — displays All Task, Entries, Archive, Today (due today + in progress), and Overdue counts',
       'Compact stat card design with reduced spacing for better visual integration',
