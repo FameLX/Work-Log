@@ -287,9 +287,9 @@ svg.icon.sm{width:13px;height:13px;}
 .repeat-modal-actions{display:flex;gap:8px;justify-content:flex-end;}
 
 /* Stat Cards */
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-width:136px;text-align:center;box-shadow:var(--shadow);}
-.stat-label{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
-.stat-value{font-size:20px;font-weight:600;color:var(--text);}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:8px 12px;display:flex;flex-direction:column;gap:3px;min-width:128px;text-align:center;box-shadow:var(--shadow);}
+.stat-label{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
+.stat-value{font-size:18px;font-weight:600;color:var(--text);}
 
 @media(max-width:700px){
   .app{grid-template-columns:1fr;}
@@ -1737,7 +1737,6 @@ function render(){
   if(statRowEl){
     statRowEl.innerHTML = statCardsRow;
     statRowEl.style.display = 'block';
-    statRowEl.style.borderBottom = '1px solid var(--border)';
   }
 
   // Original filter bar with type chips
