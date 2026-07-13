@@ -9,19 +9,178 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#F7F6F3;--surface:#FFFFFF;--surface2:#F0EFE9;
-  --border:#E2E0D8;--border2:#C8C6BC;
-  --text:#1A1917;--text2:#6B6860;--text3:#9C9A92;
-  --accent:#1A1917;--accent-text:#FFFFFF;
-  --success:#2D6A4F;--success-bg:#D8F3DC;
-  --warn:#92400E;--warn-bg:#FEF3C7;
-  --danger:#991B1B;--danger-bg:#FEE2E2;
-  --info:#1E40AF;--info-bg:#DBEAFE;
-  --radius:10px;--radius-lg:14px;
-  --font:'DM Sans',system-ui,sans-serif;
-  --mono:'DM Mono',monospace;
-  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+:root {
+  /* Default Light Theme */
+  --bg: #F7F6F3;
+  --surface: #FFFFFF;
+  --surface2: #F0EFE9;
+  --border: #E2E0D8;
+  --border2: #C8C6BC;
+  --text: #1A1917;
+  --text2: #6B6860;
+  --text3: #9C9A92;
+  --accent: #1A1917;
+  --accent-text: #FFFFFF;
+  --success: #2D6A4F;
+  --success-bg: #D8F3DC;
+  --warn: #92400E;
+  --warn-bg: #FEF3C7;
+  --danger: #991B1B;
+  --danger-bg: #FEE2E2;
+  --info: #1E40AF;
+  --info-bg: #DBEAFE;
+  --today: #FCC0A3;
+  --today-text: #1A1917;
+  --last-day: #FF8C7F;
+  --last-day-text: #1A1917;
+  --task-mode: #5B21B6;
+  --task-mode-bg: #EDE9FE;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', monospace;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+
+/* Dark Theme */
+:root.theme-dark {
+  --bg: #0F0E0C;
+  --surface: #1A1917;
+  --surface2: #262320;
+  --border: #3D3935;
+  --border2: #4D4945;
+  --text: #F5F5F0;
+  --text2: #B8B5AD;
+  --text3: #7C7973;
+  --accent: #E8E4DE;
+  --accent-text: #0F0E0C;
+  --success: #5EE5A8;
+  --success-bg: #1A3D2E;
+  --warn: #FFD066;
+  --warn-bg: #3D3010;
+  --danger: #FF6B6B;
+  --danger-bg: #3D1515;
+  --info: #6BB6FF;
+  --info-bg: #1A2E47;
+  --today: #F0A860;
+  --today-text: #1A1512;
+  --last-day: #FF7F6B;
+  --last-day-text: #1A1210;
+  --task-mode: #C58CFF;
+  --task-mode-bg: #2B1F45;
+  --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.2);
+}
+
+/* Dusty Pink Theme */
+:root.theme-dusty-pink {
+  --bg: #FBF7F6;
+  --surface: #FFFFFF;
+  --surface2: #F5EEE9;
+  --border: #E8D5D1;
+  --border2: #DCC0BA;
+  --text: #3D2B28;
+  --text2: #8B6F6A;
+  --text3: #B8A3A0;
+  --accent: #C05C6F;
+  --accent-text: #FFFFFF;
+  --success: #7B5C5C;
+  --success-bg: #E8D5D1;
+  --warn: #C4844C;
+  --warn-bg: #F5E3D0;
+  --danger: #A85A5A;
+  --danger-bg: #F0D7D4;
+  --info: #7A8FA8;
+  --info-bg: #E0E5ED;
+  --today: #E8A97A;
+  --today-text: #3D2B28;
+  --last-day: #D97C6B;
+  --last-day-text: #3D2B28;
+  --task-mode: #8E5BA8;
+  --task-mode-bg: #F0E4F2;
+}
+
+/* Twilight Sky Theme */
+:root.theme-twilight-sky {
+  --bg: #0D1B2A;
+  --surface: #1B263B;
+  --surface2: #2A3F5F;
+  --border: #415A77;
+  --border2: #57698F;
+  --text: #E0E1DD;
+  --text2: #A9ABA5;
+  --text3: #7A7D75;
+  --accent: #778DA9;
+  --accent-text: #0D1B2A;
+  --success: #6BBF9A;
+  --success-bg: #1A3D2E;
+  --warn: #FFD66E;
+  --warn-bg: #3D3810;
+  --danger: #FF6B6B;
+  --danger-bg: #3D1515;
+  --info: #7DB4E8;
+  --info-bg: #1A2E47;
+  --today: #E8B36B;
+  --today-text: #0D1B2A;
+  --last-day: #E8836B;
+  --last-day-text: #0D1B2A;
+  --task-mode: #B48EE8;
+  --task-mode-bg: #241B3D;
+}
+
+/* Neon Twilight Theme */
+:root.theme-neon-twilight {
+  --bg: #0D1B2A;
+  --surface: #1B263B;
+  --surface2: #2A3F5F;
+  --border: #415A77;
+  --border2: #57698F;
+  --text: #E0E1DD;
+  --text2: #A9ABA5;
+  --text3: #7A7D75;
+  --accent: #00E5FF;
+  --accent-text: #06222B;
+  --success: #4FE0B0;
+  --success-bg: #103A30;
+  --warn: #FFD66E;
+  --warn-bg: #3D3810;
+  --danger: #FF6B8A;
+  --danger-bg: #3D1520;
+  --info: #38C6FF;
+  --info-bg: #10314A;
+  --today: #FFB86B;
+  --today-text: #06222B;
+  --last-day: #FF7F97;
+  --last-day-text: #06222B;
+  --task-mode: #C58CFF;
+  --task-mode-bg: #241B3D;
+}
+
+/* Woodland Theme */
+:root.theme-woodland {
+  --bg: #D9D2C2;
+  --surface: #FBF8F2;
+  --surface2: #E4E7DD;
+  --border: #C6BCA4;
+  --border2: #ADA084;
+  --text: #232C28;
+  --text2: #5B564A;
+  --text3: #948C7A;
+  --accent: #A87860;
+  --accent-text: #FFFFFF;
+  --success: #616F5F;
+  --success-bg: #DCE3D8;
+  --warn: #B07A3F;
+  --warn-bg: #F1E4CD;
+  --danger: #634A50;
+  --danger-bg: #EADBDD;
+  --info: #4B6B63;
+  --info-bg: #DEE7E3;
+  --today: #C99A5B;
+  --today-text: #232C28;
+  --last-day: #A8635A;
+  --last-day-text: #232C28;
+  --task-mode: #7A5A78;
+  --task-mode-bg: #EDE1EA;
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;}
 a{color:inherit;}
@@ -73,9 +232,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .filter-bar{padding:12px 24px;display:flex;gap:6px;flex-wrap:nowrap;align-items:center;border-bottom:1px solid var(--border);overflow:hidden;}
 .filter-chip{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;}
 .filter-chip:hover{border-color:var(--border2);}
-.filter-chip.active{background:var(--text);color:#fff;border-color:var(--text);}
-.btn-sync-all{background:#D8F3DC;color:#2D6A4F;border-color:rgba(45,106,79,.25);}
-.btn-sync-all:hover{background:#c0eac6;border-color:rgba(45,106,79,.4);}
+.filter-chip.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent);}
+.btn-sync-all{background:var(--success-bg);color:var(--success);border-color:var(--success);}
+.btn-sync-all:hover{filter:brightness(.95);}
 .entries{padding:16px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;}
 .empty-state{text-align:center;padding:60px 24px;color:var(--text3);}
 .empty-icon{font-size:36px;margin-bottom:12px;opacity:.3;}
@@ -94,9 +253,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .chip.type{background:var(--info-bg);color:var(--info);border-color:rgba(30,64,175,.2);}
 .chip.overdue{background:var(--danger-bg);color:var(--danger);border-color:rgba(153,27,27,.25);}
 .chip.soon{background:var(--warn-bg);color:var(--warn);border-color:rgba(146,64,14,.25);}
-.chip.today{background:#fcc0a3;color:#1A1917;border-color:#fcc0a3;}
+.chip.today{background:var(--today);color:var(--today-text);border-color:var(--today);}
 .chip.in-progress{background:var(--success-bg);color:var(--success);border-color:rgba(45,106,79,.25);}
-.chip.last-day{background:#FF8C7F;color:#1A1917;border-color:#FF8C7F;}
+.chip.last-day{background:var(--last-day);color:var(--last-day-text);border-color:var(--last-day);}
 .entry-actions{display:flex;gap:4px;flex-shrink:0;}
 .icon-btn{width:30px;height:30px;border-radius:8px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all .12s;}
 .icon-btn:hover{background:var(--surface2);color:var(--text);}
@@ -115,7 +274,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .ai-badge{font-size:10px;font-weight:500;letter-spacing:.04em;padding:2px 7px;border-radius:99px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);}
 .ai-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
 .ai-msg{max-width:90%;font-size:13px;line-height:1.6;}
-.ai-msg.user{align-self:flex-end;background:var(--text);color:#fff;padding:8px 12px;border-radius:12px 12px 3px 12px;}
+.ai-msg.user{align-self:flex-end;background:var(--accent);color:var(--accent-text);padding:8px 12px;border-radius:12px 12px 3px 12px;}
 .ai-msg.bot{align-self:flex-start;background:var(--surface2);color:var(--text);padding:8px 12px;border-radius:3px 12px 12px 12px;border:1px solid var(--border);}
 .ai-msg.bot.loading{color:var(--text3);}
 .ai-input-row{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;}
@@ -230,8 +389,8 @@ body.no-scroll{overflow:hidden;}
 .due-item-meta{font-size:12px;color:var(--text2);margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .due-item-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 .due-item-actions input[type=date]{font-size:12px;padding:5px 8px;width:auto;}
-.due-item-actions .btn-danger{background:#D1FFBD;color:#1A1917;border-color:#D1FFBD;}
-.due-item-actions .btn-danger:hover{background:#bfff9e;border-color:#bfff9e;}
+.due-item-actions .btn-danger{background:var(--success-bg);color:var(--success);border-color:var(--success-bg);}
+.due-item-actions .btn-danger:hover{filter:brightness(.95);}
 .due-modal-footer{display:flex;justify-content:flex-end;flex-shrink:0;}
 
 /* Deadline range */
@@ -242,7 +401,7 @@ body.no-scroll{overflow:hidden;}
 .sync-mode-btn{flex:1;font-family:var(--font);font-size:13px;padding:6px 0;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;}
 .sync-mode-btn.active{background:var(--accent);color:var(--accent-text);}
 .sync-mode-btn:not(.active):hover{background:var(--surface2);}
-.chip.task-mode{background:#EDE9FE;color:#5B21B6;border-color:rgba(91,33,182,.25);}
+.chip.task-mode{background:var(--task-mode-bg);color:var(--task-mode);border-color:var(--task-mode-bg);}
 
 svg.icon{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 svg.icon.sm{width:13px;height:13px;}
@@ -294,10 +453,249 @@ svg.icon.sm{width:13px;height:13px;}
 .stat-label{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);}
 .stat-value{font-size:18px;font-weight:600;color:var(--text);}
 
+/* Appearance Themes */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.theme-btn {
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.theme-btn:hover {
+  border-color: var(--border2);
+}
+
+.theme-btn.active {
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+}
+
+.theme-preview {
+  display: flex;
+  gap: 4px;
+  height: 24px;
+  width: 100%;
+}
+
+.theme-color {
+  flex: 1;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,.1);
+}
+
+.theme-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Custom Theme Builder */
+.custom-theme-section {
+  background: var(--surface2);
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  margin-top: 16px;
+}
+
+.custom-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.color-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.color-picker-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.color-picker-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-picker-input input[type="color"] {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.color-picker-input input[type="text"] {
+  flex: 1;
+  font-size: 12px;
+  font-family: var(--mono);
+  padding: 6px 8px;
+}
+
+.custom-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.custom-actions button {
+  flex: 1;
+}
+
+.custom-theme-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.custom-theme-hint {
+  font-size: 12px;
+  color: var(--text3);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.advanced-toggle-btn {
+  width: 100%;
+  justify-content: space-between;
+  margin: 4px 0 8px;
+}
+
+.advanced-toggle-btn .chevron {
+  transition: transform .2s;
+}
+
+.advanced-toggle-btn.open .chevron {
+  transform: rotate(180deg);
+}
+
+#advanced-theme-panel {
+  padding: 8px 0 4px;
+  border-top: 1px dashed var(--border);
+  margin-top: 4px;
+}
+
+.adv-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin: 16px 0 8px;
+}
+
+.custom-save-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.custom-save-row input[type="text"] {
+  flex: 1;
+  min-width: 150px;
+}
+
+.saved-theme-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.saved-theme-row.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.05);
+}
+
+.saved-theme-row .theme-preview.saved {
+  width: 60px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.saved-theme-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.saved-theme-name:hover {
+  border-color: var(--border);
+}
+
+.saved-theme-name:focus {
+  border-color: var(--border2);
+  background: var(--surface2);
+  outline: none;
+}
+
+.saved-empty {
+  font-size: 12px;
+  color: var(--text3);
+  padding: 8px 0;
+}
+
+/* Button improvements */
+.btn {
+  font-weight: 500;
+  letter-spacing: -.3px;
+}
+
+.btn-primary {
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.16);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
 @media(max-width:700px){
   .app{grid-template-columns:1fr;}
   .sidebar{border-right:none;border-bottom:1px solid var(--border);}
   .ai-panel{width:100%;top:56px;}
+  .theme-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  }
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -308,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.5.2</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.0</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -654,33 +1052,95 @@ svg.icon.sm{width:13px;height:13px;}
       </button>
     </div>
 
-    <!-- UI Colours -->
+    <!-- Themes -->
     <div class="settings-section">
-      <h3>Interface Colour</h3>
-      <div class="desc">Customise the text, background, and surface colours of the interface.</div>
-      <div style="display:flex;flex-direction:column;gap:12px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:13px;color:var(--text2);width:120px;">Text colour</span>
-          <div class="color-input-wrap">
-            <input type="color" id="ui-accent-color" value="#1A1917"/>
-            <input type="text" id="ui-accent-hex" placeholder="#1A1917" oninput="syncColorFromHex('ui-accent-color','ui-accent-hex')"/>
+      <h3>Appearance Themes</h3>
+      <div class="desc">Choose from 6 carefully designed themes, or create your own custom theme.</div>
+
+      <!-- Preset Themes -->
+      <div class="theme-grid" id="theme-presets">
+        <button class="theme-btn active" data-theme="default" onclick="switchTheme('default')">
+          <div class="theme-preview">
+            <div class="theme-color" style="background: #F7F6F3;"></div>
+            <div class="theme-color" style="background: #1A1917;"></div>
+            <div class="theme-color" style="background: #FFFFFF;"></div>
           </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:13px;color:var(--text2);width:120px;">Background</span>
-          <div class="color-input-wrap">
-            <input type="color" id="ui-bg-color" value="#F7F6F3"/>
-            <input type="text" id="ui-bg-hex" placeholder="#F7F6F3" oninput="syncColorFromHex('ui-bg-color','ui-bg-hex')"/>
+          <span class="theme-name">Default</span>
+        </button>
+
+        <button class="theme-btn" data-theme="dark" onclick="switchTheme('dark')">
+          <div class="theme-preview">
+            <div class="theme-color" style="background: #0F0E0C;"></div>
+            <div class="theme-color" style="background: #E8E4DE;"></div>
+            <div class="theme-color" style="background: #1A1917;"></div>
           </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:13px;color:var(--text2);width:120px;">Surface</span>
-          <div class="color-input-wrap">
-            <input type="color" id="ui-surface-color" value="#FFFFFF"/>
-            <input type="text" id="ui-surface-hex" placeholder="#FFFFFF" oninput="syncColorFromHex('ui-surface-color','ui-surface-hex')"/>
+          <span class="theme-name">Dark</span>
+        </button>
+
+        <button class="theme-btn" data-theme="dusty-pink" onclick="switchTheme('dusty-pink')">
+          <div class="theme-preview">
+            <div class="theme-color" style="background: #FBF7F6;"></div>
+            <div class="theme-color" style="background: #C05C6F;"></div>
+            <div class="theme-color" style="background: #F5EEE9;"></div>
           </div>
+          <span class="theme-name">Dusty Pink</span>
+        </button>
+
+        <button class="theme-btn" data-theme="twilight-sky" onclick="switchTheme('twilight-sky')">
+          <div class="theme-preview">
+            <div class="theme-color" style="background: #0D1B2A;"></div>
+            <div class="theme-color" style="background: #778DA9;"></div>
+            <div class="theme-color" style="background: #E0E1DD;"></div>
+          </div>
+          <span class="theme-name">Twilight</span>
+        </button>
+
+        <button class="theme-btn" data-theme="neon-twilight" onclick="switchTheme('neon-twilight')">
+          <div class="theme-preview">
+            <div class="theme-color" style="background: #0D1B2A;"></div>
+            <div class="theme-color" style="background: #00E5FF;"></div>
+            <div class="theme-color" style="background: #E0E1DD;"></div>
+          </div>
+          <span class="theme-name">Neon Twilight</span>
+        </button>
+
+        <button class="theme-btn" data-theme="woodland" onclick="switchTheme('woodland')">
+          <div class="theme-preview">
+            <div class="theme-color" style="background: #A87860;"></div>
+            <div class="theme-color" style="background: #616F5F;"></div>
+            <div class="theme-color" style="background: #B07A3F;"></div>
+          </div>
+          <span class="theme-name">Woodland</span>
+        </button>
+      </div>
+
+      <!-- Custom Theme Builder -->
+      <div class="custom-theme-section">
+        <div class="custom-theme-title">Create Custom Theme</div>
+        <p class="custom-theme-hint">These are the colours the active theme is using right now. Adjust any of them — the app previews instantly — then save it as a reusable theme.</p>
+        <div class="custom-theme-grid" id="custom-basic-grid"></div>
+
+        <button class="btn btn-sm advanced-toggle-btn" id="advanced-toggle-btn" onclick="toggleAdvancedTheme()">
+          <span>Advanced Theme Settings</span>
+          <svg class="icon sm chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="advanced-theme-panel" style="display:none;">
+          <p class="custom-theme-hint">Fine-tune every surface, border, text tone and status colour individually.</p>
+          <div id="advanced-token-groups"></div>
         </div>
-        <button class="btn btn-sm" onclick="resetUIColors()" style="align-self:flex-start;">Reset to defaults</button>
+
+        <div class="custom-save-row">
+          <input type="text" id="custom-theme-name" placeholder="Name this theme…"/>
+          <button class="btn btn-primary" onclick="saveCustomTheme()">Save Custom Theme</button>
+          <button class="btn" onclick="resetCustomForm()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Saved Themes -->
+      <div class="custom-theme-section">
+        <div class="custom-theme-title">Saved Themes</div>
+        <p class="custom-theme-hint">Your saved custom themes. Rename, apply, or delete any of them.</p>
+        <div id="saved-themes-list"></div>
       </div>
     </div>
 
@@ -781,7 +1241,6 @@ let customTypeOrder = JSON.parse(localStorage.getItem('wl2_custom_type_order') |
 let typeOrder = JSON.parse(localStorage.getItem('wl2_type_order') || '[]');
 let typeColors = JSON.parse(localStorage.getItem('wl2_type_colors') || '{}');
 let typeGCalIds = JSON.parse(localStorage.getItem('wl2_type_gcal_ids') || '{}');
-let uiColors = JSON.parse(localStorage.getItem('wl2_ui_colors') || '{}');
 
 function allTypes(){
   if(typeOrder.length > 0){
@@ -836,7 +1295,6 @@ function init(){
     document.getElementById('gcal-pill-text').textContent = 'Calendar connected';
     verifyGCalToken();
   }
-  applyUIColors();
   populateTypeSelects();
   render();
   updateTrashBadge();
@@ -2386,7 +2844,6 @@ function openSettings(){
     customTypeOrder: [...customTypeOrder],
     typeColors: {...typeColors},
     typeGCalIds: {...typeGCalIds},
-    uiColors: {...uiColors},
     builtinTypes: [...BUILTIN_TYPES]
   };
   settingsDirty = false;
@@ -2414,10 +2871,8 @@ function discardSettingsChanges(){
   customTypeOrder = [...settingsSnapshot.customTypeOrder];
   typeColors = {...settingsSnapshot.typeColors};
   typeGCalIds = {...settingsSnapshot.typeGCalIds};
-  uiColors = {...settingsSnapshot.uiColors};
   BUILTIN_TYPES.length = 0;
   BUILTIN_TYPES.push(...settingsSnapshot.builtinTypes);
-  applyUIColors();
   populateTypeSelects();
   render();
   settingsDirty = false;
@@ -2477,25 +2932,12 @@ function buildSettingsUI(){
     el.addEventListener('dragend', handleTypeRowDragEnd);
   });
 
-  // UI colors
-  const defaults = {accent:'#1A1917', bg:'#F7F6F3', surface:'#FFFFFF'};
-  const accent = uiColors.accent || defaults.accent;
-  const bg = uiColors.bg || defaults.bg;
-  const surface = uiColors.surface || defaults.surface;
-  document.getElementById('ui-accent-color').value = accent;
-  document.getElementById('ui-accent-hex').value = accent;
-  document.getElementById('ui-bg-color').value = bg;
-  document.getElementById('ui-bg-hex').value = bg;
-  document.getElementById('ui-surface-color').value = surface;
-  document.getElementById('ui-surface-hex').value = surface;
-
-  // Sync color pickers live
-  ['ui-accent','ui-bg','ui-surface'].forEach(id=>{
-    document.getElementById(id+'-color').oninput = function(){
-      document.getElementById(id+'-hex').value = this.value;
-      previewUIColors();
-    };
-  });
+  // Theme UI: build the custom pickers, fill them with the active theme's colours,
+  // highlight the active preset, and render the saved-theme list.
+  buildCustomEditor();
+  populateCustomFromCurrent();
+  markActiveTheme();
+  renderSavedThemes();
 }
 
 let draggedTypeRow = null;
@@ -2548,53 +2990,6 @@ function syncTypeColorHex(type){
   const colorEl = document.getElementById('tc-color-'+type);
   const hexEl = document.getElementById('tc-hex-'+type);
   if(colorEl && hexEl) hexEl.value = colorEl.value;
-}
-
-function syncColorFromHex(colorId, hexId, reverse=false){
-  // reverse=true means hexId is actually the color picker id and colorId is the hex
-  const colorEl = document.getElementById(reverse ? hexId : colorId);
-  const hexEl = document.getElementById(reverse ? colorId : hexId);
-  if(!colorEl || !hexEl) return;
-  const val = hexEl.value.trim();
-  if(/^#[0-9a-fA-F]{6}$/.test(val)) colorEl.value = val;
-  if(!reverse) previewUIColors();
-}
-
-function previewUIColors(){
-  settingsDirty = true;
-  const accent = document.getElementById('ui-accent-color')?.value;
-  const bg = document.getElementById('ui-bg-color')?.value;
-  const surface = document.getElementById('ui-surface-color')?.value;
-  if(accent) document.documentElement.style.setProperty('--text', accent);
-  if(bg) document.documentElement.style.setProperty('--bg', bg);
-  if(surface) document.documentElement.style.setProperty('--surface', surface);
-}
-
-function applyUIColors(){
-  if(!uiColors || !Object.keys(uiColors).length) return;
-  const root = document.documentElement;
-  if(uiColors.accent) root.style.setProperty('--text', uiColors.accent);
-  if(uiColors.bg) root.style.setProperty('--bg', uiColors.bg);
-  if(uiColors.surface) root.style.setProperty('--surface', uiColors.surface);
-}
-
-function resetUIColors(){
-  settingsDirty = true;
-  const root = document.documentElement;
-  root.style.removeProperty('--text');
-  root.style.removeProperty('--text2');
-  root.style.removeProperty('--text3');
-  root.style.removeProperty('--border');
-  root.style.removeProperty('--border2');
-  root.style.removeProperty('--bg');
-  root.style.removeProperty('--surface');
-  const defaults = {accent:'#1A1917', bg:'#F7F6F3', surface:'#FFFFFF'};
-  document.getElementById('ui-accent-color').value = defaults.accent;
-  document.getElementById('ui-accent-hex').value = defaults.accent;
-  document.getElementById('ui-bg-color').value = defaults.bg;
-  document.getElementById('ui-bg-hex').value = defaults.bg;
-  document.getElementById('ui-surface-color').value = defaults.surface;
-  document.getElementById('ui-surface-hex').value = defaults.surface;
 }
 
 function addCustomType(){
@@ -2653,14 +3048,6 @@ function saveSettings(){
   localStorage.setItem('wl2_custom_type_order', JSON.stringify(customTypeOrder));
   localStorage.setItem('wl2_type_order', JSON.stringify(typeOrder));
 
-  // UI colors
-  uiColors = {
-    accent: document.getElementById('ui-accent-hex').value.trim() || document.getElementById('ui-accent-color').value,
-    bg: document.getElementById('ui-bg-hex').value.trim() || document.getElementById('ui-bg-color').value,
-    surface: document.getElementById('ui-surface-hex').value.trim() || document.getElementById('ui-surface-color').value,
-  };
-  localStorage.setItem('wl2_ui_colors', JSON.stringify(uiColors));
-  applyUIColors();
   settingsDirty = false;
   document.getElementById('settings-unsaved-modal').classList.remove('open');
   closeSettingsForce();
@@ -2672,7 +3059,16 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.5.2', date: 'July 2026', latest: true,
+    version: 'v1.6.0', date: 'July 2026', latest: true,
+    items: [
+      'Appearance Themes — choose from 6 designed themes (Default, Dark, Dusty Pink, Twilight Sky, Neon Twilight, Woodland), replacing the old 3-colour picker',
+      'Custom Theme builder — shows the colours the active theme is using right now, edit any of them with instant preview',
+      'Advanced Theme Settings — fine-tune all 24 individual colours (surfaces, borders, text tones, and every status/chip colour)',
+      'Saved Themes — save your own custom themes with a name, then rename, apply, or delete them at any time'
+    ]
+  },
+  {
+    version: 'v1.5.2', date: 'July 2026', latest: false,
     items: [
       'Settings changes are now a draft until you click "Save changes" — edits to task types, colours, and interface theme no longer apply live; closing without saving reverts everything',
       'Leaving Settings with unsaved changes now prompts to save or discard instead of silently losing or keeping them',
@@ -3124,8 +3520,240 @@ function appendMsg(text, cls){
 }
 function removeMsg(id){ document.getElementById(id)?.remove(); }
 
+// ── Themes ───────────────────────────────────────────────────────────────────
+// Every themeable CSS variable. tier:'basic' shows in the always-visible grid;
+// tier:'adv' shows under "Advanced Theme Settings", grouped by `group`.
+const THEME_TOKENS = [
+  {key:'bg',          label:'Background',      tier:'basic'},
+  {key:'surface',     label:'Surface',         tier:'basic'},
+  {key:'accent',      label:'Accent',          tier:'basic'},
+  {key:'text',        label:'Text',            tier:'basic'},
+  {key:'surface2',    label:'Surface (alt)',   tier:'adv', group:'Surfaces & borders'},
+  {key:'border',      label:'Border',          tier:'adv', group:'Surfaces & borders'},
+  {key:'border2',     label:'Border (strong)', tier:'adv', group:'Surfaces & borders'},
+  {key:'text2',       label:'Text (muted)',    tier:'adv', group:'Text tones'},
+  {key:'text3',       label:'Text (faint)',    tier:'adv', group:'Text tones'},
+  {key:'accent-text', label:'Accent text',     tier:'adv', group:'Text tones'},
+  {key:'success',     label:'Success',         tier:'adv', group:'Status — success'},
+  {key:'success-bg',  label:'Success bg',      tier:'adv', group:'Status — success'},
+  {key:'info',        label:'Info',            tier:'adv', group:'Status — info'},
+  {key:'info-bg',     label:'Info bg',         tier:'adv', group:'Status — info'},
+  {key:'warn',        label:'Warning',         tier:'adv', group:'Status — warning'},
+  {key:'warn-bg',     label:'Warning bg',      tier:'adv', group:'Status — warning'},
+  {key:'danger',      label:'Danger',          tier:'adv', group:'Status — danger'},
+  {key:'danger-bg',   label:'Danger bg',       tier:'adv', group:'Status — danger'},
+  {key:'today',        label:'Today chip',      tier:'adv', group:'Status — today'},
+  {key:'today-text',   label:'Today chip text', tier:'adv', group:'Status — today'},
+  {key:'last-day',     label:'Last day chip',      tier:'adv', group:'Status — last day'},
+  {key:'last-day-text',label:'Last day chip text', tier:'adv', group:'Status — last day'},
+  {key:'task-mode',    label:'Task mode chip',      tier:'adv', group:'Status — task mode'},
+  {key:'task-mode-bg', label:'Task mode chip bg',   tier:'adv', group:'Status — task mode'},
+];
+
+let savedThemes = JSON.parse(localStorage.getItem('wl2_saved_themes') || '[]');
+
+function normalizeHex(v){
+  v = (v || '').trim();
+  if(!v) return '#000000';
+  const rgb = v.match(/rgba?\(([^)]+)\)/i);
+  if(rgb){
+    const parts = rgb[1].split(',').map(x => parseInt(x.trim()));
+    return '#' + parts.slice(0,3).map(n => (n||0).toString(16).padStart(2,'0')).join('');
+  }
+  if(v[0] !== '#') v = '#' + v;
+  if(/^#[0-9a-fA-F]{3}$/.test(v)) v = '#' + v[1]+v[1]+v[2]+v[2]+v[3]+v[3];
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '#000000';
+}
+
+// Read the colour every token currently resolves to (inline overrides + theme class).
+function readCurrentTokens(){
+  const cs = getComputedStyle(document.documentElement);
+  const out = {};
+  THEME_TOKENS.forEach(t => { out[t.key] = normalizeHex(cs.getPropertyValue('--' + t.key)); });
+  return out;
+}
+
+function clearThemeOverrides(){
+  const root = document.documentElement;
+  THEME_TOKENS.forEach(t => root.style.removeProperty('--' + t.key));
+}
+
+function applyTokenSet(tokens){
+  const root = document.documentElement;
+  THEME_TOKENS.forEach(t => { if(tokens[t.key]) root.style.setProperty('--' + t.key, tokens[t.key]); });
+}
+
+// Switch to one of the built-in preset themes.
+function switchTheme(themeName){
+  clearThemeOverrides();
+  document.documentElement.className = themeName === 'default' ? '' : 'theme-' + themeName;
+  localStorage.setItem('wl2_current_theme', themeName);
+  markActiveTheme();
+  populateCustomFromCurrent();
+  renderSavedThemes();
+}
+
+// Highlight whichever preset button matches the stored theme.
+function markActiveTheme(){
+  const cur = localStorage.getItem('wl2_current_theme') || 'default';
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  if(!cur.startsWith('saved:')){
+    document.querySelector(`.theme-btn[data-theme="${cur}"]`)?.classList.add('active');
+  }
+}
+
+// ── Custom theme editor ──
+// Build the colour pickers (basic grid + advanced grouped panel) from THEME_TOKENS.
+function pickerHTML(t){
+  return `<div class="color-picker-group">
+    <label class="color-picker-label" for="tk-${t.key}">${t.label}</label>
+    <div class="color-picker-input">
+      <input type="color" id="tk-${t.key}" oninput="onTokenColor('${t.key}')"/>
+      <input type="text" id="tk-${t.key}-hex" onchange="onTokenHex('${t.key}')" placeholder="#000000"/>
+    </div>
+  </div>`;
+}
+
+function buildCustomEditor(){
+  const basicWrap = document.getElementById('custom-basic-grid');
+  const advWrap = document.getElementById('advanced-token-groups');
+  if(!basicWrap || !advWrap) return;
+  basicWrap.innerHTML = THEME_TOKENS.filter(t => t.tier === 'basic').map(pickerHTML).join('');
+  const groups = {};
+  THEME_TOKENS.filter(t => t.tier === 'adv').forEach(t => {
+    (groups[t.group] = groups[t.group] || []).push(t);
+  });
+  advWrap.innerHTML = Object.keys(groups).map(g =>
+    `<div class="adv-group-label">${g}</div>
+     <div class="custom-theme-grid">${groups[g].map(pickerHTML).join('')}</div>`
+  ).join('');
+}
+
+// Fill every picker with the colour the active theme uses right now.
+function populateCustomFromCurrent(){
+  const tokens = readCurrentTokens();
+  THEME_TOKENS.forEach(t => {
+    const c = document.getElementById('tk-' + t.key);
+    const h = document.getElementById('tk-' + t.key + '-hex');
+    if(c) c.value = tokens[t.key];
+    if(h) h.value = tokens[t.key];
+  });
+}
+
+// Live-apply an edit so the whole app previews the change immediately.
+function onTokenColor(key){
+  const v = document.getElementById('tk-' + key).value;
+  document.getElementById('tk-' + key + '-hex').value = v;
+  document.documentElement.style.setProperty('--' + key, v);
+}
+function onTokenHex(key){
+  const v = normalizeHex(document.getElementById('tk-' + key + '-hex').value);
+  document.getElementById('tk-' + key).value = v;
+  document.getElementById('tk-' + key + '-hex').value = v;
+  document.documentElement.style.setProperty('--' + key, v);
+}
+
+function toggleAdvancedTheme(){
+  const panel = document.getElementById('advanced-theme-panel');
+  const btn = document.getElementById('advanced-toggle-btn');
+  const opening = panel.style.display === 'none' || !panel.style.display;
+  panel.style.display = opening ? 'block' : 'none';
+  btn.classList.toggle('open', opening);
+}
+
+// Revert unsaved tweaks back to the active theme's colours.
+function resetCustomForm(){
+  const cur = localStorage.getItem('wl2_current_theme') || 'default';
+  clearThemeOverrides();
+  if(cur.startsWith('saved:')){
+    const th = savedThemes.find(t => 'saved:' + t.id === cur);
+    if(th) applyTokenSet(th.tokens);
+  }
+  populateCustomFromCurrent();
+}
+
+// ── Saved themes ──
+function saveCustomTheme(){
+  const nameInput = document.getElementById('custom-theme-name');
+  let name = (nameInput.value || '').trim();
+  if(!name) name = 'My Theme ' + (savedThemes.length + 1);
+  const tokens = readCurrentTokens();
+  const id = 't' + Date.now();
+  savedThemes.push({ id, name, tokens });
+  localStorage.setItem('wl2_saved_themes', JSON.stringify(savedThemes));
+  nameInput.value = '';
+  applySavedTheme(id);
+  toast('Theme "' + name + '" saved');
+}
+
+function applySavedTheme(id){
+  const th = savedThemes.find(t => t.id === id);
+  if(!th) return;
+  clearThemeOverrides();
+  document.documentElement.className = 'theme-custom';
+  applyTokenSet(th.tokens);
+  localStorage.setItem('wl2_current_theme', 'saved:' + id);
+  markActiveTheme();
+  populateCustomFromCurrent();
+  renderSavedThemes();
+}
+
+function deleteSavedTheme(id){
+  savedThemes = savedThemes.filter(t => t.id !== id);
+  localStorage.setItem('wl2_saved_themes', JSON.stringify(savedThemes));
+  if(localStorage.getItem('wl2_current_theme') === 'saved:' + id){
+    switchTheme('default');
+  }
+  renderSavedThemes();
+  toast('Theme deleted');
+}
+
+function renameSavedTheme(id, value){
+  const th = savedThemes.find(t => t.id === id);
+  if(!th) return;
+  th.name = (value || '').trim() || th.name;
+  localStorage.setItem('wl2_saved_themes', JSON.stringify(savedThemes));
+}
+
+function renderSavedThemes(){
+  const list = document.getElementById('saved-themes-list');
+  if(!list) return;
+  if(!savedThemes.length){
+    list.innerHTML = '<div class="saved-empty">No saved themes yet. Adjust the colours above and click Save Custom Theme.</div>';
+    return;
+  }
+  const cur = localStorage.getItem('wl2_current_theme');
+  list.innerHTML = savedThemes.map(th => {
+    const active = cur === 'saved:' + th.id;
+    const sw = ['bg','surface','accent','text']
+      .map(k => `<div class="theme-color" style="background:${th.tokens[k] || '#ccc'}"></div>`).join('');
+    return `<div class="saved-theme-row${active ? ' active' : ''}">
+      <div class="theme-preview saved">${sw}</div>
+      <input class="saved-theme-name" value="${esc(th.name)}" onchange="renameSavedTheme('${th.id}', this.value)"/>
+      <button class="btn btn-sm${active ? ' btn-primary' : ''}" onclick="applySavedTheme('${th.id}')">${active ? 'Active' : 'Apply'}</button>
+      <button class="icon-btn del" onclick="deleteSavedTheme('${th.id}')" title="Delete theme">
+        <svg class="icon sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// Apply the stored theme on page load (no UI side-effects — settings isn't built yet).
+function loadTheme(){
+  const cur = localStorage.getItem('wl2_current_theme') || 'default';
+  clearThemeOverrides();
+  if(cur.startsWith('saved:')){
+    const th = savedThemes.find(t => 'saved:' + t.id === cur);
+    if(th){ document.documentElement.className = 'theme-custom'; applyTokenSet(th.tokens); return; }
+    document.documentElement.className = '';
+    return;
+  }
+  document.documentElement.className = cur === 'default' ? '' : 'theme-' + cur;
+}
+
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 // Run init() here, at the very end, so all let/const state above is initialized.
+loadTheme();
 init();
 initAI();
 </script>
