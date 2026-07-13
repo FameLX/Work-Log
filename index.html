@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.0</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.1</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1196,10 +1196,31 @@ svg.icon.sm{width:13px;height:13px;}
 <div class="toast" id="toast"></div>
 
 <script>
+// ── One-time migration: dev/beta used to share the 'wl2_' keys with
+// production (same GitHub Pages origin). Copy any old shared data into the
+// new 'wl2dev_' namespace once, without touching or deleting the old keys —
+// production keeps reading 'wl2_' untouched.
+(function migrateToDevNamespace(){
+  if(localStorage.getItem('wl2dev_migrated')) return;
+  const oldKeys = [
+    'wl2_ai_key','wl2_ai_model','wl2_archived','wl2_current_theme','wl2_custom_type_order',
+    'wl2_custom_types','wl2_entries','wl2_gcal_client_id','wl2_gcal_token','wl2_saved_themes',
+    'wl2_trash','wl2_type_colors','wl2_type_gcal_ids','wl2_type_order'
+  ];
+  oldKeys.forEach(oldKey => {
+    const newKey = oldKey.replace('wl2_', 'wl2dev_');
+    if(localStorage.getItem(newKey) === null){
+      const oldVal = localStorage.getItem(oldKey);
+      if(oldVal !== null) localStorage.setItem(newKey, oldVal);
+    }
+  });
+  localStorage.setItem('wl2dev_migrated', '1');
+})();
+
 // ── State ──────────────────────────────────────────────────────────────────
-let entries = JSON.parse(localStorage.getItem('wl2_entries') || '[]');
-let archived = JSON.parse(localStorage.getItem('wl2_archived') || '[]');
-let trash = JSON.parse(localStorage.getItem('wl2_trash') || '[]');
+let entries = JSON.parse(localStorage.getItem('wl2dev_entries') || '[]');
+let archived = JSON.parse(localStorage.getItem('wl2dev_archived') || '[]');
+let trash = JSON.parse(localStorage.getItem('wl2dev_trash') || '[]');
 // Migration: add updated field to old entries that don't have it
 entries.forEach(e => { if(!e.updated) e.updated = e.created; });
 archived.forEach(e => { if(!e.updated) e.updated = e.created; });
@@ -1210,12 +1231,12 @@ trash.forEach(e => { if(!e.deletedAt && e.trashedAt){ e.deletedAt = e.trashedAt;
   const cutoff = Date.now() - 5*86400000;
   const before = trash.length;
   trash = trash.filter(e => new Date(e.deletedAt).getTime() > cutoff);
-  if(trash.length !== before) localStorage.setItem('wl2_trash', JSON.stringify(trash));
+  if(trash.length !== before) localStorage.setItem('wl2dev_trash', JSON.stringify(trash));
 })();
 let viewMode = 'active'; // 'active' or 'archive'
 let searchQuery = '';
-let gcalToken = localStorage.getItem('wl2_gcal_token') || null;
-let gcalClientId = localStorage.getItem('wl2_gcal_client_id') || '';
+let gcalToken = localStorage.getItem('wl2dev_gcal_token') || null;
+let gcalClientId = localStorage.getItem('wl2dev_gcal_client_id') || '';
 let selectedFilterTypes = []; // empty = All
 let sortMode = 'deadline';
 let sortDir = 'desc'; // deadline default: furthest first
@@ -1236,11 +1257,11 @@ function fmtTime12(t){
 function buildGTaskTitle(entry){
   return entry.time ? `${fmtTime12(entry.time)} | ${entry.name}` : entry.name;
 }
-let customTypes = JSON.parse(localStorage.getItem('wl2_custom_types') || '[]');
-let customTypeOrder = JSON.parse(localStorage.getItem('wl2_custom_type_order') || '[]');
-let typeOrder = JSON.parse(localStorage.getItem('wl2_type_order') || '[]');
-let typeColors = JSON.parse(localStorage.getItem('wl2_type_colors') || '{}');
-let typeGCalIds = JSON.parse(localStorage.getItem('wl2_type_gcal_ids') || '{}');
+let customTypes = JSON.parse(localStorage.getItem('wl2dev_custom_types') || '[]');
+let customTypeOrder = JSON.parse(localStorage.getItem('wl2dev_custom_type_order') || '[]');
+let typeOrder = JSON.parse(localStorage.getItem('wl2dev_type_order') || '[]');
+let typeColors = JSON.parse(localStorage.getItem('wl2dev_type_colors') || '{}');
+let typeGCalIds = JSON.parse(localStorage.getItem('wl2dev_type_gcal_ids') || '{}');
 
 function allTypes(){
   if(typeOrder.length > 0){
@@ -1265,7 +1286,7 @@ function allTypes(){
     const params = new URLSearchParams(location.hash.slice(1));
     const token = params.get('access_token');
     if(token && window.opener){
-      try{ window.opener.postMessage({type:'wl2_gcal_token', token}, location.origin); }catch(e){}
+      try{ window.opener.postMessage({type:'wl2dev_gcal_token', token}, location.origin); }catch(e){}
       // Clean the token out of the address bar then close the popup.
       history.replaceState(null,'',location.pathname + location.search);
       window.close();
@@ -1276,7 +1297,7 @@ function allTypes(){
 // Main-window listener: receive the token the popup sent and connect.
 window.addEventListener('message', function(ev){
   if(ev.origin !== location.origin) return;
-  if(ev.data && ev.data.type==='wl2_gcal_token' && ev.data.token){
+  if(ev.data && ev.data.type==='wl2dev_gcal_token' && ev.data.token){
     gcalApplyToken(ev.data.token);
   }
 });
@@ -1470,10 +1491,10 @@ function saveEdit(id){
 }
 
 function save(){
-  localStorage.setItem('wl2_entries', JSON.stringify(entries));
-  localStorage.setItem('wl2_archived', JSON.stringify(archived));
+  localStorage.setItem('wl2dev_entries', JSON.stringify(entries));
+  localStorage.setItem('wl2dev_archived', JSON.stringify(archived));
 }
-function saveTrash(){ localStorage.setItem('wl2_trash', JSON.stringify(trash)); }
+function saveTrash(){ localStorage.setItem('wl2dev_trash', JSON.stringify(trash)); }
 
 function archiveEntry(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
@@ -2593,7 +2614,7 @@ function closeGCalModal(){ document.getElementById('gcal-modal').classList.remov
 
 function gcalDisconnect(){
   gcalToken = null;
-  localStorage.removeItem('wl2_gcal_token');
+  localStorage.removeItem('wl2dev_gcal_token');
   clearGCalExpired();
   document.getElementById('gcal-pill').classList.remove('connected');
   document.getElementById('gcal-pill-text').textContent = 'Connect Google Calendar';
@@ -2607,7 +2628,7 @@ function gcalAuthorise(){
   const cidInput = document.getElementById('gcal-client-id');
   const cid = (cidInput.offsetParent !== null ? cidInput.value.trim() : '') || gcalClientId;
   if(!cid){ toast('Paste your Client ID first.'); document.getElementById('gcal-setup-section').style.display='block'; document.getElementById('gcal-connected-section').style.display='none'; return; }
-  gcalClientId = cid; localStorage.setItem('wl2_gcal_client_id', cid);
+  gcalClientId = cid; localStorage.setItem('wl2dev_gcal_client_id', cid);
   const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/tasks');
   const redirect = encodeURIComponent('https://famelx.github.io/Work-Log/');
   window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(cid)}&redirect_uri=${redirect}&response_type=token&scope=${scope}&prompt=consent`,'gcal_oauth','width=520,height=620');
@@ -2628,7 +2649,7 @@ function gcalSaveToken(){
 // Shared: store the token and flip the UI to connected. Called both by the
 // automatic postMessage capture and by the manual-paste fallback.
 function gcalApplyToken(t){
-  gcalToken=t; localStorage.setItem('wl2_gcal_token',t);
+  gcalToken=t; localStorage.setItem('wl2dev_gcal_token',t);
   clearGCalExpired();
   document.getElementById('gcal-pill').classList.add('connected');
   document.getElementById('gcal-pill-text').textContent='Calendar connected';
@@ -3042,11 +3063,11 @@ function saveSettings(){
     }
     if(gcalEl) typeGCalIds[t] = gcalEl.value;
   });
-  localStorage.setItem('wl2_type_colors', JSON.stringify(typeColors));
-  localStorage.setItem('wl2_type_gcal_ids', JSON.stringify(typeGCalIds));
-  localStorage.setItem('wl2_custom_types', JSON.stringify(customTypes));
-  localStorage.setItem('wl2_custom_type_order', JSON.stringify(customTypeOrder));
-  localStorage.setItem('wl2_type_order', JSON.stringify(typeOrder));
+  localStorage.setItem('wl2dev_type_colors', JSON.stringify(typeColors));
+  localStorage.setItem('wl2dev_type_gcal_ids', JSON.stringify(typeGCalIds));
+  localStorage.setItem('wl2dev_custom_types', JSON.stringify(customTypes));
+  localStorage.setItem('wl2dev_custom_type_order', JSON.stringify(customTypeOrder));
+  localStorage.setItem('wl2dev_type_order', JSON.stringify(typeOrder));
 
   settingsDirty = false;
   document.getElementById('settings-unsaved-modal').classList.remove('open');
@@ -3059,7 +3080,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.0', date: 'July 2026', latest: true,
+    version: 'v1.6.1', date: 'July 2026', latest: true,
+    items: [
+      'Fix: beta now keeps its own separate stored data instead of sharing localStorage with production (they were on the same origin on GitHub Pages) — your existing beta entries were copied over automatically, nothing was lost'
+    ]
+  },
+  {
+    version: 'v1.6.0', date: 'July 2026', latest: false,
     items: [
       'Appearance Themes — choose from 6 designed themes (Default, Dark, Dusty Pink, Twilight Sky, Neon Twilight, Woodland), replacing the old 3-colour picker',
       'Custom Theme builder — shows the colours the active theme is using right now, edit any of them with instant preview',
@@ -3352,8 +3379,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── AI Panel ───────────────────────────────────────────────────────────────
-let aiKey = localStorage.getItem('wl2_ai_key') || '';
-let aiModel = localStorage.getItem('wl2_ai_model') || 'llama-3.3-70b-versatile';
+let aiKey = localStorage.getItem('wl2dev_ai_key') || '';
+let aiModel = localStorage.getItem('wl2dev_ai_model') || 'llama-3.3-70b-versatile';
 
 function initAI(){
   if(aiKey){
@@ -3373,7 +3400,7 @@ function initAI(){
 function saveAIKey(){
   const k = document.getElementById('ai-key-input').value.trim();
   if(!k){ toast('Please paste your Groq API key (starts with gsk_).'); return; }
-  aiKey = k; localStorage.setItem('wl2_ai_key', k);
+  aiKey = k; localStorage.setItem('wl2dev_ai_key', k);
   document.getElementById('ai-setup').style.display='none';
   const modelRow = document.getElementById('ai-model-row');
   modelRow.style.display='flex';
@@ -3390,18 +3417,18 @@ function saveModel(){
   } else {
     document.getElementById('ai-custom-model-row').style.display='none';
     aiModel = sel.value;
-    localStorage.setItem('wl2_ai_model', aiModel);
+    localStorage.setItem('wl2dev_ai_model', aiModel);
     toast('Model switched to '+sel.options[sel.selectedIndex].text);
   }
 }
 
 function saveCustomModel(){
   const v = document.getElementById('ai-custom-model-input').value.trim();
-  if(v){ aiModel=v; localStorage.setItem('wl2_ai_model', v); }
+  if(v){ aiModel=v; localStorage.setItem('wl2dev_ai_model', v); }
 }
 
 function disconnectAI(){
-  aiKey=''; localStorage.removeItem('wl2_ai_key');
+  aiKey=''; localStorage.removeItem('wl2dev_ai_key');
   document.getElementById('ai-setup').style.display='block';
   document.getElementById('ai-model-row').style.display='none';
   document.getElementById('ai-custom-model-row').style.display='none';
@@ -3550,7 +3577,7 @@ const THEME_TOKENS = [
   {key:'task-mode-bg', label:'Task mode chip bg',   tier:'adv', group:'Status — task mode'},
 ];
 
-let savedThemes = JSON.parse(localStorage.getItem('wl2_saved_themes') || '[]');
+let savedThemes = JSON.parse(localStorage.getItem('wl2dev_saved_themes') || '[]');
 
 function normalizeHex(v){
   v = (v || '').trim();
@@ -3587,7 +3614,7 @@ function applyTokenSet(tokens){
 function switchTheme(themeName){
   clearThemeOverrides();
   document.documentElement.className = themeName === 'default' ? '' : 'theme-' + themeName;
-  localStorage.setItem('wl2_current_theme', themeName);
+  localStorage.setItem('wl2dev_current_theme', themeName);
   markActiveTheme();
   populateCustomFromCurrent();
   renderSavedThemes();
@@ -3595,7 +3622,7 @@ function switchTheme(themeName){
 
 // Highlight whichever preset button matches the stored theme.
 function markActiveTheme(){
-  const cur = localStorage.getItem('wl2_current_theme') || 'default';
+  const cur = localStorage.getItem('wl2dev_current_theme') || 'default';
   document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
   if(!cur.startsWith('saved:')){
     document.querySelector(`.theme-btn[data-theme="${cur}"]`)?.classList.add('active');
@@ -3663,7 +3690,7 @@ function toggleAdvancedTheme(){
 
 // Revert unsaved tweaks back to the active theme's colours.
 function resetCustomForm(){
-  const cur = localStorage.getItem('wl2_current_theme') || 'default';
+  const cur = localStorage.getItem('wl2dev_current_theme') || 'default';
   clearThemeOverrides();
   if(cur.startsWith('saved:')){
     const th = savedThemes.find(t => 'saved:' + t.id === cur);
@@ -3680,7 +3707,7 @@ function saveCustomTheme(){
   const tokens = readCurrentTokens();
   const id = 't' + Date.now();
   savedThemes.push({ id, name, tokens });
-  localStorage.setItem('wl2_saved_themes', JSON.stringify(savedThemes));
+  localStorage.setItem('wl2dev_saved_themes', JSON.stringify(savedThemes));
   nameInput.value = '';
   applySavedTheme(id);
   toast('Theme "' + name + '" saved');
@@ -3692,7 +3719,7 @@ function applySavedTheme(id){
   clearThemeOverrides();
   document.documentElement.className = 'theme-custom';
   applyTokenSet(th.tokens);
-  localStorage.setItem('wl2_current_theme', 'saved:' + id);
+  localStorage.setItem('wl2dev_current_theme', 'saved:' + id);
   markActiveTheme();
   populateCustomFromCurrent();
   renderSavedThemes();
@@ -3700,8 +3727,8 @@ function applySavedTheme(id){
 
 function deleteSavedTheme(id){
   savedThemes = savedThemes.filter(t => t.id !== id);
-  localStorage.setItem('wl2_saved_themes', JSON.stringify(savedThemes));
-  if(localStorage.getItem('wl2_current_theme') === 'saved:' + id){
+  localStorage.setItem('wl2dev_saved_themes', JSON.stringify(savedThemes));
+  if(localStorage.getItem('wl2dev_current_theme') === 'saved:' + id){
     switchTheme('default');
   }
   renderSavedThemes();
@@ -3712,7 +3739,7 @@ function renameSavedTheme(id, value){
   const th = savedThemes.find(t => t.id === id);
   if(!th) return;
   th.name = (value || '').trim() || th.name;
-  localStorage.setItem('wl2_saved_themes', JSON.stringify(savedThemes));
+  localStorage.setItem('wl2dev_saved_themes', JSON.stringify(savedThemes));
 }
 
 function renderSavedThemes(){
@@ -3722,7 +3749,7 @@ function renderSavedThemes(){
     list.innerHTML = '<div class="saved-empty">No saved themes yet. Adjust the colours above and click Save Custom Theme.</div>';
     return;
   }
-  const cur = localStorage.getItem('wl2_current_theme');
+  const cur = localStorage.getItem('wl2dev_current_theme');
   list.innerHTML = savedThemes.map(th => {
     const active = cur === 'saved:' + th.id;
     const sw = ['bg','surface','accent','text']
@@ -3740,7 +3767,7 @@ function renderSavedThemes(){
 
 // Apply the stored theme on page load (no UI side-effects — settings isn't built yet).
 function loadTheme(){
-  const cur = localStorage.getItem('wl2_current_theme') || 'default';
+  const cur = localStorage.getItem('wl2dev_current_theme') || 'default';
   clearThemeOverrides();
   if(cur.startsWith('saved:')){
     const th = savedThemes.find(t => 'saved:' + t.id === cur);
