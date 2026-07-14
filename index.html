@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.1</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.2</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -915,41 +915,17 @@ svg.icon.sm{width:13px;height:13px;}
   <div class="ai-panel-header">
     <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.6 5.6 4 7.1V20h8v-2.9c2.4-1.5 4-4.1 4-7.1a8 8 0 0 0-8-8z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
     <h2>AI Assistant</h2>
-    <span class="ai-badge" id="ai-model-badge">Not connected</span>
-    <button class="icon-btn" onclick="toggleAI()" style="margin-left:auto;">
+    <span class="ai-badge" id="ai-model-badge">Ready</span>
+    <button class="icon-btn" onclick="clearAIChat()" title="Clear chat" style="margin-left:auto;">
+      <svg class="icon sm" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+    </button>
+    <button class="icon-btn" onclick="toggleAI()" title="Close">
       <svg class="icon sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
-  <!-- API key setup -->
-  <div id="ai-setup" style="padding:16px;border-bottom:1px solid var(--border);background:var(--surface2);">
-    <div style="font-size:13px;font-weight:500;margin-bottom:6px;">Connect AI (free)</div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6;">
-      Get a free API key from <a href="https://console.groq.com/keys" target="_blank" style="color:var(--info)">console.groq.com/keys</a> — free, no credit card needed. Sign in with Google, click <strong>Create API Key</strong>, copy and paste below.
-    </div>
-    <div style="display:flex;gap:6px;">
-      <input type="password" id="ai-key-input" placeholder="gsk_…" style="flex:1;font-size:12px;padding:6px 9px;"/>
-      <button class="btn btn-primary btn-sm" onclick="saveAIKey()">Save</button>
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-top:6px;">Key is saved locally in your browser only.</div>
-  </div>
-  <!-- Model selector (shown when connected) -->
-  <div id="ai-model-row" style="display:none;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface2);align-items:center;gap:8px;">
-    <span style="font-size:12px;color:var(--text2);flex-shrink:0;">Model:</span>
-    <select id="ai-model-select" style="flex:1;font-size:12px;padding:4px 8px;" onchange="saveModel()">
-      <option value="llama-3.3-70b-versatile">Llama 3.3 70B (recommended)</option>
-      <option value="llama-3.1-8b-instant">Llama 3.1 8B (fastest)</option>
-    </select>
-    <button class="btn btn-sm" onclick="testModel()" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Test</button>
-    <button class="btn btn-sm btn-danger" onclick="disconnectAI()" style="font-size:11px;padding:4px 8px;flex-shrink:0;">Disconnect</button>
-  </div>
-  <div id="ai-custom-model-row" style="display:none;padding:0 16px 10px;background:var(--surface2);border-bottom:1px solid var(--border);">
-    <input type="text" id="ai-custom-model-input" placeholder="e.g. mistralai/mistral-7b-instruct:free" style="font-size:12px;padding:6px 9px;" oninput="saveCustomModel()"/>
-    <div style="font-size:11px;color:var(--text3);margin-top:4px;">Find model names at <a href="https://console.groq.com/docs/models" target="_blank" style="color:var(--info)">console.groq.com/docs/models</a></div>
-  </div>
   <div class="ai-messages" id="ai-messages">
-    <div class="ai-msg bot">Paste your free Groq key above to get started. Once connected, I can summarise tasks, find overdue items, add or edit entries, and more.</div>
-  </div>
-  <div class="ai-suggestions">
+    <div class="ai-msg bot">Hi! I can help you manage your work log. Ask me to summarise tasks, find overdue items, or add, edit, archive, and delete entries just by describing what you need.</div>
+  </div>  <div class="ai-suggestions">
     <button class="ai-suggest" onclick="aiSuggest('Summarise my current tasks')">Summarise tasks</button>
     <button class="ai-suggest" onclick="aiSuggest('Which tasks are overdue?')">Overdue tasks</button>
     <button class="ai-suggest" onclick="aiSuggest('What is due this week?')">Due this week</button>
@@ -2857,6 +2833,9 @@ var GCAL_COLOR_NAMES = {
 
 let settingsSnapshot = null;
 let settingsDirty = false;
+let pendingTheme = null;         // previewed-but-uncommitted theme while Settings is open
+let pendingCustomEdited = false; // user tweaked individual colours (a custom look)
+function activeThemeName(){ return pendingTheme !== null ? pendingTheme : (localStorage.getItem('wl2dev_current_theme') || 'default'); }
 
 function openSettings(){
   settingsSnapshot = {
@@ -2865,9 +2844,12 @@ function openSettings(){
     customTypeOrder: [...customTypeOrder],
     typeColors: {...typeColors},
     typeGCalIds: {...typeGCalIds},
-    builtinTypes: [...BUILTIN_TYPES]
+    builtinTypes: [...BUILTIN_TYPES],
+    savedThemes: JSON.stringify(savedThemes)
   };
   settingsDirty = false;
+  pendingTheme = localStorage.getItem('wl2dev_current_theme') || 'default';
+  pendingCustomEdited = false;
   buildSettingsUI();
   document.getElementById('settings-overlay').classList.add('open');
   document.body.classList.add('no-scroll');
@@ -2894,6 +2876,10 @@ function discardSettingsChanges(){
   typeGCalIds = {...settingsSnapshot.typeGCalIds};
   BUILTIN_TYPES.length = 0;
   BUILTIN_TYPES.push(...settingsSnapshot.builtinTypes);
+  savedThemes = JSON.parse(settingsSnapshot.savedThemes);
+  localStorage.setItem('wl2dev_saved_themes', JSON.stringify(savedThemes));
+  pendingTheme = null; pendingCustomEdited = false;
+  loadTheme();
   populateTypeSelects();
   render();
   settingsDirty = false;
@@ -3069,6 +3055,16 @@ function saveSettings(){
   localStorage.setItem('wl2dev_custom_type_order', JSON.stringify(customTypeOrder));
   localStorage.setItem('wl2dev_type_order', JSON.stringify(typeOrder));
 
+  // Commit the previewed theme (deferred until Save)
+  if(pendingCustomEdited){
+    localStorage.setItem('wl2dev_current_theme', 'custom');
+    localStorage.setItem('wl2dev_custom_tokens', JSON.stringify(readCurrentTokens()));
+  } else if(pendingTheme !== null && pendingTheme !== 'custom'){
+    localStorage.setItem('wl2dev_current_theme', pendingTheme);
+    localStorage.removeItem('wl2dev_custom_tokens');
+  }
+  pendingTheme = null; pendingCustomEdited = false;
+
   settingsDirty = false;
   document.getElementById('settings-unsaved-modal').classList.remove('open');
   closeSettingsForce();
@@ -3080,7 +3076,14 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.1', date: 'July 2026', latest: true,
+    version: 'v1.6.2', date: 'July 2026', latest: true,
+    items: [
+      'AI Assistant upgraded — now runs on a much stronger model (GPT-OSS-120B) via a secure proxy, so you no longer need to paste your own API key. It can take real actions with reliable tool-calling (add, edit, delete, archive, restore), do several at once, and remembers the conversation for follow-ups',
+      'Fix: theme changes now preview live when you click them but require Save to keep — leaving Settings with an unsaved theme prompts you to save or discard, matching the rest of Settings'
+    ]
+  },
+  {
+    version: 'v1.6.1', date: 'July 2026', latest: false,
     items: [
       'Fix: beta now keeps its own separate stored data instead of sharing localStorage with production (they were on the same origin on GitHub Pages) — your existing beta entries were copied over automatically, nothing was lost'
     ]
@@ -3379,162 +3382,137 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── AI Panel ───────────────────────────────────────────────────────────────
-let aiKey = localStorage.getItem('wl2dev_ai_key') || '';
-let aiModel = localStorage.getItem('wl2dev_ai_model') || 'llama-3.3-70b-versatile';
+const AI_PROXY_URL = 'https://worklog-ai.phurint2283.workers.dev/';
+const AI_MODEL = 'openai/gpt-oss-120b';
+let aiMessages = []; // conversation memory (user / assistant / tool turns)
+
+const AI_TOOLS = [
+  { type:'function', function:{ name:'add_entry', description:'Add a new work log entry (an event or a task).', parameters:{ type:'object', properties:{
+    name:{type:'string', description:'Title of the entry'},
+    type:{type:'string', description:'Task type, e.g. Meeting, Review, Report, Research, Other, or a custom type'},
+    deadline:{type:'string', description:'Start date (events) or due date (tasks), YYYY-MM-DD'},
+    deadlineEnd:{type:'string', description:'Optional end date for multi-day events, YYYY-MM-DD'},
+    time:{type:'string', description:'Optional start time, HH:MM 24-hour'},
+    timeTo:{type:'string', description:'Optional end time, HH:MM 24-hour'},
+    remark:{type:'string', description:'Optional notes'},
+    syncMode:{type:'string', enum:['event','task'], description:'"event" (default) or "task"'}
+  }, required:['name'] } } },
+  { type:'function', function:{ name:'edit_entry', description:'Edit an existing entry, identified by its numeric id.', parameters:{ type:'object', properties:{
+    id:{type:'number', description:'The numeric id of the entry to edit'},
+    name:{type:'string'}, type:{type:'string'}, deadline:{type:'string'}, deadlineEnd:{type:'string'}, time:{type:'string'}, timeTo:{type:'string'}, remark:{type:'string'}
+  }, required:['id'] } } },
+  { type:'function', function:{ name:'delete_entry', description:'Move an active entry to trash, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } },
+  { type:'function', function:{ name:'archive_entry', description:'Archive an active entry, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } },
+  { type:'function', function:{ name:'restore_entry', description:'Restore an archived entry back to active, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } }
+];
+
+function buildContext(){
+  const fmt = e => `[id:${e.id}] "${e.name}" | type:${e.type||'--'} | ${e.syncMode==='task'?'due':'date'}:${e.deadline||'--'}${e.deadlineEnd?(' -> '+e.deadlineEnd):''}${e.time?(' '+e.time):''} | remark:${e.remark||'--'}`;
+  const active = entries.length ? 'ACTIVE ENTRIES:\n'+entries.map(fmt).join('\n') : 'ACTIVE ENTRIES: (none)';
+  const arch = archived.length ? '\n\nARCHIVED ENTRIES:\n'+archived.map(fmt).join('\n') : '';
+  return active + arch;
+}
+
+function buildAISystemPrompt(){
+  return `You are the assistant built into a personal "Work Log" app. You help the user query, summarise, and manage their work entries.\n\nToday's date is ${today()}.\n\nYou can take actions with the provided tools (add, edit, delete, archive, restore). When the user asks for a change, call the right tool(s) with correct arguments -- you may call several tools to satisfy one request (e.g. archiving multiple entries). Use the numeric id shown in the list below to target an existing entry. After acting, confirm briefly in plain language. For questions, answer directly from the list. Keep replies concise and friendly.\n\nFormatting: reply in plain conversational sentences only -- NO markdown of any kind (no tables, no headings, no **bold**, no bullet lists, no asterisks). Write like a normal chat message. NEVER show the internal numeric id to the user (use ids only silently for tool calls) -- refer to entries by their name.\n\nAvailable task types: ${allTypes().join(', ')}.\nDates are YYYY-MM-DD; times are HH:MM (24-hour).\n\n${buildContext()}`;
+}
+
+function executeAITool(name, args){
+  const nowIso = new Date().toISOString();
+  try{
+    if(name==='add_entry'){
+      const type = args.type || '';
+      const entry = { id: Date.now()+Math.floor(Math.random()*1000), name: args.name||'Untitled', type, deadline: args.deadline||'', deadlineEnd: args.deadlineEnd||'', time: args.time||'', timeTo: args.timeTo||'', remark: args.remark||'', color: typeColors[type]||null, gcalColorId: typeGCalIds[type]||undefined, syncMode: args.syncMode==='task'?'task':'event', createdAt: nowIso, updatedAt: nowIso };
+      entries.unshift(entry); pinnedId = entry.id; save(); render();
+      if(gcalToken && entry.deadline){ entry.syncMode==='task' ? pushToGTask(entry) : pushToGCal(entry); }
+      return {ok:true, id:entry.id, message:`Added "${entry.name}"`};
+    }
+    if(name==='edit_entry'){
+      const e = entries.find(x=>x.id===args.id) || archived.find(x=>x.id===args.id);
+      if(!e) return {ok:false, message:`No entry found with id ${args.id}`};
+      ['name','type','deadline','deadlineEnd','time','timeTo','remark'].forEach(k=>{ if(args[k]!==undefined && args[k]!==null) e[k]=args[k]; });
+      if(args.type!==undefined){ e.color = typeColors[e.type]||null; e.gcalColorId = typeGCalIds[e.type]||undefined; }
+      e.updatedAt = nowIso; save(); render();
+      if(gcalToken && e.deadline){ if(e.syncMode==='task' && e.gcalTaskId) patchGTask(e); else if(e.syncMode!=='task' && e.gcalEventId) patchGCal(e); }
+      return {ok:true, message:`Updated "${e.name}"`};
+    }
+    if(name==='delete_entry'){
+      const e = entries.find(x=>x.id===args.id);
+      if(!e) return {ok:false, message:`No active entry with id ${args.id}`};
+      deleteEntry(args.id);
+      return {ok:true, message:`Moved "${e.name}" to trash`};
+    }
+    if(name==='archive_entry'){
+      const e = entries.find(x=>x.id===args.id);
+      if(!e) return {ok:false, message:`No active entry with id ${args.id}`};
+      archiveEntry(args.id);
+      return {ok:true, message:`Archived "${e.name}"`};
+    }
+    if(name==='restore_entry'){
+      const e = archived.find(x=>x.id===args.id);
+      if(!e) return {ok:false, message:`No archived entry with id ${args.id}`};
+      restoreEntry(args.id);
+      return {ok:true, message:`Restored "${e.name}"`};
+    }
+    return {ok:false, message:`Unknown tool: ${name}`};
+  }catch(err){ return {ok:false, message:'Error: '+err.message}; }
+}
 
 function initAI(){
-  if(aiKey){
-    document.getElementById('ai-setup').style.display='none';
-    const modelRow = document.getElementById('ai-model-row');
-    modelRow.style.display='flex';
-    const sel = document.getElementById('ai-model-select');
-    const known = [...sel.options].map(o=>o.value);
-    if(known.includes(aiModel)) sel.value=aiModel;
-    else { sel.value='custom'; document.getElementById('ai-custom-model-row').style.display='block'; document.getElementById('ai-custom-model-input').value=aiModel; }
-    document.getElementById('ai-model-badge').textContent='Connected';
-    document.getElementById('ai-model-badge').style.color='var(--success)';
-    document.getElementById('ai-messages').innerHTML='<div class="ai-msg bot">Hi! I can help you manage your work log. Ask me to summarise tasks, find overdue items, add or edit entries, and more.</div>';
-  }
-}
-
-function saveAIKey(){
-  const k = document.getElementById('ai-key-input').value.trim();
-  if(!k){ toast('Please paste your Groq API key (starts with gsk_).'); return; }
-  aiKey = k; localStorage.setItem('wl2dev_ai_key', k);
-  document.getElementById('ai-setup').style.display='none';
-  const modelRow = document.getElementById('ai-model-row');
-  modelRow.style.display='flex';
-  document.getElementById('ai-model-badge').textContent='Connected';
-  document.getElementById('ai-model-badge').style.color='var(--success)';
-  document.getElementById('ai-messages').innerHTML='<div class="ai-msg bot">Connected! Ask me anything about your work log.</div>';
-  toast('AI connected.');
-}
-
-function saveModel(){
-  const sel = document.getElementById('ai-model-select');
-  if(sel.value==='custom'){
-    document.getElementById('ai-custom-model-row').style.display='block';
-  } else {
-    document.getElementById('ai-custom-model-row').style.display='none';
-    aiModel = sel.value;
-    localStorage.setItem('wl2dev_ai_model', aiModel);
-    toast('Model switched to '+sel.options[sel.selectedIndex].text);
-  }
-}
-
-function saveCustomModel(){
-  const v = document.getElementById('ai-custom-model-input').value.trim();
-  if(v){ aiModel=v; localStorage.setItem('wl2dev_ai_model', v); }
-}
-
-function disconnectAI(){
-  aiKey=''; localStorage.removeItem('wl2dev_ai_key');
-  document.getElementById('ai-setup').style.display='block';
-  document.getElementById('ai-model-row').style.display='none';
-  document.getElementById('ai-custom-model-row').style.display='none';
-  document.getElementById('ai-model-badge').textContent='Not connected';
-  document.getElementById('ai-model-badge').style.color='';
-  toast('AI disconnected.');
-}
-
-async function testModel(){
-  if(!aiKey){ toast('Connect your API key first.'); return; }
   const badge = document.getElementById('ai-model-badge');
-  badge.textContent='Testing…'; badge.style.color='var(--warn)';
-  try{
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
-      body:JSON.stringify({model:aiModel, messages:[{role:'user',content:'Reply with just the word OK.'}], max_tokens:5})
-    });
-    const data = await resp.json();
-    if(data.error){
-      badge.textContent='Unavailable'; badge.style.color='var(--danger)';
-      toast('Error: '+data.error.message.slice(0,80), 4000);
-    } else {
-      badge.textContent='Connected ✓'; badge.style.color='var(--success)';
-      toast('AI is working!');
-      setTimeout(()=>{ badge.textContent='Connected'; },3000);
-    }
-  }catch{
-    badge.textContent='Error'; badge.style.color='var(--danger)';
-    toast('Could not reach Groq API.');
-  }
+  if(badge){ badge.textContent='Ready'; badge.style.color='var(--success)'; }
 }
 
 function toggleAI(){
   const p = document.getElementById('ai-panel');
   p.classList.toggle('open');
-  if(p.classList.contains('open')) document.getElementById(aiKey ? 'ai-input' : 'ai-key-input').focus();
+  if(p.classList.contains('open')) document.getElementById('ai-input')?.focus();
 }
 
 function aiSuggest(text){ document.getElementById('ai-input').value=text; sendAI(); }
 
+function clearAIChat(){
+  aiMessages = [];
+  document.getElementById('ai-messages').innerHTML = '<div class="ai-msg bot">Chat cleared. How can I help with your work log?</div>';
+}
+
 async function sendAI(){
-  if(!aiKey){ toast('Please add your Groq API key first.'); return; }
   const input = document.getElementById('ai-input');
   const text = input.value.trim(); if(!text) return;
   input.value='';
   appendMsg(text,'user');
-  const loadId = appendMsg('Thinking…','bot loading');
-  const context = buildContext();
-  const systemPrompt = `You are a helpful work-log assistant. The user has a work log with entries. Help them query, summarise, analyse tasks, or make changes.
-
-When the user wants to ADD an entry, include this block in your response:
-<action>{"type":"add","name":"...","workType":"...","deadline":"YYYY-MM-DD","remark":"..."}</action>
-
-When the user wants to DELETE an entry, include:
-<action>{"type":"delete","id":NUMERIC_ID}</action>
-
-When the user wants to EDIT an entry, include:
-<action>{"type":"edit","id":NUMERIC_ID,"name":"...","workType":"...","deadline":"YYYY-MM-DD","remark":"..."}</action>
-
-Always include a friendly plain-text response. Keep it concise. Today is ${today()}.`;
+  aiMessages.push({role:'user', content:text});
+  const loadId = appendMsg('Thinking...','bot loading');
   try{
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiKey},
-      body:JSON.stringify({
-        model: aiModel,
-        messages:[
-          {role:'system', content: systemPrompt},
-          {role:'user', content:`My work log:\n${context}\n\nRequest: ${text}`}
-        ],
-        max_tokens: 1000
-      })
-    });
-    const data = await resp.json();
-    removeMsg(loadId);
-    if(data.error){ appendMsg('Error: '+data.error.message,'bot'); return; }
-    const full = data.choices?.[0]?.message?.content || '';
-    const actionMatch = full.match(/<action>([\s\S]*?)<\/action>/);
-    const displayText = full.replace(/<action>[\s\S]*?<\/action>/g,'').trim();
-    appendMsg(displayText || '(done)', 'bot');
-    if(actionMatch){
-      try{
-        const act = JSON.parse(actionMatch[1]);
-        if(act.type==='add'){
-          const now = new Date().toISOString();
-          entries.unshift({id:Date.now(), name:act.name||'Untitled', type:act.workType||'', deadline:act.deadline||'', remark:act.remark||'', created:now, updated:now});
-          save(); render(); toast('AI added an entry.');
-        } else if(act.type==='delete'){
-          entries=entries.filter(e=>e.id!==act.id); save(); render(); toast('AI deleted the entry.');
-        } else if(act.type==='edit'){
-          const e=entries.find(x=>x.id===act.id);
-          if(e){ Object.assign(e,{name:act.name||e.name,type:act.workType||e.type,deadline:act.deadline||e.deadline,remark:act.remark||e.remark,updated:new Date().toISOString()}); save(); render(); toast('AI updated the entry.'); }
+    let guard = 0;
+    while(guard++ < 6){
+      const resp = await fetch(AI_PROXY_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model: AI_MODEL, messages:[{role:'system', content: buildAISystemPrompt()}, ...aiMessages], tools: AI_TOOLS, tool_choice:'auto', temperature:0.3 })
+      });
+      const data = await resp.json();
+      if(data.error){ removeMsg(loadId); appendMsg('Error: '+(data.error.message||JSON.stringify(data.error)),'bot'); return; }
+      const msg = data.choices && data.choices[0] && data.choices[0].message;
+      if(!msg){ removeMsg(loadId); appendMsg('No response from the AI.','bot'); return; }
+      aiMessages.push({role:'assistant', content: msg.content||'', tool_calls: msg.tool_calls});
+      if(msg.tool_calls && msg.tool_calls.length){
+        for(const tc of msg.tool_calls){
+          let args={}; try{ args = JSON.parse(tc.function.arguments||'{}'); }catch(e){}
+          const result = executeAITool(tc.function.name, args);
+          aiMessages.push({role:'tool', tool_call_id: tc.id, content: JSON.stringify(result)});
         }
-      }catch(err){ console.error('Action parse error',err); }
+        continue;
+      }
+      removeMsg(loadId);
+      appendMsg(msg.content || '(done)', 'bot');
+      return;
     }
+    removeMsg(loadId);
+    appendMsg('Stopped after too many steps -- please try rephrasing.','bot');
   }catch(err){
     removeMsg(loadId);
-    appendMsg('Could not reach Groq. Check your internet connection or API key.','bot');
+    appendMsg('Could not reach the AI service. Check your internet connection.','bot');
   }
-}
-
-function buildContext(){
-  const active = entries.length ? 'ACTIVE:\n'+entries.map(e=>`[ID:${e.id}] ${e.name} | Type:${e.type||'—'} | Deadline:${e.deadline||'—'} | Remark:${e.remark||'—'}`).join('\n') : 'ACTIVE: (none)';
-  const arch = archived.length ? '\nARCHIVED:\n'+archived.map(e=>`[ID:${e.id}] ${e.name} | Type:${e.type||'—'} | Deadline:${e.deadline||'—'}`).join('\n') : '';
-  return active + arch;
 }
 
 let msgCounter = 0;
@@ -3614,7 +3592,7 @@ function applyTokenSet(tokens){
 function switchTheme(themeName){
   clearThemeOverrides();
   document.documentElement.className = themeName === 'default' ? '' : 'theme-' + themeName;
-  localStorage.setItem('wl2dev_current_theme', themeName);
+  pendingTheme = themeName; pendingCustomEdited = false; settingsDirty = true;
   markActiveTheme();
   populateCustomFromCurrent();
   renderSavedThemes();
@@ -3622,7 +3600,7 @@ function switchTheme(themeName){
 
 // Highlight whichever preset button matches the stored theme.
 function markActiveTheme(){
-  const cur = localStorage.getItem('wl2dev_current_theme') || 'default';
+  const cur = activeThemeName();
   document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
   if(!cur.startsWith('saved:')){
     document.querySelector(`.theme-btn[data-theme="${cur}"]`)?.classList.add('active');
@@ -3672,12 +3650,14 @@ function onTokenColor(key){
   const v = document.getElementById('tk-' + key).value;
   document.getElementById('tk-' + key + '-hex').value = v;
   document.documentElement.style.setProperty('--' + key, v);
+  pendingCustomEdited = true; settingsDirty = true;
 }
 function onTokenHex(key){
   const v = normalizeHex(document.getElementById('tk-' + key + '-hex').value);
   document.getElementById('tk-' + key).value = v;
   document.getElementById('tk-' + key + '-hex').value = v;
   document.documentElement.style.setProperty('--' + key, v);
+  pendingCustomEdited = true; settingsDirty = true;
 }
 
 function toggleAdvancedTheme(){
@@ -3690,7 +3670,7 @@ function toggleAdvancedTheme(){
 
 // Revert unsaved tweaks back to the active theme's colours.
 function resetCustomForm(){
-  const cur = localStorage.getItem('wl2dev_current_theme') || 'default';
+  const cur = activeThemeName();
   clearThemeOverrides();
   if(cur.startsWith('saved:')){
     const th = savedThemes.find(t => 'saved:' + t.id === cur);
@@ -3719,7 +3699,7 @@ function applySavedTheme(id){
   clearThemeOverrides();
   document.documentElement.className = 'theme-custom';
   applyTokenSet(th.tokens);
-  localStorage.setItem('wl2dev_current_theme', 'saved:' + id);
+  pendingTheme = 'saved:' + id; pendingCustomEdited = false; settingsDirty = true;
   markActiveTheme();
   populateCustomFromCurrent();
   renderSavedThemes();
@@ -3728,7 +3708,7 @@ function applySavedTheme(id){
 function deleteSavedTheme(id){
   savedThemes = savedThemes.filter(t => t.id !== id);
   localStorage.setItem('wl2dev_saved_themes', JSON.stringify(savedThemes));
-  if(localStorage.getItem('wl2dev_current_theme') === 'saved:' + id){
+  if(activeThemeName() === 'saved:' + id){
     switchTheme('default');
   }
   renderSavedThemes();
@@ -3749,7 +3729,7 @@ function renderSavedThemes(){
     list.innerHTML = '<div class="saved-empty">No saved themes yet. Adjust the colours above and click Save Custom Theme.</div>';
     return;
   }
-  const cur = localStorage.getItem('wl2dev_current_theme');
+  const cur = activeThemeName();
   list.innerHTML = savedThemes.map(th => {
     const active = cur === 'saved:' + th.id;
     const sw = ['bg','surface','accent','text']
@@ -3769,6 +3749,12 @@ function renderSavedThemes(){
 function loadTheme(){
   const cur = localStorage.getItem('wl2dev_current_theme') || 'default';
   clearThemeOverrides();
+  if(cur === 'custom'){
+    const tokens = JSON.parse(localStorage.getItem('wl2dev_custom_tokens') || '{}');
+    document.documentElement.className = 'theme-custom';
+    applyTokenSet(tokens);
+    return;
+  }
   if(cur.startsWith('saved:')){
     const th = savedThemes.find(t => 'saved:' + t.id === cur);
     if(th){ document.documentElement.className = 'theme-custom'; applyTokenSet(th.tokens); return; }
