@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.5</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.6</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -3088,7 +3088,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.5', date: 'July 2026', latest: true,
+    version: 'v1.6.6', date: 'July 2026', latest: true,
+    items: [
+      'Fix: the AI Assistant had no visibility into Trash at all -- asking it to check or restore trashed entries would incorrectly say "nothing there" or confuse Trash with Archive. It now sees Trash separately and can restore items from it directly'
+    ]
+  },
+  {
+    version: 'v1.6.5', date: 'July 2026', latest: false,
     items: [
       'Fix: the Woodland and Dusty Pink themes\' "success" colour (used for the Archive button, connected-calendar pill, Sync All, and several other spots) was so pale it was nearly indistinguishable from the surrounding card and border colours -- both themes now use a clearly green success colour while keeping their muted look'
     ]
@@ -3433,18 +3439,20 @@ const AI_TOOLS = [
   }, required:['id'] } } },
   { type:'function', function:{ name:'delete_entry', description:'Move an active entry to trash, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } },
   { type:'function', function:{ name:'archive_entry', description:'Archive an active entry, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } },
-  { type:'function', function:{ name:'restore_entry', description:'Restore an archived entry back to active, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } }
+  { type:'function', function:{ name:'restore_entry', description:'Restore an archived entry back to active, by numeric id.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } },
+  { type:'function', function:{ name:'restore_from_trash', description:'Restore a deleted (trashed) entry back to active, by numeric id. Trash is separate from Archive -- entries land in trash via delete_entry, not archive_entry.', parameters:{ type:'object', properties:{ id:{type:'number'} }, required:['id'] } } }
 ];
 
 function buildContext(){
   const fmt = e => `[id:${e.id}] "${e.name}" | type:${e.type||'--'} | ${e.syncMode==='task'?'due':'date'}:${e.deadline||'--'}${e.deadlineEnd?(' -> '+e.deadlineEnd):''}${e.time?(' '+e.time):''} | remark:${e.remark||'--'}`;
   const active = entries.length ? 'ACTIVE ENTRIES:\n'+entries.map(fmt).join('\n') : 'ACTIVE ENTRIES: (none)';
   const arch = archived.length ? '\n\nARCHIVED ENTRIES:\n'+archived.map(fmt).join('\n') : '';
-  return active + arch;
+  const trashed = trash.length ? '\n\nTRASH (deleted entries, auto-purged after 5 days):\n'+trash.map(fmt).join('\n') : '\n\nTRASH: (empty)';
+  return active + arch + trashed;
 }
 
 function buildAISystemPrompt(){
-  return `You are the assistant built into a personal "Work Log" app. You help the user query, summarise, and manage their work entries.\n\nToday's date is ${today()}.\n\nYou can take actions with the provided tools (add, edit, delete, archive, restore). When the user asks for a change, call the right tool(s) with correct arguments -- you may call several tools to satisfy one request (e.g. archiving multiple entries). Use the numeric id shown in the list below to target an existing entry. After acting, confirm briefly in plain language. For questions, answer directly from the list. Keep replies concise and friendly.\n\nFormatting: reply in plain conversational sentences only -- NO markdown of any kind (no tables, no headings, no **bold**, no bullet lists, no asterisks). Write like a normal chat message. NEVER show the internal numeric id to the user (use ids only silently for tool calls) -- refer to entries by their name.\n\nAvailable task types: ${allTypes().join(', ')}.\nDates are YYYY-MM-DD; times are HH:MM (24-hour).\n\n${buildContext()}`;
+  return `You are the assistant built into a personal "Work Log" app. You help the user query, summarise, and manage their work entries.\n\nToday's date is ${today()}.\n\nThere are three separate lists, and they are NOT interchangeable: ACTIVE (current work), ARCHIVED (put away on purpose via archive_entry/restore_entry), and TRASH (deleted via delete_entry, restored via restore_from_trash, auto-purged after 5 days). If the user says "trash" or "deleted", use the TRASH list and restore_from_trash -- do NOT use archive/restore_entry for that, and do not confuse the two lists when answering or acting.\n\nYou can take actions with the provided tools (add, edit, delete, archive, restore_entry, restore_from_trash). When the user asks for a change, call the right tool(s) with correct arguments -- you may call several tools to satisfy one request (e.g. restoring every item in trash). Use the numeric id shown in the lists below to target an existing entry. After acting, confirm briefly in plain language. For questions, answer directly from the lists below -- never guess or say something doesn't exist without checking the relevant list first. Keep replies concise and friendly.\n\nFormatting: reply in plain conversational sentences only -- NO markdown of any kind (no tables, no headings, no **bold**, no bullet lists, no asterisks). Write like a normal chat message. NEVER show the internal numeric id to the user (use ids only silently for tool calls) -- refer to entries by their name.\n\nAvailable task types: ${allTypes().join(', ')}.\nDates are YYYY-MM-DD; times are HH:MM (24-hour).\n\n${buildContext()}`;
 }
 
 function executeAITool(name, args){
@@ -3483,6 +3491,12 @@ function executeAITool(name, args){
       if(!e) return {ok:false, message:`No archived entry with id ${args.id}`};
       restoreEntry(args.id);
       return {ok:true, message:`Restored "${e.name}"`};
+    }
+    if(name==='restore_from_trash'){
+      const e = trash.find(x=>x.id===args.id);
+      if(!e) return {ok:false, message:`No trashed entry with id ${args.id}`};
+      restoreFromTrash(args.id);
+      return {ok:true, message:`Restored "${e.name}" from trash`};
     }
     return {ok:false, message:`Unknown tool: ${name}`};
   }catch(err){ return {ok:false, message:'Error: '+err.message}; }
