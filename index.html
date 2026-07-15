@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.3</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.4</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1527,7 +1527,12 @@ function checkDueOverdue(){
     } else {
       cssClass = 'in-progress'; label = `In Progress · ${dateRange}`;
     }
-    const typeChip = e.type ? `<span class="chip type">${esc(e.type)}</span>` : '';
+    const cardColor = typeColors[e.type] || null;
+    const typeChip = e.type ? (() => {
+      const dot = cardColor ? `<span style="width:7px;height:7px;border-radius:50%;background:${esc(cardColor)};display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;"></span>` : '';
+      const chipStyle = cardColor ? ` style="background:${esc(cardColor)}22;color:${esc(cardColor)};border-color:${esc(cardColor)}55;"` : '';
+      return `<span class="chip type"${chipStyle}>${dot}${esc(e.type)}</span>`;
+    })() : '';
     return `
     <div class="due-item ${cssClass}" id="due-item-${e.id}">
       <div class="due-item-name">${esc(e.name)}</div>
@@ -3083,7 +3088,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.3', date: 'July 2026', latest: true,
+    version: 'v1.6.4', date: 'July 2026', latest: true,
+    items: [
+      'Fix: task type chips in the "Tasks Needing Attention" modal were plain grey, ignoring your custom type colours -- they now match the colour-coded chips used everywhere else'
+    ]
+  },
+  {
+    version: 'v1.6.3', date: 'July 2026', latest: false,
     items: [
       'Fix: the toast notification (e.g. "Settings saved.") used the page text colour as its background, which would render nearly invisible on the Twilight Sky and Neon Twilight themes -- it now uses the theme\'s accent colour pairing instead, the same guaranteed-contrast pair used by primary buttons, so it stays readable on every theme including custom ones'
     ]
