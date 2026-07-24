@@ -1,0 +1,2343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Component Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400..700;1,400..700&family=Inter:wght@400..700&display=swap" />
+<link rel="stylesheet" href="time-picker.css" />
+<link rel="stylesheet" href="date-picker.css" />
+<link rel="stylesheet" href="datetime-picker.css" />
+<link rel="stylesheet" href="easter-egg.css" />
+<link rel="stylesheet" href="output-layout.css" />
+<link rel="stylesheet" href="gcal-connect.css" />
+<link rel="stylesheet" href="due-alert.css" />
+<link rel="stylesheet" href="changelog-modal.css" />
+<link rel="stylesheet" href="bulk-select.css" />
+<link rel="stylesheet" href="recurrence.css" />
+<link rel="stylesheet" href="badge-taxonomy.css" />
+<link rel="stylesheet" href="status-popup.css" />
+<link rel="stylesheet" href="multi-date.css" />
+<link rel="stylesheet" href="firestore-sync.css" />
+<link rel="stylesheet" href="ai-chat-panel.css" />
+<link rel="stylesheet" href="condition-evaluator.css" />
+<link rel="stylesheet" href="scroll-reveal-bars.css" />
+<link rel="stylesheet" href="pixel-grid.css" />
+<link rel="stylesheet" href="tooltip-icon.css" />
+<link rel="stylesheet" href="annotated-lines.css" />
+<link rel="stylesheet" href="glossary-list.css" />
+<link rel="stylesheet" href="structure-diagram.css" />
+<link rel="stylesheet" href="smart-tooltip.css" />
+<link rel="stylesheet" href="collapsible-section.css" />
+<style>
+  :root {
+    --bg: #f5f6f7;
+    --surface: #ffffff;
+    --surface2: #eceef0;
+    --surface-2: #eceef0;
+    --border: #dde1e4;
+    --border2: #c7cdd1;
+    --text: #12181b;
+    --text2: #4b565c;
+    --text-2: #4b565c;
+    --text3: #838d92;
+    --text-muted: #838d92;
+    --accent: #147d74;
+    --accent-text: #ffffff;
+    --ok-bg: #e1f3ee;
+    --ok-text: #0f6b5c;
+    --code-bg: #eef1f2;
+
+    --display-face: "Fraunces", Georgia, "Iowan Old Style", serif;
+    --body-face: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+    --mono-face: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1113;
+      --surface: #151a1d;
+      --surface2: #1c2226;
+      --surface-2: #1c2226;
+      --border: #2a3236;
+      --border2: #384146;
+      --text: #e8ecee;
+      --text2: #aab4b8;
+      --text-2: #aab4b8;
+      --text3: #74807f;
+      --text-muted: #74807f;
+      --accent: #45c7b8;
+      --accent-text: #06201d;
+      --ok-bg: #123932;
+      --ok-text: #7bd9c7;
+      --code-bg: #191f22;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0d1113;
+    --surface: #151a1d;
+    --surface2: #1c2226;
+    --surface-2: #1c2226;
+    --border: #2a3236;
+    --border2: #384146;
+    --text: #e8ecee;
+    --text2: #aab4b8;
+    --text-2: #aab4b8;
+    --text3: #74807f;
+    --text-muted: #74807f;
+    --accent: #45c7b8;
+    --accent-text: #06201d;
+    --ok-bg: #123932;
+    --ok-text: #7bd9c7;
+    --code-bg: #191f22;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f5f6f7;
+    --surface: #ffffff;
+    --surface2: #eceef0;
+    --surface-2: #eceef0;
+    --border: #dde1e4;
+    --border2: #c7cdd1;
+    --text: #12181b;
+    --text2: #4b565c;
+    --text-2: #4b565c;
+    --text3: #838d92;
+    --text-muted: #838d92;
+    --accent: #147d74;
+    --accent-text: #ffffff;
+    --ok-bg: #e1f3ee;
+    --ok-text: #0f6b5c;
+    --code-bg: #eef1f2;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body-face);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .shell {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 32px 96px;
+  }
+
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 56px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono-face);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: var(--display-face);
+    font-size: 2.4rem;
+    font-weight: 400;
+    margin: 0 0 12px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .top p {
+    max-width: 46ch;
+    color: var(--text2);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .theme-toggle {
+    flex-shrink: 0;
+    font-family: var(--mono-face);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .catalog {
+    display: grid;
+    grid-template-columns: 176px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .toc-title {
+    font-family: var(--mono-face);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  .toc-index-btn {
+    font-family: var(--mono-face);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    background: none;
+    border: none;
+    padding: 0 0 8px;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+  }
+  .toc-index-btn:hover { color: var(--accent); }
+  .toc-index-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .toc-group { margin-top: 14px; }
+  .toc-group:first-of-type { margin-top: 0; }
+
+  .toc-topic {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-family: var(--mono-face);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    background: none;
+    border: none;
+    padding: 0 0 8px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .toc-topic:hover { color: var(--text); }
+  .toc-topic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .toc-chevron { width: 12px; height: 12px; flex-shrink: 0; transition: transform 0.15s ease; }
+  .toc-group.collapsed .toc-chevron { transform: rotate(-90deg); }
+  .toc-group.active .toc-topic { color: var(--accent); }
+
+  .toc-links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-group.collapsed .toc-links { display: none; }
+
+  nav.toc a {
+    text-decoration: none;
+    font-size: 0.86rem;
+    color: var(--text2);
+    padding: 6px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -2px;
+  }
+  nav.toc a:hover { color: var(--text); border-left-color: var(--border2); }
+  nav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  section.group { margin-bottom: 8px; }
+
+  .group-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-heading h2 {
+    font-family: var(--mono-face);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin: 0;
+  }
+
+  .entry {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 28px 28px 24px;
+    margin-bottom: 28px;
+    scroll-margin-top: 24px;
+  }
+
+  .entry-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .entry-head h3 {
+    font-family: var(--display-face);
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .pill {
+    font-family: var(--mono-face);
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--ok-bg);
+    color: var(--ok-text);
+    white-space: nowrap;
+  }
+
+  .meta {
+    font-family: var(--mono-face);
+    font-size: 0.76rem;
+    color: var(--text3);
+    margin: 6px 0 16px;
+  }
+
+  .entry > p.desc {
+    color: var(--text2);
+    font-size: 0.92rem;
+    max-width: 62ch;
+    margin: 0 0 20px;
+  }
+
+  .specimen {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .specimen-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 160px;
+  }
+
+  .field-label {
+    font-size: 0.72rem;
+    color: var(--text3);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  details.usage {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  details.usage summary {
+    cursor: pointer;
+    padding: 9px 14px;
+    font-family: var(--mono-face);
+    font-size: 0.76rem;
+    color: var(--text2);
+    background: var(--surface2);
+    list-style: none;
+  }
+  details.usage summary::-webkit-details-marker { display: none; }
+  details.usage summary::before { content: "▸ "; color: var(--text3); }
+  details.usage[open] summary::before { content: "▾ "; }
+  details.usage summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  pre.code {
+    margin: 0;
+    padding: 14px 16px;
+    background: var(--code-bg);
+    overflow-x: auto;
+    font-family: var(--mono-face);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text2);
+  }
+  pre.code .k { color: var(--accent); }
+
+  .other-plan {
+    border: 1px dashed var(--border2);
+    border-radius: 10px;
+    padding: 24px 28px;
+    color: var(--text2);
+    font-size: 0.9rem;
+  }
+  .other-plan p { margin: 0 0 14px; max-width: 64ch; }
+  .other-plan ul { margin: 0; padding-left: 20px; }
+  .other-plan li { margin-bottom: 8px; }
+  .egg-trigger {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--accent);
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: transform 0.1s ease;
+  }
+  .egg-trigger:hover { border-color: var(--accent); }
+  .egg-trigger:active { transform: scale(0.94); }
+  .egg-hint {
+    font-size: 0.8rem;
+    color: var(--text3);
+    align-self: center;
+  }
+
+  .egg-frame {
+    border: 0;
+    width: 100%;
+    height: 110px;
+    background: transparent;
+    display: block;
+  }
+  .egg-frame.egg-frame-full {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+  }
+
+  .ol-resize-box {
+    resize: horizontal;
+    overflow: auto;
+    min-width: 320px;
+    max-width: 100%;
+    width: 360px; /* opens 1-up; drag wider to cross the threshold into 2-up */
+    height: 380px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding-right: 14px; /* room for the resize handle so it doesn't sit on the divider */
+  }
+  .ol-resize-hint {
+    font-size: 0.72rem;
+    color: var(--text3);
+    margin: 8px 0 0;
+  }
+
+  .btn-demo-trigger {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-demo-trigger:hover { border-color: var(--accent); color: var(--accent); }
+  .demo-note {
+    font-size: 0.78rem;
+    color: var(--text3);
+    margin: 10px 0 0;
+  }
+  .demo-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .demo-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: grab;
+  }
+  .demo-list-item:last-child { margin-bottom: 0; }
+  .drag-reorder-dragging { opacity: 0.5; }
+  .drag-reorder-over-top { border-top: 2px solid var(--accent) !important; }
+  .drag-reorder-over-bottom { border-bottom: 2px solid var(--accent) !important; }
+
+  .other-plan code {
+    font-family: var(--mono-face);
+    font-size: 0.82em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .theme-frame {
+    border: 0;
+    width: 100%;
+    height: 900px;
+    display: block;
+    border-radius: 8px;
+  }
+
+  footer.note {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text3);
+  }
+
+  @media (max-width: 720px) {
+    .catalog { grid-template-columns: 1fr; }
+    nav.toc { position: static; flex-direction: row; flex-wrap: wrap; gap: 12px; }
+    nav.toc a { padding-left: 0; border-left: none; border-bottom: 2px solid transparent; }
+    nav.toc a:hover { border-bottom-color: var(--border2); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* backwards, not both/forwards: holding the final translateY(0) after the
+       animation ends leaves a non-"none" transform on .entry, which creates a
+       new containing block for any position:fixed descendant (like the Fame
+       Easter Egg Modal's fullscreen iframe) — anchoring it to this card
+       instead of the real viewport. backwards only affects the pre-start state. */
+    .entry { animation: rise 0.35s ease backwards; }
+    .entry:nth-of-type(2) { animation-delay: 0.05s; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">Universal &middot; cross-project</p>
+      <h1 id="brand-title" style="cursor:default;user-select:none;">Component Library</h1>
+      <p>Reusable pieces built once and meant to be pulled into any project — named, previewed live, and ready to copy in. Files live in <code style="font-family:var(--mono-face)">Misc/</code>.</p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button">Toggle theme</button>
+  </header>
+
+  <div class="catalog">
+    <nav class="toc">
+      <button class="toc-index-btn" type="button" id="toc-index-btn">Index</button>
+
+      <div class="toc-group collapsed" data-section="inputs-pickers">
+        <button class="toc-topic" type="button"><span>Inputs & Pickers</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#time-picker">Time Picker</a>
+          <a href="#date-picker">Date Picker</a>
+          <a href="#datetime-picker">Date + Time Picker</a>
+          <a href="#multi-date">Multi-Date Picker</a>
+          <a href="#status-popup">Status Popup</a>
+          <a href="#timezone-converter">Timezone-Aware DateTime Converter</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="modals-overlays">
+        <button class="toc-topic" type="button"><span>Modals & Overlays</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#easter-egg">Easter Egg Modal</a>
+          <a href="#fame-easter-egg">Fame Easter Egg Modal</a>
+          <a href="#due-alert">Due/Overdue Alert Modal</a>
+          <a href="#changelog-modal">Changelog Modal</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="lists-data">
+        <button class="toc-topic" type="button"><span>Lists & Data Tables</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#output-layout">Output Layout</a>
+          <a href="#bulk-select">Bulk Select + Action Bar</a>
+          <a href="#drag-reorder">Drag-to-Reorder Rows</a>
+          <a href="#export-data">CSV / JSON / XLSX Export</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="theming">
+        <button class="toc-topic" type="button"><span>Theming & Visual Style</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#theme-system">Appearance Themes</a>
+          <a href="#hex-palette">Hex Palette Generator</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="settings-config">
+        <button class="toc-topic" type="button"><span>Settings & Config Patterns</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#settings-draft">Settings Draft/Discard Guard</a>
+          <a href="#badge-taxonomy">Configurable Badge Taxonomy</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="sync-backend">
+        <button class="toc-topic" type="button"><span>Sync & Backend Recipes</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#firestore-sync">Firestore Live Sync</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="ai">
+        <button class="toc-topic" type="button"><span>AI</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#ai-chat-panel">AI Chat Panel</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="scheduling">
+        <button class="toc-topic" type="button"><span>Scheduling</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#recurrence">Recurrence Generator</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="decorative">
+        <button class="toc-topic" type="button"><span>Decorative & Effects</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#particle-bg">Particle Background</a>
+          <a href="#scroll-reveal-bars">Scroll-Reveal Bars</a>
+          <a href="#pixel-grid">Pixel-Grid Waffle Chart</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="other">
+        <button class="toc-topic" type="button"><span>Other</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#gcal-connect">Connect to Google Calendar</a>
+          <a href="#condition-evaluator">Condition Evaluator</a>
+          <a href="#quill-sync">Quill Rich-Text Sync</a>
+          <a href="#trash-ttl">Soft-Delete with TTL</a>
+          <a href="#fuzzy-date-search">Fuzzy Date/Time Search</a>
+          <a href="#search-filter-list">Search-Filter-Highlight List</a>
+        </div>
+      </div>
+
+      <div class="toc-group collapsed" data-section="docs-onboarding">
+        <button class="toc-topic" type="button"><span>Documentation & Onboarding</span><svg class="toc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="toc-links">
+          <a href="#tooltip-icon">Input Guidance Tooltip</a>
+          <a href="#annotated-lines">Annotated Line Viewer</a>
+          <a href="#glossary-list">Glossary List</a>
+          <a href="#structure-diagram">Structure Cheat-Sheet Diagram</a>
+          <a href="#sample-data-fill">Sample Data Autofill</a>
+          <a href="#smart-tooltip">Smart Help Tooltip</a>
+          <a href="#collapsible-section">Collapsible Section Toggle</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="group" id="inputs-pickers">
+        <div class="group-heading"><h2>Inputs & Pickers</h2></div>
+
+        <article class="entry" id="time-picker">
+          <div class="entry-head">
+            <h3>Time Picker</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">time-picker.js · time-picker.css · needs time-mask.js</p>
+          <p class="desc">Replaces a native <code style="font-family:var(--mono-face)">&lt;input type="time"&gt;</code>. Two scrollable columns (hour, 5-minute steps) in a small dropdown; also accepts direct typing with auto-formatting.</p>
+
+          <div class="specimen">
+            <div class="specimen-row">
+              <div class="field">
+                <label class="field-label" for="demo-time-1">Start time</label>
+                <input type="text" id="demo-time-1" value="09:00" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="demo-time-2">End time</label>
+                <input type="text" id="demo-time-2" />
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">createTimePicker(<span class="k">'my-input-id'</span>); <span class="k">// self-inserts in place of the input</span>
+
+<span class="k">// read the value elsewhere exactly as before</span>
+document.getElementById(<span class="k">'my-input-id'</span>).value; <span class="k">// "HH:MM"</span></pre>
+          </details>
+        </article>
+        <article class="entry" id="date-picker">
+          <div class="entry-head">
+            <h3>Date Picker</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">date-picker.js · date-picker.css · needs date-mask.js</p>
+          <p class="desc">Replaces a native <code style="font-family:var(--mono-face)">&lt;input type="date"&gt;</code>. The trigger is a real text field — type <code style="font-family:var(--mono-face)">DD/MM/YYYY</code> directly, or click it to open the shared popover with month/year selects and a day grid.</p>
+
+          <div class="specimen">
+            <div class="specimen-row">
+              <div class="field">
+                <label class="field-label">Deadline</label>
+                <div id="demo-date-1-slot"></div>
+              </div>
+              <div class="field">
+                <label class="field-label">Empty state</label>
+                <div id="demo-date-2-slot"></div>
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> trigger = createDateTrigger(<span class="k">'due-date'</span>, <span class="k">'2026-07-15'</span>); <span class="k">// '' for empty</span>
+container.appendChild(trigger);
+
+<span class="k">// read the value elsewhere</span>
+document.getElementById(<span class="k">'due-date'</span>).dataset.iso; <span class="k">// "YYYY-MM-DD"</span></pre>
+          </details>
+        </article>
+        <article class="entry" id="datetime-picker">
+          <div class="entry-head">
+            <h3>Date + Time Picker</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">datetime-picker.js · datetime-picker.css · needs date-mask.js + time-mask.js</p>
+          <p class="desc">Replaces <code style="font-family:var(--mono-face)">&lt;input type="datetime-local"&gt;</code>. Type <code style="font-family:var(--mono-face)">DDMMYYYY[HHMM]</code> directly into the trigger, or click it for the same calendar as the date-only picker plus a merged <code style="font-family:var(--mono-face)">HH:MM</code> field — picking a day doesn't close the panel, so there's time to set the time too. Stores a full UTC ISO string; optionally edited against a fixed offset (e.g. GMT+7) instead of raw UTC.</p>
+
+          <div class="specimen">
+            <div class="specimen-row">
+              <div class="field">
+                <label class="field-label">Due at (UTC)</label>
+                <div id="demo-dt-1-slot"></div>
+              </div>
+              <div class="field">
+                <label class="field-label">Due at (GMT+7), unset</label>
+                <div id="demo-dt-2-slot"></div>
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> trigger = createDateTimeTrigger(<span class="k">'due-at'</span>, <span class="k">'2026-07-15T09:30:00Z'</span>); <span class="k">// '' for unset</span>
+container.appendChild(trigger);
+
+<span class="k">// edit against a fixed local reference instead of raw UTC</span>
+createDateTimeTrigger(<span class="k">'due-at'</span>, iso, { offsetMinutes: <span class="k">420</span> }); <span class="k">// GMT+7</span>
+
+<span class="k">// read the value elsewhere</span>
+document.getElementById(<span class="k">'due-at'</span>).dataset.iso; <span class="k">// "YYYY-MM-DDTHH:MM:SSZ"</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="multi-date">
+          <div class="entry-head">
+            <h3>Multi-Date Picker with Pills</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">multi-date.js · multi-date.css</p>
+          <p class="desc">Add arbitrary dates to a buffer (auto-sorted, deduped), rendered as removable pill chips with today/past styling. For "pick multiple dates" scenarios — recurring events, work days, blackout dates. Fully standalone (plain text input + validation), no load-order dependency on the Date Picker above.</p>
+
+          <div class="specimen">
+            <div id="multi-date-demo-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> picker = createMultiDatePicker({ initialDates: [<span class="k">'2026-07-20'</span>] });
+container.appendChild(picker.el);
+picker.onChange((dates) =&gt; console.log(<span class="k">'dates now:'</span>, dates));
+picker.getDates(); <span class="k">// -&gt; ['2026-07-20', ...] sorted ISO strings</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="status-popup">
+          <div class="entry-head">
+            <h3>Click-to-Open Status Popup</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">status-popup.js · status-popup.css</p>
+          <p class="desc">Turns a status badge into a click target that opens a small color-coded option grid instead of a <code style="font-family:var(--mono-face)">&lt;select&gt;</code>. Selecting an option updates the badge inline. A single shared overlay is reused by every badge on the page — pairs naturally with the Configurable Badge Taxonomy below.</p>
+
+          <div class="specimen">
+            <div class="demo-row">
+              <span>Task status:</span>
+              <span class="sp-badge" id="status-popup-demo-badge"></span>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">attachStatusPopup(badgeEl, [
+  { key: <span class="k">'pending'</span>, label: <span class="k">'Pending'</span>, bg: <span class="k">'#E6F1FB'</span>, text: <span class="k">'#185FA5'</span> },
+  { key: <span class="k">'done'</span>, label: <span class="k">'Done'</span>, bg: <span class="k">'#DCFCE7'</span>, text: <span class="k">'#166534'</span> },
+], (key, item) =&gt; { task.status = key; save(); });</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="timezone-converter">
+          <div class="entry-head">
+            <h3>Timezone-Aware DateTime Converter</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">timezone-converter.js</p>
+          <p class="desc">Operators always type wall-clock time in ONE fixed "home" zone; this converts it to any other IANA zone through a real UTC instant — so daylight saving is handled correctly (a summer flight to London reads GMT+1, a winter one GMT+0) — and flags a midnight-crossing conversion with a (+1d)/(-1d) marker instead of silently eating it.</p>
+
+          <div class="specimen">
+            <div class="specimen-row">
+              <div class="field">
+                <label class="field-label" for="tzc-date">Date (home zone, GMT+7)</label>
+                <input type="text" id="tzc-date" value="2026-07-25" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="tzc-time">Time (home zone)</label>
+                <input type="text" id="tzc-time" value="23:30" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="tzc-zone">Destination port</label>
+                <select id="tzc-zone" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;">
+                  <option value="Europe/London">LHR &mdash; London</option>
+                  <option value="Asia/Tokyo">NRT &mdash; Tokyo</option>
+                  <option value="Asia/Kolkata">DEL &mdash; Delhi</option>
+                  <option value="Asia/Bangkok">BKK &mdash; Bangkok</option>
+                </select>
+              </div>
+            </div>
+            <div class="demo-row" style="margin-top:12px;">
+              <span id="tzc-offset" style="font-family:var(--mono-face);font-size:0.72rem;font-weight:700;padding:3px 8px;border-radius:4px;background:var(--surface2);color:var(--text2);"></span>
+              <span style="color:var(--text3);">&rarr;</span>
+              <span class="demo-note" id="tzc-preview" style="margin:0;font-weight:700;"></span>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">convertPreview(<span class="k">'2026-07-25'</span>, <span class="k">'23:30'</span>, <span class="k">'Asia/Bangkok'</span>, <span class="k">'Europe/London'</span>);
+<span class="k">// -&gt; { text: "25/07/2026  17:30", shiftDays: 0 }</span>
+
+gmtOffsetLabel(<span class="k">'Europe/London'</span>, <span class="k">'2026-07-25'</span>); <span class="k">// -&gt; "GMT+1" (DST-aware)</span></pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="modals-overlays">
+        <div class="group-heading"><h2>Modals & Overlays</h2></div>
+
+        <article class="entry" id="easter-egg">
+          <div class="entry-head">
+            <h3>Easter Egg Modal</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">easter-egg.js · easter-egg.css</p>
+          <p class="desc">Click any trigger element 4 times within 2 seconds to reveal a hidden modal — a credit, a signature, a changelog, anything worth tucking behind a logo. The script must load after the modal markup in the DOM (it looks up <code style="font-family:var(--mono-face)">#creator-modal</code> once, at load time).</p>
+
+          <div class="specimen">
+            <div class="specimen-row">
+              <button class="egg-trigger" type="button" onclick="easterEggClick()" aria-label="Secret trigger, click 4 times">◆</button>
+              <span class="egg-hint">Click me 4× fast</span>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;button onclick=<span class="k">"easterEggClick()"</span>&gt;◆&lt;/button&gt;
+
+&lt;div class=<span class="k">"modal-overlay creator-modal"</span> id=<span class="k">"creator-modal"</span>&gt;
+  &lt;div class=<span class="k">"modal"</span>&gt;
+    ... <span class="k">your hidden content</span> ...
+    &lt;button onclick=<span class="k">"closeCreatorModal()"</span>&gt;Close&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+<span class="k">// include easter-egg.js AFTER the modal markup above</span></pre>
+          </details>
+        </article>
+        <article class="entry" id="fame-easter-egg">
+          <div class="entry-head">
+            <h3>Fame Easter Egg Modal</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">fame-easter-egg-modal.html · fame-easter-egg.js · fame-easter-egg.css · fame-signature.gif</p>
+          <p class="desc">The actual creator-credit modal used across Fame's own projects — same 4-click trigger as the generic version above, with a name, role, and signature GIF baked in instead of placeholder content. Assumes the host project already has a <code style="font-family:var(--mono-face)">--radius-lg</code> variable and a <code style="font-family:var(--mono-face)">.btn.btn-primary</code> button style. Demoed here in an iframe — loading it side-by-side with the generic Easter Egg Modal on one page would collide (both declare the same globals and both modals use <code style="font-family:var(--mono-face)">id="creator-modal"</code>).</p>
+
+          <div class="specimen">
+            <iframe id="fame-egg-frame" class="egg-frame" src="fame-easter-egg-demo.html" title="Fame Easter Egg Modal demo"></iframe>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">// fame-easter-egg-modal.html ships with the real signature GIF inlined as base64</span>
+<span class="k">// (self-contained — no separate asset file needed when you paste it elsewhere)</span>
+
+&lt;button onclick=<span class="k">"easterEggClick()"</span>&gt;◆&lt;/button&gt;
+<span class="k">// paste fame-easter-egg-modal.html's markup here</span>
+
+<span class="k">// fame-easter-egg.css needs --radius-lg + .btn.btn-primary already defined</span>
+<span class="k">// include fame-easter-egg.js AFTER the modal markup</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="due-alert">
+          <div class="entry-head">
+            <h3>Due/Overdue Alert Modal</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">due-alert.js · due-alert.css</p>
+          <p class="desc">A "needs attention" popup for anything with a due date. Pass a plain <code style="font-family:var(--mono-face)">{id, title, dueDate}</code> array on load; overdue / due-today / due-soon items get listed with per-item Extend and Dismiss actions, and the modal auto-closes once the list empties. No app-specific field names baked in. Singleton overlay — call it as many times as you like.</p>
+
+          <div class="specimen">
+            <button class="btn-demo-trigger" id="due-alert-demo-btn" type="button">Open demo (3 sample items)</button>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">checkDueAlerts(
+  [{ id: <span class="k">1</span>, title: <span class="k">'Renew certificate'</span>, dueDate: <span class="k">'2026-07-10'</span> }],
+  {
+    soonDays: <span class="k">3</span>,
+    onExtend: (id, newDate) =&gt; myStore.setDue(id, newDate),
+    onDismiss: (id) =&gt; myStore.archive(id),
+  }
+);</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="changelog-modal">
+          <div class="entry-head">
+            <h3>Changelog Modal</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">changelog-modal.js · changelog-modal.css</p>
+          <p class="desc">One-version-per-page changelog, prev/next nav, auto "Latest" tag on the newest entry. Zero coupling beyond the data array — multiple independent instances are supported, unlike most other singletons in this library.</p>
+
+          <div class="specimen">
+            <button class="btn-demo-trigger" id="changelog-demo-btn" type="button">Open changelog</button>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> changelog = createChangelogModal([
+  { version: <span class="k">'v1.2.0'</span>, date: <span class="k">'July 2026'</span>, tag: <span class="k">'Latest'</span>, items: [<span class="k">'Added dark mode'</span>] },
+  { version: <span class="k">'v1.1.0'</span>, date: <span class="k">'June 2026'</span>, items: [<span class="k">'Initial release'</span>] },
+]);
+document.body.appendChild(changelog.el);
+versionLabel.addEventListener(<span class="k">'click'</span>, () =&gt; changelog.open());</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="lists-data">
+        <div class="group-heading"><h2>Lists & Data Tables</h2></div>
+
+        <article class="entry" id="output-layout">
+          <div class="entry-head">
+            <h3>Output Layout</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">output-layout.js · output-layout.css</p>
+          <p class="desc">A paginated output pane for generated items (messages, documents, results) that shows two side by side when the pane itself is wide enough, one at a time otherwise — reflowing live as the pane resizes, without losing your place. An odd item out stays in the left column with the divider still shown, and every item gets its own Copy button (never one ambiguous global one). Drag the box's bottom-right corner below to see it switch between 1-up and 2-up.</p>
+
+          <div class="specimen">
+            <div class="ol-resize-box" id="ol-demo-box"></div>
+            <p class="ol-resize-hint">Drag the bottom-right corner to resize the pane — reflow is driven by ITS width, not the browser window's.</p>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> wrap = createOutputLayout(<span class="k">'Results'</span>, (item) =&gt; <span class="k">`&lt;pre&gt;${item.body}&lt;/pre&gt;`</span>);
+container.appendChild(wrap);
+
+setItems([
+  { title: <span class="k">'Item 1'</span>, subtitle: <span class="k">'optional'</span>, body: <span class="k">'...'</span> },
+  { title: <span class="k">'Item 2'</span>, body: <span class="k">'...'</span> },
+]);</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="bulk-select">
+          <div class="entry-head">
+            <h3>Bulk Select + Action Bar</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">bulk-select.js · bulk-select.css</p>
+          <p class="desc">Toggleable "select mode" for any list: reveals a checkbox on each matching item, tracks a Set of selected ids, and shows a floating action bar with a live count plus whatever action buttons you pass in. Toggle select mode below, pick a few rows.</p>
+
+          <div class="specimen">
+            <div class="demo-row" style="margin-bottom:10px;">
+              <button class="btn-demo-trigger" id="bulk-toggle-btn" type="button">Toggle select mode</button>
+            </div>
+            <div id="bulk-demo-list"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> bulk = createBulkSelect(document.getElementById(<span class="k">'list'</span>), {
+  itemSelector: <span class="k">'.entry-card'</span>,
+  actions: [
+    { label: <span class="k">'Archive selected'</span>, onClick: (ids) =&gt; archiveMany(ids) },
+    { label: <span class="k">'Delete selected'</span>, onClick: (ids) =&gt; deleteMany(ids), danger: <span class="k">true</span> },
+  ],
+});
+toggleBtn.addEventListener(<span class="k">'click'</span>, () =&gt; bulk.toggleMode());</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="drag-reorder">
+          <div class="entry-head">
+            <h3>Drag-to-Reorder List Rows</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">drag-reorder.js (CSS is a 3-line snippet, see Usage)</p>
+          <p class="desc">Plain HTML5 drag-and-drop reordering for any list — no library. Shows an insertion-line indicator as you drag, reorders the actual DOM nodes on drop, and reports the new id order back. Try dragging the rows below (same list as the Bulk Select demo above).</p>
+
+          <div class="specimen">
+            <div id="reorder-demo-list"></div>
+            <p class="demo-note" id="reorder-demo-order"></p>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> reorder = makeReorderable(document.getElementById(<span class="k">'type-list'</span>), {
+  itemSelector: <span class="k">'.type-row'</span>,
+  onReorder: (newIds) =&gt; saveNewOrder(newIds),
+});
+
+<span class="k">/* add to your stylesheet: */</span>
+.drag-reorder-dragging { opacity: <span class="k">0.5</span>; }
+.drag-reorder-over-top    { border-top: <span class="k">2px</span> solid var(--accent) !important; }
+.drag-reorder-over-bottom { border-bottom: <span class="k">2px</span> solid var(--accent) !important; }</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="export-data">
+          <div class="entry-head">
+            <h3>CSV / JSON / XLSX Export</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">export-data.js · needs ExcelJS (CDN) for XLSX only</p>
+          <p class="desc">Export any flat array of plain objects to CSV, JSON, or a styled XLSX workbook (header color, zebra stripes, autofilter, column alignment all configurable). No field-name assumptions — whatever keys your row objects have become the columns. CSV/JSON have zero dependencies; XLSX needs ExcelJS loaded as a global.</p>
+
+          <div class="specimen">
+            <div class="demo-row">
+              <button class="btn-demo-trigger" id="export-csv-btn" type="button">Export CSV</button>
+              <button class="btn-demo-trigger" id="export-json-btn" type="button">Export JSON</button>
+              <button class="btn-demo-trigger" id="export-xlsx-btn" type="button">Export XLSX</button>
+            </div>
+            <p class="demo-note">Exports the same 5-row sample dataset used above. Check your downloads folder.</p>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> rows = [{ id: <span class="k">'1'</span>, name: <span class="k">'Task A'</span>, due: <span class="k">'01/07/2026'</span> }];
+exportCSV(rows, <span class="k">'tasks.csv'</span>);
+exportJSON(rows, <span class="k">'tasks.json'</span>);
+<span class="k">await</span> exportXLSX(rows, <span class="k">'tasks.xlsx'</span>, { sheetName: <span class="k">'Tasks'</span> });</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="theming">
+        <div class="group-heading"><h2>Theming & Visual Style</h2></div>
+
+        <article class="entry" id="theme-system">
+          <div class="entry-head">
+            <h3>Appearance Themes</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">theme-system.js · theme-system.css</p>
+          <p class="desc">CSS-variable theming: one-click built-in presets (each just a <code style="font-family:var(--mono-face)">:root.theme-&lt;name&gt;</code> class), a live custom editor (drag any token, the whole app re-previews instantly via inline <code style="font-family:var(--mono-face)">:root</code> style overrides — no separate render path), and named custom themes saved to <code style="font-family:var(--mono-face)">localStorage</code>. Demoed in an iframe since it really does retheme the whole page it's mounted in — on the actual library page that would fight the theme toggle up top and redefine tokens (<code style="font-family:var(--mono-face)">--border</code>, <code style="font-family:var(--mono-face)">--accent</code>...) the other components also read.</p>
+
+          <div class="specimen" style="padding:0;">
+            <iframe class="theme-frame" src="theme-system-demo.html" title="Appearance Themes demo"></iframe>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">loadTheme();  <span class="k">// call ASAP at boot, before first paint</span>
+
+<span class="k">// later, wherever your Settings UI lives:</span>
+<span class="k">const</span> wrap = createThemeSystem(document.getElementById(<span class="k">'settings-slot'</span>));
+settingsSlot.appendChild(wrap);
+
+<span class="k">// components style themselves with var(--token-name) — never hardcoded colors</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="hex-palette">
+          <div class="entry-head">
+            <h3>Single-Hex Palette Generator</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">hex-palette.js</p>
+          <p class="desc">Pure RGB lighten/darken math: pick ONE seed color, get a full 9-color palette back. A distinct mechanism from Appearance Themes above — that's curated presets + per-token editing; this is one-color-in, whole-palette-out, nothing saved. Good for a quick "theme from my brand color" tool.</p>
+
+          <div class="specimen">
+            <div id="hex-palette-demo-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> palette = generatePalette(<span class="k">'#1a3a6b'</span>);
+<span class="k">// -&gt; { header, dark, mid, bg, panel, nav, input, border, btnLight }</span>
+
+<span class="k">const</span> ui = createPaletteGeneratorUI((palette) =&gt; {
+  document.documentElement.style.setProperty(<span class="k">'--theme-header'</span>, palette.header);
+});
+settingsPanel.appendChild(ui);</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="settings-config">
+        <div class="group-heading"><h2>Settings & Config Patterns</h2></div>
+
+        <article class="entry" id="settings-draft">
+          <div class="entry-head">
+            <h3>Settings Draft/Dirty/Discard Guard</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">settings-draft.js (behavior only, no CSS)</p>
+          <p class="desc">Generic "open a panel, edit freely, Save or Discard" flow. Not tied to any fields — you supply a getState/applyState pair and this tracks a snapshot + dirty flag around it. Edit the field below, then try Close: it'll prompt because it's dirty. Save re-baselines so Close no longer prompts.</p>
+
+          <div class="specimen">
+            <div class="demo-row" style="margin-bottom:10px;">
+              <label style="font-size:0.82rem;">Panel title: <input type="text" id="draft-demo-input" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.82rem;" /></label>
+            </div>
+            <div class="demo-row">
+              <button class="btn-demo-trigger" id="draft-demo-save">Save</button>
+              <button class="btn-demo-trigger" id="draft-demo-close">Close</button>
+              <span class="demo-note" id="draft-demo-status" style="margin:0;"></span>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> guard = createDraftGuard(
+  () =&gt; ({ theme: currentTheme }),         <span class="k">// getState</span>
+  (state) =&gt; { currentTheme = state.theme; render(); }  <span class="k">// applyState</span>
+);
+input.addEventListener(<span class="k">'input'</span>, () =&gt; { currentTheme = input.value; guard.markDirty(); });
+closeBtn.onclick = () =&gt; guard.confirmDiscardIfDirty(() =&gt; panel.close());
+saveBtn.onclick = () =&gt; { persist(); guard.snapshot(); };</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="badge-taxonomy">
+          <div class="entry-head">
+            <h3>Configurable Badge Taxonomy</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">badge-taxonomy.js · badge-taxonomy.css</p>
+          <p class="desc">User-editable categorical tags (statuses, priorities, labels) rendered as colored pills, with an add/remove editor. Builtins are protected from deletion and self-heal if storage is tampered with. Pairs naturally with the Status Popup above via <code style="font-family:var(--mono-face)">taxonomy.getAll</code>.</p>
+
+          <div class="specimen">
+            <div id="badge-taxonomy-demo-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> statusTax = createTaxonomyEditor({
+  storageKey: <span class="k">'app_statuses'</span>,
+  builtins: [
+    { key: <span class="k">'pending'</span>, label: <span class="k">'Pending'</span>, bg: <span class="k">'#E6F1FB'</span>, text: <span class="k">'#185FA5'</span> },
+    { key: <span class="k">'completed'</span>, label: <span class="k">'Completed'</span>, bg: <span class="k">'#DCFCE7'</span>, text: <span class="k">'#166534'</span> },
+  ],
+});
+settingsPanel.appendChild(statusTax.el);
+someCard.appendChild(renderBadge(statusTax, task.status));</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="sync-backend">
+        <div class="group-heading"><h2>Sync & Backend Recipes</h2></div>
+
+        <article class="entry" id="firestore-sync">
+          <div class="entry-head">
+            <h3>Firestore Live Cross-Device Sync</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">firestore-sync.js · firestore-sync.css · needs the Firebase JS SDK + a real project</p>
+          <p class="desc">Turns a localStorage-only array into a live, multi-device-synced Firestore collection — any client's writes propagate to every other open client via <code style="font-family:var(--mono-face)">onSnapshot</code>; there's no manual "save all". Plus a connecting/connected/error status pill. No real Firebase project wired into this demo — the pill below is driven directly to show its three states, and a real <code style="font-family:var(--mono-face)">createFirestoreSync(...)</code> call would drive it automatically via <code style="font-family:var(--mono-face)">onStatusChange</code>.</p>
+
+          <div class="specimen">
+            <div class="demo-row" style="margin-bottom:10px;">
+              <button class="btn-demo-trigger" id="fs-demo-connecting">Connecting…</button>
+              <button class="btn-demo-trigger" id="fs-demo-connected">Connected</button>
+              <button class="btn-demo-trigger" id="fs-demo-error">Error</button>
+            </div>
+            <div id="fs-status-pill-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">// after the Firebase SDK module block sets window._db / window._collection / etc:</span>
+<span class="k">const</span> sync = createFirestoreSync({
+  db: window._db,
+  firestoreFns: { collection: window._collection, doc: window._doc,
+    onSnapshot: window._onSnapshot, setDoc: window._setDoc, deleteDoc: window._deleteDoc },
+  collectionPath: <span class="k">'entries'</span>,
+  onSnapshotUpdate: (items) =&gt; { myItems = items; renderUI(); },
+  onStatusChange: (status) =&gt; pill.setStatus(status),
+});
+sync.saveItem(item);   <span class="k">// setDoc, item.id required</span>
+sync.deleteItem(id);   <span class="k">// deleteDoc</span>
+
+<span class="k">// Security rules must restrict access before this goes beyond a private tool —</span>
+<span class="k">// see REF/integrations-reference.html (Block 1, Step D).</span></pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="ai">
+        <div class="group-heading"><h2>AI</h2></div>
+
+        <article class="entry" id="ai-chat-panel">
+          <div class="entry-head">
+            <h3>AI Chat Panel with Tool-Calling Loop</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">ai-chat-panel.js · ai-chat-panel.css</p>
+          <p class="desc">A sliding chat panel for any Groq/OpenAI-compatible chat-completions endpoint, with the full <code style="font-family:var(--mono-face)">tools</code>/<code style="font-family:var(--mono-face)">tool_calls</code> agentic loop: when the model asks for a tool call, it's executed locally and fed back in, looping until a final reply. The tool registry is a parameter, not hardcoded. No API key is wired into this demo — open the panel and send a message to see the real network-error path (a visible error bubble, not a silent console failure).</p>
+
+          <div class="specimen">
+            <div class="demo-row">
+              <button class="btn-demo-trigger" id="ai-chat-open-btn" type="button">Open chat panel</button>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> chat = createAIChatPanel({
+  endpoint: <span class="k">'https://api.groq.com/openai/v1/chat/completions'</span>,
+  apiKey: () =&gt; localStorage.getItem(<span class="k">'my_api_key'</span>),
+  model: <span class="k">'llama-3.3-70b-versatile'</span>,
+  systemPrompt: <span class="k">'You are a helpful assistant.'</span>,
+  tools: [{ type: <span class="k">'function'</span>, function: { name: <span class="k">'add_item'</span>, description: <span class="k">'Add a to-do item'</span>,
+    parameters: { type: <span class="k">'object'</span>, properties: { text: { type: <span class="k">'string'</span> } }, required: [<span class="k">'text'</span>] } } }],
+  executeTool: (name, args) =&gt; name === <span class="k">'add_item'</span> ? (todos.push(args.text), { ok: <span class="k">true</span> }) : { ok: <span class="k">false</span> },
+});
+document.body.appendChild(chat.el);
+openBtn.addEventListener(<span class="k">'click'</span>, () =&gt; chat.toggle());</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="scheduling">
+        <div class="group-heading"><h2>Scheduling</h2></div>
+
+        <article class="entry" id="recurrence">
+          <div class="entry-head">
+            <h3>Recurrence Generator + Calendar Preview</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">recurrence.js · recurrence.css</p>
+          <p class="desc">Two layers: a pure <code style="font-family:var(--mono-face)">generateRepeatDates(opts)</code> function (daily/weekly/monthly-by-day-or-nth-weekday/yearly/custom, zero DOM coupling) plus <code style="font-family:var(--mono-face)">createRecurrencePicker(opts)</code> — a mode selector with a live mini-calendar preview and a check/uncheck confirm step before committing. Multiple instances allowed, no shared singleton.</p>
+
+          <div class="specimen">
+            <div id="recurrence-demo-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> dates = generateRepeatDates({
+  mode: <span class="k">'weekly'</span>, start: <span class="k">'2026-07-01'</span>, weekdays: [<span class="k">1</span>, <span class="k">3</span>, <span class="k">5</span>], endDate: <span class="k">'2026-07-31'</span>
+});
+<span class="k">// -&gt; ['2026-07-03', '2026-07-06', ...]</span>
+
+<span class="k">const</span> picker = createRecurrencePicker({
+  start: <span class="k">'2026-07-16'</span>,
+  onConfirm: (dateList) =&gt; dateList.forEach(d =&gt; addEntry(d)),
+});
+container.appendChild(picker);</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="decorative">
+        <div class="group-heading"><h2>Decorative & Effects</h2></div>
+        <p class="demo-note" style="margin:-4px 0 20px;">Decorative/visual only — not data-critical UI. Ship sensible defaults, safe to call with zero opts.</p>
+
+        <article class="entry" id="particle-bg">
+          <div class="entry-head">
+            <h3>Canvas Particle Background</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">particle-bg.js</p>
+          <p class="desc">Ambient animated canvas: gradient fill, drifting sine-wave "current" lines, a field of wobbling particles (circle or rect). Auto-resizes to the canvas's own size. Owns its own <code style="font-family:var(--mono-face)">requestAnimationFrame</code> loop — always call <code style="font-family:var(--mono-face)">.stop()</code>/<code style="font-family:var(--mono-face)">.destroy()</code> when the canvas is removed.</p>
+
+          <div class="specimen" style="padding:0;overflow:hidden;border-radius:8px;">
+            <canvas id="particle-bg-demo-canvas" style="width:100%;height:180px;display:block;"></canvas>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> bg = createParticleBg(document.getElementById(<span class="k">'myCanvas'</span>), {
+  count: <span class="k">200</span>, colors: [<span class="k">'#5dd4f0'</span>, <span class="k">'#ff6b35'</span>], shape: <span class="k">'circle'</span>, speed: <span class="k">1</span>,
+});
+<span class="k">// later, e.g. on route change / unmount:</span>
+bg.destroy();</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="scroll-reveal-bars">
+          <div class="entry-head">
+            <h3>Scroll-Reveal Progress Bars</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">scroll-reveal-bars.js · scroll-reveal-bars.css</p>
+          <p class="desc">Animates bar width from 0 to a target once each scrolls into view (IntersectionObserver). Driven by real percentages, so it doubles as a lightweight stat display. Respects <code style="font-family:var(--mono-face)">prefers-reduced-motion</code>. Scroll this card out of view and back to re-trigger.</p>
+
+          <div class="specimen" id="scroll-reveal-demo"></div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div class=<span class="k">"bar-group"</span>&gt;
+  &lt;div class=<span class="k">"bar-label"</span>&gt;&lt;span&gt;Label&lt;/span&gt;&lt;span&gt;90%&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=<span class="k">"bar-track"</span>&gt;&lt;div class=<span class="k">"bar-fill"</span> data-w=<span class="k">"90%"</span>&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+initScrollRevealBars(document.getElementById(<span class="k">'stats'</span>));</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="pixel-grid">
+          <div class="entry-head">
+            <h3>Heatmap / Pixel-Grid Waffle Chart</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">pixel-grid.js · pixel-grid.css</p>
+          <p class="desc">N×M grid of cells, a proportion colored "filled". Deterministic mode fills exactly <code style="font-family:var(--mono-face)">round(rows*cols*filledPercent/100)</code> cells (on-screen % always exact) — a lightweight waffle-chart alternative to a full charting library, or set <code style="font-family:var(--mono-face)">randomize:true</code> for the original decorative noisy look.</p>
+
+          <div class="specimen">
+            <div class="demo-row" style="margin-bottom:10px;">
+              <button class="btn-demo-trigger" id="pixel-grid-25">25%</button>
+              <button class="btn-demo-trigger" id="pixel-grid-62">62%</button>
+              <button class="btn-demo-trigger" id="pixel-grid-90">90%</button>
+              <button class="btn-demo-trigger" id="pixel-grid-random">Randomize</button>
+            </div>
+            <div id="pixel-grid-demo-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> grid = createPixelGrid(document.getElementById(<span class="k">'coverage'</span>), {
+  rows: <span class="k">20</span>, cols: <span class="k">30</span>, filledPercent: <span class="k">62</span>,
+  filledColor: <span class="k">'#c0392b'</span>, emptyColor: <span class="k">'#0a3d62'</span>,
+});</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="other">
+        <div class="group-heading"><h2>Other</h2></div>
+
+        <article class="entry" id="gcal-connect">
+          <div class="entry-head">
+            <h3>Connect to Google Calendar</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">gcal-connect.js · gcal-connect.css (optional) · needs a Google OAuth Client ID</p>
+          <p class="desc">Client-side Google OAuth 2.0 <em>implicit</em> flow — no server, no client secret. Opens Google's consent popup, relays the <code style="font-family:var(--mono-face)">access_token</code> back via <code style="font-family:var(--mono-face)">postMessage</code>, and stores it in <code style="font-family:var(--mono-face)">localStorage</code>. The token is a Bearer for the Calendar/Tasks REST API. Generalised from the Work Log app. Key caveat: the <code style="font-family:var(--mono-face)">redirect_uri</code> must be a page that <strong>also loads this script</strong> (usually the same page) — that page's auto-capture step is what hands the token home. Tokens last ~1 hour; re-run <code style="font-family:var(--mono-face)">connect()</code> to refresh.</p>
+
+          <div class="specimen">
+            <div class="specimen-row" style="gap:10px;flex-wrap:wrap;">
+              <button class="gcal-pill" type="button" id="demo-gcal-pill">
+                <span class="gcal-dot"></span><span>Connect Google Calendar</span>
+              </button>
+              <span class="gcal-pill connected"><span class="gcal-dot"></span>Calendar connected</span>
+              <span class="gcal-pill expired"><span class="gcal-dot"></span>Session expired — Reconnect</span>
+            </div>
+            <p class="desc" style="margin-top:10px;font-size:12px;">Three states: idle · connected · expired. The first is wired to the real module in demo mode (no Client ID) — clicking it just warns, since live OAuth needs a registered origin.</p>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">// 1. Google Cloud Console: OAuth Client ID (Web). Add your page URL to both</span>
+<span class="k">//    "Authorised JavaScript origins" AND "Authorised redirect URIs".</span>
+
+&lt;link rel=<span class="k">"stylesheet"</span> href=<span class="k">"gcal-connect.css"</span>&gt;
+&lt;script src=<span class="k">"gcal-connect.js"</span>&gt;&lt;/script&gt;
+
+<span class="k">const</span> gcal = GCalConnect.init({
+  clientId:      <span class="k">'xxxx.apps.googleusercontent.com'</span>,
+  redirectUri:   location.origin + location.pathname, <span class="k">// must host this script</span>
+  scopes:        [<span class="k">'https://www.googleapis.com/auth/calendar.events'</span>],
+  storagePrefix: <span class="k">'myapp'</span>,   <span class="k">// localStorage: myapp_gcal_token / _client_id</span>
+  onChange: (s) =&gt; {          <span class="k">// s = { connected, expired, token }</span>
+    pill.classList.toggle(<span class="k">'connected'</span>, s.connected &amp;&amp; !s.expired);
+    pill.classList.toggle(<span class="k">'expired'</span>, s.expired);
+  },
+});
+
+pill.onclick = () =&gt; gcal.isConnected() ? gcal.disconnect() : gcal.connect();
+
+<span class="k">// use the token as a Bearer against the Google REST API</span>
+fetch(<span class="k">'https://www.googleapis.com/calendar/v3/calendars/primary/events'</span>, {
+  headers: { Authorization: <span class="k">'Bearer '</span> + gcal.getToken() }
+});
+
+gcal.applyToken(t); <span class="k">// manual fallback if the popup was blocked</span>
+gcal.verify();      <span class="k">// probe token; flips to expired on 401</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="condition-evaluator">
+          <div class="entry-head">
+            <h3>Condition Evaluator</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">condition-evaluator.js · condition-evaluator.css</p>
+          <p class="desc">Pick the right content variant based on yes/no facts. Given items each carrying a <code style="font-family:var(--mono-face)">conds</code> object, renders one yes/no row per unique condition key found across all items, and highlights which items are fully matched as you answer.</p>
+
+          <div class="specimen">
+            <div id="condition-evaluator-demo-slot"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> evalr = createConditionEvaluator(
+  [{ id: <span class="k">'T008'</span>, label: <span class="k">'PNR Cutover — Go Live'</span>, conds: { rollbackConfirmed: <span class="k">true</span>, credsActive: <span class="k">true</span> } }],
+  { mountEl: document.getElementById(<span class="k">'cond-eval'</span>), onMatchChange: (matches) =&gt; console.log(matches) }
+);</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="quill-sync">
+          <div class="entry-head">
+            <h3>Quill Rich-Text + Hidden-Textarea Sync</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">quill-sync.js · needs Quill (CDN)</p>
+          <p class="desc">Mounts a Quill editor and keeps a hidden <code style="font-family:var(--mono-face)">&lt;textarea&gt;</code>'s value synced to its HTML on every change, so existing form-save code that reads the textarea keeps working unmodified.</p>
+
+          <div class="specimen">
+            <div id="quill-sync-demo-mount" style="background:var(--surface);border-radius:6px;"></div>
+            <textarea id="quill-sync-demo-textarea" style="display:none;"></textarea>
+            <p class="demo-note" id="quill-sync-demo-note"></p>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div id=<span class="k">"body-editor"</span>&gt;&lt;/div&gt;
+&lt;textarea id=<span class="k">"body"</span> style=<span class="k">"display:none"</span>&gt;&lt;/textarea&gt;
+
+<span class="k">const</span> handle = attachQuillEditor(
+  document.getElementById(<span class="k">'body-editor'</span>),
+  document.getElementById(<span class="k">'body'</span>),
+  { placeholder: <span class="k">'Email body...'</span> }
+);
+<span class="k">// existing save code just reads document.getElementById('body').value — unchanged</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="trash-ttl">
+          <div class="entry-head">
+            <h3>Soft-Delete with TTL</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">trash-ttl.js</p>
+          <p class="desc">Purges soft-deleted items past a TTL. <code style="font-family:var(--mono-face)">purgeExpiredTrash</code> is a pure function (doesn't mutate or touch storage); <code style="font-family:var(--mono-face)">schedulePurge</code> wraps it for "run on load, then periodically."</p>
+
+          <div class="specimen">
+            <p class="demo-note" id="trash-ttl-before" style="margin:0 0 8px;"></p>
+            <button class="btn-demo-trigger" id="trash-ttl-run-btn" type="button">Run purgeExpiredTrash (5-day TTL)</button>
+            <p class="demo-note" id="trash-ttl-after"></p>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">trash = purgeExpiredTrash(trash, { days: <span class="k">5</span>, dateField: <span class="k">'deletedAt'</span> });
+save();
+
+<span class="k">const</span> stop = schedulePurge(() =&gt; trash, (next) =&gt; { trash = next; save(); }, { days: <span class="k">5</span>, intervalMs: <span class="k">3600000</span> });</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="fuzzy-date-search">
+          <div class="entry-head">
+            <h3>Fuzzy Date/Time Search</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">fuzzy-date-search.js</p>
+          <p class="desc">Builds a search blob of every common phrasing of a date/time (ISO, D/M/Y, "Jul 2", month names, 12h/24h) so a plain substring search box matches any format the user types. Try typing <code style="font-family:var(--mono-face)">jul 2</code> or <code style="font-family:var(--mono-face)">02/07</code> below.</p>
+
+          <div class="specimen">
+            <input type="text" id="fuzzy-search-input" placeholder="Search by date, any format…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;margin-bottom:10px;" />
+            <div id="fuzzy-search-results"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">dateSearchBlob(<span class="k">'2026-07-02'</span>);
+<span class="k">// -&gt; "2026-07-02 02/7/2026 2/7/2026 July jul jul 2 July 2 2 jul 2 July 2026"</span>
+
+<span class="k">function</span> matchesSearch(entry, query) {
+  <span class="k">return</span> dateSearchBlob(entry.deadline).toLowerCase().includes(query.toLowerCase());
+}</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="search-filter-list">
+          <div class="entry-head">
+            <h3>Generic Search-Filter-Highlight List</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">search-filter-list.js</p>
+          <p class="desc">Type-in-a-box, filter-a-list, highlight-the-hit helper. Field-name-agnostic — you list which keys to match and supply a render function. Reuses Fuzzy Date/Time Search's highlighter if that file is loaded, otherwise ships its own.</p>
+
+          <div class="specimen">
+            <input type="text" id="sfl-search-input" placeholder="Filter the list…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;margin-bottom:10px;" />
+            <div id="sfl-results"></div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> filter = createSearchFilter(entries, {
+  fields: [<span class="k">'name'</span>, <span class="k">'remark'</span>],
+  render: (item, query) =&gt; <span class="k">`&lt;div&gt;${filter.highlight(item.name, query)}&lt;/div&gt;`</span>,
+});
+searchInput.addEventListener(<span class="k">'input'</span>, (e) =&gt; {
+  filter.setQuery(e.target.value);
+  list.innerHTML = filter.getResults().join(<span class="k">''</span>);
+});</pre>
+          </details>
+        </article>
+      </section>
+
+      <section class="group" id="docs-onboarding">
+        <div class="group-heading"><h2>Documentation & Onboarding</h2></div>
+
+        <article class="entry" id="tooltip-icon">
+          <div class="entry-head">
+            <h3>Input Guidance Tooltip</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">tooltip-icon.css (CSS-only, no JS)</p>
+          <p class="desc">A small "?" icon anchored inside any field — hover or focus reveals a short help bubble without ever leaving the form. Pure CSS (<code style="font-family:var(--mono-face)">:hover</code>/<code style="font-family:var(--mono-face)">:focus-visible</code> + adjacent-sibling selector), no JS to wire up.</p>
+
+          <div class="specimen">
+            <div class="specimen-row">
+              <div class="field" style="width:220px;">
+                <label class="field-label" for="ti-demo-flight">Flight Number</label>
+                <div class="ti-wrap">
+                  <input type="text" id="ti-demo-flight" placeholder="e.g. TG320" style="padding:8px 32px 8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;width:100%;" />
+                  <div class="ti-icon" tabindex="0">?</div>
+                  <div class="ti-tooltip">Airline + flight code, printed on the ticket.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div class=<span class="k">"ti-wrap"</span>&gt;
+  &lt;input type=<span class="k">"text"</span> /&gt;
+  &lt;div class=<span class="k">"ti-icon"</span> tabindex=<span class="k">"0"</span>&gt;?&lt;/div&gt;
+  &lt;div class=<span class="k">"ti-tooltip"</span>&gt;Help text goes here.&lt;/div&gt;
+&lt;/div&gt;
+<span class="k">// the icon must be the tooltip's immediately preceding sibling — the CSS is a plain :hover + adjacent-sibling selector</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="annotated-lines">
+          <div class="entry-head">
+            <h3>Annotated Line Viewer</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">annotated-lines.css (CSS-only, no JS)</p>
+          <p class="desc">Explain structured output (XML, JSON, config) line by line: a short label in a fixed-width left column, the real code on the right. Stacks label-over-code on narrow screens instead of clipping.</p>
+
+          <div class="specimen">
+            <div class="al-container">
+              <div class="al-line">
+                <div class="al-anno">Message type</div>
+                <div class="al-code"><span class="al-tag">&lt;CheckInTravellerRequest&gt;</span></div>
+              </div>
+              <div class="al-line">
+                <div class="al-anno">First flight</div>
+                <div class="al-code">&nbsp;&nbsp;<span class="al-tag">&lt;Leg SequenceNumber="1"&gt;</span></div>
+              </div>
+              <div class="al-line">
+                <div class="al-anno">Flight code</div>
+                <div class="al-code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="al-tag">&lt;FlightNumber&gt;</span><span class="al-value">TG320</span><span class="al-tag">&lt;/FlightNumber&gt;</span></div>
+              </div>
+              <div class="al-line">
+                <div class="al-anno">End of first flight</div>
+                <div class="al-code">&nbsp;&nbsp;<span class="al-tag">&lt;/Leg&gt;</span></div>
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div class=<span class="k">"al-container"</span>&gt;
+  &lt;div class=<span class="k">"al-line"</span>&gt;
+    &lt;div class=<span class="k">"al-anno"</span>&gt;Message type&lt;/div&gt;
+    &lt;div class=<span class="k">"al-code"</span>&gt;&lt;span class=<span class="k">"al-tag"</span>&gt;&amp;lt;Request&amp;gt;&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  <span class="k">// repeat one .al-line per row you want to explain</span>
+&lt;/div&gt;</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="glossary-list">
+          <div class="entry-head">
+            <h3>Glossary List</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">glossary-list.css (CSS-only, no JS)</p>
+          <p class="desc">A quick-reference definition list for domain jargon at the top of a README or help panel — term, then a one-line plain-language explanation.</p>
+
+          <div class="specimen">
+            <div id="glossary-demo-slot">
+              <div class="gl-item">
+                <div class="gl-term">PseudoCity</div>
+                <div class="gl-def">Travel agent's office ID, like a store name. Example: ABC123.</div>
+              </div>
+              <div class="gl-item">
+                <div class="gl-term">ServiceNumber</div>
+                <div class="gl-def">Unique flight reference ID for this leg — helps the system track which flight is which.</div>
+              </div>
+              <div class="gl-item">
+                <div class="gl-term">OperatingCrew</div>
+                <div class="gl-def">People who work on the plane (pilots, flight attendants).</div>
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div class=<span class="k">"gl-item"</span>&gt;
+  &lt;div class=<span class="k">"gl-term"</span>&gt;PseudoCity&lt;/div&gt;
+  &lt;div class=<span class="k">"gl-def"</span>&gt;Travel agent's office ID.&lt;/div&gt;
+&lt;/div&gt;
+<span class="k">// repeat one .gl-item per term; last one drops its own border automatically</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="structure-diagram">
+          <div class="entry-head">
+            <h3>Structure Cheat-Sheet Diagram</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">structure-diagram.css (CSS-only, no JS)</p>
+          <p class="desc">A one-glance box-and-arrow diagram showing how a data model's pieces relate — parent on top, children side by side below, back to a shared child at the bottom. Good for onboarding docs where beginners need the shape before the detail.</p>
+
+          <div class="specimen">
+            <div class="sd-diagram">
+              <div class="sd-box">Journey</div>
+              <div class="sd-arrow">&#8595;</div>
+              <div class="sd-row">
+                <div class="sd-box-sub">Leg 1<br/>DEL &rarr; BKK<br/>TG320</div>
+                <div style="font-weight:700;color:var(--accent);align-self:center;">+</div>
+                <div class="sd-box-sub">Leg 2<br/>BKK &rarr; DEL<br/>TG321</div>
+              </div>
+              <div class="sd-arrow">&#8595;</div>
+              <div class="sd-box">Traveller<br/>(on both legs)</div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div class=<span class="k">"sd-diagram"</span>&gt;
+  &lt;div class=<span class="k">"sd-box"</span>&gt;Parent&lt;/div&gt;
+  &lt;div class=<span class="k">"sd-arrow"</span>&gt;&amp;#8595;&lt;/div&gt;
+  &lt;div class=<span class="k">"sd-row"</span>&gt;
+    &lt;div class=<span class="k">"sd-box-sub"</span>&gt;Child A&lt;/div&gt;
+    &lt;div class=<span class="k">"sd-box-sub"</span>&gt;Child B&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="sample-data-fill">
+          <div class="entry-head">
+            <h3>Sample Data Autofill</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">sample-data-fill.js</p>
+          <p class="desc">A "+ Generate sample" button that cycles canned realistic records into any form — lets a new user see what good data looks like, copy it, and learn by example, instead of guessing at field formats. Field-name-agnostic: you supply the sample records and a key-&gt;selector map.</p>
+
+          <div class="specimen">
+            <div class="demo-row" style="margin-bottom:10px;">
+              <button class="btn-demo-trigger" id="sdf-demo-btn" type="button">+ Generate traveller</button>
+              <span class="demo-note" id="sdf-demo-count" style="margin:0;"></span>
+            </div>
+            <div class="specimen-row">
+              <div class="field">
+                <label class="field-label" for="sdf-demo-name">Given name</label>
+                <input type="text" id="sdf-demo-name" readonly style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="sdf-demo-nat">Nationality</label>
+                <input type="text" id="sdf-demo-nat" readonly style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="sdf-demo-doc">Document #</label>
+                <input type="text" id="sdf-demo-doc" readonly style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;" />
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code"><span class="k">const</span> filler = createSampleDataFiller(
+  [
+    { name: <span class="k">'Sarah Williams'</span>, nationality: <span class="k">'US'</span>, doc: <span class="k">'AC567890'</span> },
+    { name: <span class="k">'Michael Johnson'</span>, nationality: <span class="k">'GB'</span>, doc: <span class="k">'CD234567'</span> },
+  ],
+  { name: <span class="k">'#f-name'</span>, nationality: <span class="k">'#f-nat'</span>, doc: <span class="k">'#f-doc'</span> }
+);
+generateBtn.addEventListener(<span class="k">'click'</span>, () =&gt; filler.fill());</pre>
+          </details>
+        </article>
+
+        <article class="entry" id="smart-tooltip">
+          <div class="entry-head">
+            <h3>Smart Help Tooltip (Viewport-Clamped)</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">smart-tooltip.js · smart-tooltip.css</p>
+          <p class="desc">A "?" badge that shows help text in a single shared <code style="font-family:var(--mono-face)">position:fixed</code> bubble instead of a per-icon CSS tooltip — it survives inside scrolling/<code style="font-family:var(--mono-face)">overflow:auto</code> panels (where an in-flow bubble gets clipped) and auto-flips above/below the badge to stay fully on screen. A different mechanism from the Input Guidance Tooltip above — that one is pure CSS for simple, non-scrolling forms; this one is for panels that scroll, or where the tooltip text is generated dynamically.</p>
+
+          <div class="specimen" style="overflow:auto;max-height:90px;">
+            <p style="margin:0 0 44px;font-size:0.82rem;color:var(--text2);">Scroll down inside this box &mdash; the badge still finds room for its bubble.</p>
+            <label style="font-size:0.85rem;display:flex;align-items:center;color:var(--text);">PseudoCity<span class="st-icon" data-tip="Travel agent's office ID, like a store name. Example: ABC123.">?</span></label>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;label&gt;Flight Number&lt;span class=<span class="k">"st-icon"</span> data-tip=<span class="k">"Code on the ticket, e.g. TG320."</span>&gt;?&lt;/span&gt;&lt;/label&gt;
+
+initSmartTooltips(); <span class="k">// call once — delegates to every .st-icon on the page, present or future</span></pre>
+          </details>
+        </article>
+
+        <article class="entry" id="collapsible-section">
+          <div class="entry-head">
+            <h3>Collapsible Section Toggle</h3>
+            <span class="pill">Stable</span>
+          </div>
+          <p class="meta">collapsible-section.css (~8-line JS, see Usage)</p>
+          <p class="desc">A chevron-rotate disclosure for hiding rarely-used optional fields — starts collapsed to keep a form short, expands on click. Deliberately tiny: one class for the toggle row, one for the chevron, no framework.</p>
+
+          <div class="specimen">
+            <div class="cs-toggle" id="cs-demo-toggle"><span class="cs-chevron">&#9656;</span> Header / Transaction <span class="cs-note">(optional)</span></div>
+            <div id="cs-demo-body" style="display:none;padding-top:10px;">
+              <div class="field">
+                <label class="field-label" for="cs-demo-input">Header DateTime</label>
+                <input type="text" id="cs-demo-input" placeholder="Leave blank to auto-stamp" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);font-size:0.85rem;" />
+              </div>
+            </div>
+          </div>
+
+          <details class="usage">
+            <summary>Usage</summary>
+            <pre class="code">&lt;div class=<span class="k">"cs-toggle"</span> onclick=<span class="k">"toggleSection('sec-body', this)"</span>&gt;
+  &lt;span class=<span class="k">"cs-chevron"</span>&gt;&#9656;&lt;/span&gt; Optional fields
+&lt;/div&gt;
+&lt;div id=<span class="k">"sec-body"</span> style=<span class="k">"display:none;"</span>&gt;...&lt;/div&gt;
+
+<span class="k">function</span> toggleSection(bodyId, toggleEl) {
+  <span class="k">const</span> body = document.getElementById(bodyId);
+  <span class="k">const</span> open = body.style.display === <span class="k">'none'</span>;
+  body.style.display = open ? <span class="k">'block'</span> : <span class="k">'none'</span>;
+  toggleEl.classList.toggle(<span class="k">'open'</span>, open);
+}</pre>
+          </details>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <footer class="note">Add a new entry by dropping its files in <code style="font-family:var(--mono-face)">Misc/</code> and adding a block here — no build step, just open this file in a browser.</footer>
+</div>
+
+<!-- The page's own real Fame Easter Egg Modal (click the title 4× fast) —
+     separate from the demo iframe inside the catalog entry below. Kept
+     invisible/off-layout so it never shows as a box; position:fixed on
+     .egg-frame-full escapes this wrapper's overflow:hidden when it opens. -->
+<div style="position:absolute;width:0;height:0;overflow:hidden;">
+  <iframe id="fame-egg-frame-footer" class="egg-frame" src="fame-easter-egg-demo.html" title="Fame Easter Egg Modal" tabindex="-1" aria-hidden="true"></iframe>
+</div>
+
+<div class="modal-overlay creator-modal" id="creator-modal">
+  <div class="modal">
+    <button class="modal-close" type="button" onclick="closeCreatorModal()" aria-label="Close">&times;</button>
+    <div class="modal-icon">&#10024;</div>
+    <h2>You found it.</h2>
+    <p>This is placeholder content for the demo — swap it for whatever's worth hiding behind a logo: a signature, a thank-you, a build number.</p>
+    <button class="modal-primary" type="button" onclick="closeCreatorModal()">Close</button>
+  </div>
+</div>
+
+<script src="time-mask.js"></script>
+<script src="date-mask.js"></script>
+<script src="time-picker.js"></script>
+<script src="date-picker.js"></script>
+<script src="datetime-picker.js"></script>
+<script src="easter-egg.js"></script>
+<script src="gcal-connect.js"></script>
+<script src="output-layout.js"></script>
+<script src="due-alert.js"></script>
+<script src="changelog-modal.js"></script>
+<script src="bulk-select.js"></script>
+<script src="drag-reorder.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="export-data.js"></script>
+<script src="settings-draft.js"></script>
+<script src="recurrence.js"></script>
+<script src="badge-taxonomy.js"></script>
+<script src="status-popup.js"></script>
+<script src="multi-date.js"></script>
+<script src="hex-palette.js"></script>
+<script src="firestore-sync.js"></script>
+<script src="ai-chat-panel.js"></script>
+<script src="condition-evaluator.js"></script>
+<script src="trash-ttl.js"></script>
+<script src="fuzzy-date-search.js"></script>
+<script src="search-filter-list.js"></script>
+<script src="sample-data-fill.js"></script>
+<script src="timezone-converter.js"></script>
+<script src="smart-tooltip.js"></script>
+<script src="particle-bg.js"></script>
+<script src="scroll-reveal-bars.js"></script>
+<script src="pixel-grid.js"></script>
+<link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css" />
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script src="quill-sync.js"></script>
+<script>
+  // Demo wiring for the Connect to Google Calendar pill (no real Client ID).
+  (function () {
+    const pill = document.getElementById('demo-gcal-pill');
+    if (!pill || !window.GCalConnect) return;
+    const gcal = GCalConnect.init({
+      storagePrefix: 'complib_demo',
+      redirectUri: location.origin + location.pathname,
+      onError: (m) => alert(m + '\n\n(Demo has no Client ID — plug in a real one to open Google.)')
+    });
+    pill.addEventListener('click', () => gcal.connect());
+  })();
+</script>
+<script>
+  function effectiveTheme() {
+    return document.documentElement.dataset.theme
+      || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+
+  function fameEggFrames() {
+    return Array.from(document.querySelectorAll('#fame-egg-frame, #fame-egg-frame-footer'));
+  }
+
+  function syncFrameTheme() {
+    fameEggFrames().forEach((frame) => {
+      frame.contentWindow?.postMessage({ type: 'theme-sync', theme: effectiveTheme() }, '*');
+    });
+  }
+
+  (function () {
+    const stored = localStorage.getItem('component-library-theme');
+    if (stored) document.documentElement.dataset.theme = stored;
+
+    const btn = document.getElementById('theme-toggle');
+    btn.addEventListener('click', () => {
+      const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('component-library-theme', next);
+      syncFrameTheme();
+    });
+  })();
+
+  // The Fame Easter Egg Modal's fixed-position overlay is scoped to its own
+  // iframe's viewport, so it can't pop up over the real page from inside a
+  // small demo box. Two instances live on this page: the catalog entry's demo
+  // (#fame-egg-frame) and a hidden one wired to the page's own title as this
+  // page's real, working easter egg (#fame-egg-frame-footer) — match by
+  // e.source so either can expand independently. Each also posts once it's
+  // ready, so we can push it the current theme — its own data-theme attribute
+  // is invisible to this parent document and vice versa.
+  window.addEventListener('message', (e) => {
+    if (!e.data) return;
+    if (e.data.type === 'fame-easter-egg') {
+      const frame = fameEggFrames().find((f) => f.contentWindow === e.source);
+      frame?.classList.toggle('egg-frame-full', !!e.data.open);
+    } else if (e.data.type === 'fame-easter-egg-ready') {
+      e.source?.postMessage({ type: 'theme-sync', theme: effectiveTheme() }, '*');
+    }
+  });
+
+  // Title doubles as this page's own signature trigger (same 4-click-fast
+  // convention as every other project) — forwards the click into the hidden
+  // frame, which owns the actual click-counting logic.
+  document.getElementById('brand-title').addEventListener('click', () => {
+    document.getElementById('fame-egg-frame-footer').contentWindow?.postMessage({ type: 'external-trigger-click' }, '*');
+  });
+
+  // ── Index nav: collapsible topic groups that double as a content filter ──
+  // Click a topic: collapses every other topic, shows only that topic's
+  // <section>. Click the active topic again, or click "Index": reset — every
+  // topic expanded, every section visible.
+  (function () {
+    const groups = Array.from(document.querySelectorAll('.toc-group'));
+    const sections = Array.from(document.querySelectorAll('main > section.group'));
+
+    function showAll() {
+      groups.forEach((g) => { g.classList.add('collapsed'); g.classList.remove('active'); });
+      sections.forEach((s) => { s.style.display = ''; });
+    }
+
+    function filterTo(sectionId) {
+      groups.forEach((g) => {
+        const isMatch = g.dataset.section === sectionId;
+        g.classList.toggle('active', isMatch);
+        g.classList.toggle('collapsed', !isMatch);
+      });
+      sections.forEach((s) => { s.style.display = s.id === sectionId ? '' : 'none'; });
+    }
+
+    groups.forEach((g) => {
+      const topicBtn = g.querySelector('.toc-topic');
+      topicBtn.addEventListener('click', () => {
+        if (g.classList.contains('active')) {
+          showAll();
+        } else {
+          filterTo(g.dataset.section);
+        }
+      });
+    });
+
+    document.getElementById('toc-index-btn').addEventListener('click', showAll);
+
+    // Component links: smooth-scroll the entry to the top of the viewport
+    // instead of the browser's default instant anchor jump (which can land
+    // the entry mid-screen depending on its height).
+    document.querySelectorAll('nav.toc a[href^="#"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', '#' + id);
+      });
+    });
+  })();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ['demo-time-1', 'demo-time-2'].forEach((id) => {
+      if (document.getElementById(id)) createTimePicker(id);
+    });
+    document.getElementById('demo-date-1-slot').appendChild(createDateTrigger('demo-date-1', '2026-07-15'));
+    document.getElementById('demo-date-2-slot').appendChild(createDateTrigger('demo-date-2', ''));
+
+    document.getElementById('demo-dt-1-slot').appendChild(createDateTimeTrigger('demo-dt-1', '2026-07-15T09:30:00Z'));
+    document.getElementById('demo-dt-2-slot').appendChild(createDateTimeTrigger('demo-dt-2', '', { offsetMinutes: 420 }));
+
+    const olBox = document.getElementById('ol-demo-box');
+    if (olBox) {
+      const olWrap = createOutputLayout('Generated results', (item) => `<pre>${item.body}</pre>`);
+      olBox.appendChild(olWrap);
+      setItems([
+        { title: 'Result #1', subtitle: 'record A', body: 'name:  ALPHA\nstatus: OK\nref:   A-001' },
+        { title: 'Result #2', subtitle: 'record B', body: 'name:  BRAVO\nstatus: OK\nref:   A-002' },
+        { title: 'Result #3', subtitle: 'record C', body: 'name:  CHARLIE\nstatus: PENDING\nref:  A-003' },
+        { title: 'Result #4', subtitle: 'record D', body: 'name:  DELTA\nstatus: OK\nref:   A-004' },
+        { title: 'Result #5', subtitle: 'odd one out', body: 'name:  ECHO\nstatus: OK\nref:   A-005' },
+      ]);
+    }
+  });
+</script>
+
+<script>
+  // ── Demo wiring for the new batch of catalog entries ──
+  document.addEventListener('DOMContentLoaded', () => {
+    // Due/Overdue Alert Modal
+    const dueBtn = document.getElementById('due-alert-demo-btn');
+    if (dueBtn) {
+      dueBtn.addEventListener('click', () => {
+        checkDueAlerts(
+          [
+            { id: 1, title: 'Renew SSL certificate', dueDate: '2026-07-10' },
+            { id: 2, title: 'File quarterly report', dueDate: '2026-07-16' },
+            { id: 3, title: 'Review pull requests', dueDate: '2026-07-18' },
+          ],
+          {
+            soonDays: 3,
+            onExtend: (id, newDate) => console.log('extend', id, newDate),
+            onDismiss: (id) => console.log('dismiss', id),
+          }
+        );
+      });
+    }
+
+    // Changelog Modal
+    const clBtn = document.getElementById('changelog-demo-btn');
+    if (clBtn) {
+      const changelog = createChangelogModal([
+        { version: 'v1.2.0', date: 'July 2026', items: ['Added dark mode', 'Fixed export bug'] },
+        { version: 'v1.1.0', date: 'June 2026', items: ['Initial release'] },
+      ]);
+      document.body.appendChild(changelog.el);
+      clBtn.addEventListener('click', () => changelog.open());
+    }
+
+    // Bulk Select + Drag Reorder — shared demo list + row builder
+    const demoRows = [
+      { id: '1', name: 'Task A' },
+      { id: '2', name: 'Task B' },
+      { id: '3', name: 'Task C' },
+      { id: '4', name: 'Task D' },
+      { id: '5', name: 'Task E' },
+    ];
+
+    function buildDemoListEl(rows) {
+      const wrap = document.createElement('div');
+      rows.forEach((r) => {
+        const item = document.createElement('div');
+        item.className = 'demo-list-item';
+        item.dataset.id = r.id;
+        item.textContent = r.name;
+        wrap.appendChild(item);
+      });
+      return wrap;
+    }
+
+    const bulkListSlot = document.getElementById('bulk-demo-list');
+    let bulkHandle = null;
+    if (bulkListSlot) {
+      const listEl = buildDemoListEl(demoRows);
+      bulkListSlot.appendChild(listEl);
+      bulkHandle = createBulkSelect(listEl, {
+        itemSelector: '.demo-list-item',
+        actions: [
+          { label: 'Archive selected', onClick: (ids) => alert('Archive: ' + Array.from(ids).join(', ')) },
+          { label: 'Delete selected', onClick: (ids) => alert('Delete: ' + Array.from(ids).join(', ')), danger: true },
+        ],
+      });
+      document.getElementById('bulk-toggle-btn').addEventListener('click', () => bulkHandle.toggleMode());
+    }
+
+    const reorderSlot = document.getElementById('reorder-demo-list');
+    const reorderOrderEl = document.getElementById('reorder-demo-order');
+    if (reorderSlot) {
+      const listEl = buildDemoListEl(demoRows);
+      reorderSlot.appendChild(listEl);
+      const showOrder = () => {
+        const ids = Array.from(listEl.querySelectorAll('.demo-list-item')).map((el) => el.dataset.id);
+        reorderOrderEl.textContent = 'Current order: ' + ids.join(', ');
+      };
+      makeReorderable(listEl, {
+        itemSelector: '.demo-list-item',
+        onReorder: showOrder,
+      });
+      showOrder();
+    }
+
+    // Export
+    const exportRows = demoRows.map((r) => ({ ID: r.id, Name: r.name, Status: 'OK' }));
+    document.getElementById('export-csv-btn')?.addEventListener('click', () => exportCSV(exportRows, 'demo-export.csv'));
+    document.getElementById('export-json-btn')?.addEventListener('click', () => exportJSON(exportRows, 'demo-export.json'));
+    document.getElementById('export-xlsx-btn')?.addEventListener('click', () => exportXLSX(exportRows, 'demo-export.xlsx', { sheetName: 'Demo' }));
+
+    // Recurrence Generator
+    const recSlot = document.getElementById('recurrence-demo-slot');
+    if (recSlot) {
+      const picker = createRecurrencePicker({
+        start: '2026-07-16',
+        onConfirm: (dateList) => alert('Would create ' + dateList.length + ' entries:\n' + dateList.join(', ')),
+      });
+      recSlot.appendChild(picker);
+    }
+
+    // Multi-Date Picker
+    const mdSlot = document.getElementById('multi-date-demo-slot');
+    if (mdSlot) {
+      const mdPicker = createMultiDatePicker({ initialDates: ['2026-07-20', '2026-07-22'] });
+      mdSlot.appendChild(mdPicker.el);
+    }
+
+    // Status Popup
+    const statusOptions = [
+      { key: 'pending', label: 'Pending', bg: '#E6F1FB', text: '#185FA5', border: '#B7D8F5' },
+      { key: 'in-progress', label: 'In Progress', bg: '#FEF3C7', text: '#92400E', border: '#FDE1A0' },
+      { key: 'done', label: 'Done', bg: '#DCFCE7', text: '#166534', border: '#BBF0CE' },
+      { key: 'blocked', label: 'Blocked', bg: '#FEE2E2', text: '#991B1B', border: '#FBC5C5' },
+    ];
+    const statusBadge = document.getElementById('status-popup-demo-badge');
+    if (statusBadge) {
+      const initial = statusOptions[0];
+      statusBadge.textContent = initial.label;
+      statusBadge.style.background = initial.bg;
+      statusBadge.style.color = initial.text;
+      statusBadge.style.borderColor = initial.border;
+      statusBadge.dataset.statusKey = initial.key;
+      statusBadge.style.cssText += ';padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;border-width:1.5px;border-style:solid;display:inline-block;';
+      attachStatusPopup(statusBadge, statusOptions, () => {});
+    }
+
+    // Hex Palette Generator
+    const hpSlot = document.getElementById('hex-palette-demo-slot');
+    if (hpSlot) {
+      const ui = createPaletteGeneratorUI(() => {});
+      hpSlot.appendChild(ui);
+    }
+
+    // Settings Draft/Dirty/Discard Guard
+    const draftInput = document.getElementById('draft-demo-input');
+    const draftStatus = document.getElementById('draft-demo-status');
+    if (draftInput) {
+      let panelTitle = 'My Settings';
+      draftInput.value = panelTitle;
+      const guard = createDraftGuard(
+        () => ({ title: panelTitle }),
+        (state) => { panelTitle = state.title; draftInput.value = state.title; draftStatus.textContent = 'Reverted to last saved value.'; }
+      );
+      guard.snapshot(); // baseline — normally called when the settings panel opens
+      draftInput.addEventListener('input', () => { panelTitle = draftInput.value; guard.markDirty(); draftStatus.textContent = guard.isDirty() ? 'Unsaved changes.' : ''; });
+      document.getElementById('draft-demo-save').addEventListener('click', () => {
+        guard.snapshot();
+        draftStatus.textContent = 'Saved. Close will no longer prompt.';
+      });
+      document.getElementById('draft-demo-close').addEventListener('click', () => {
+        guard.confirmDiscardIfDirty(() => { draftStatus.textContent = 'Closed (no unsaved changes, or you discarded them).'; });
+      });
+    }
+
+    // Configurable Badge Taxonomy
+    const btSlot = document.getElementById('badge-taxonomy-demo-slot');
+    if (btSlot) {
+      const taxonomy = createTaxonomyEditor({
+        storageKey: 'complib_demo_statuses',
+        builtins: [
+          { key: 'pending', label: 'Pending', bg: '#E6F1FB', text: '#185FA5' },
+          { key: 'completed', label: 'Completed', bg: '#DCFCE7', text: '#166534' },
+        ],
+      });
+      btSlot.appendChild(taxonomy.el);
+    }
+
+    // Firestore Sync — status pill demo only (no real Firebase project)
+    const fsSlot = document.getElementById('fs-status-pill-slot');
+    if (fsSlot) {
+      const pill = createStatusPill(fsSlot);
+      pill.setStatus('connecting');
+      document.getElementById('fs-demo-connecting').addEventListener('click', () => pill.setStatus('connecting'));
+      document.getElementById('fs-demo-connected').addEventListener('click', () => pill.setStatus('connected'));
+      document.getElementById('fs-demo-error').addEventListener('click', () => pill.setStatus('error'));
+    }
+
+    // AI Chat Panel — real endpoint, no key: exercises the genuine error path
+    const aiOpenBtn = document.getElementById('ai-chat-open-btn');
+    if (aiOpenBtn) {
+      const chat = createAIChatPanel({
+        endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+        apiKey: '',
+        model: 'llama-3.3-70b-versatile',
+        systemPrompt: 'You are a helpful demo assistant.',
+        welcomeMessage: 'This demo has no API key wired in — send a message to see the real error-handling path.',
+      });
+      document.body.appendChild(chat.el);
+      aiOpenBtn.addEventListener('click', () => chat.toggle());
+    }
+
+    // Condition Evaluator
+    const ceSlot = document.getElementById('condition-evaluator-demo-slot');
+    if (ceSlot) {
+      createConditionEvaluator(
+        [
+          { id: 'T008', label: 'PNR Cutover — Go Live', conds: { rollbackConfirmed: true, credsActive: true } },
+          { id: 'T012', label: 'Rollback Plan', conds: { rollbackConfirmed: false } },
+          { id: 'T003', label: 'ALP Dev Checklist', conds: {} },
+        ],
+        { mountEl: ceSlot }
+      );
+    }
+
+    // Quill Sync
+    const quillMount = document.getElementById('quill-sync-demo-mount');
+    const quillTextarea = document.getElementById('quill-sync-demo-textarea');
+    const quillNote = document.getElementById('quill-sync-demo-note');
+    if (quillMount) {
+      const handle = attachQuillEditor(quillMount, quillTextarea, {
+        initialHTML: '<p>Type here — the hidden textarea stays synced.</p>',
+        placeholder: 'Email body...',
+      });
+      if (!handle) {
+        quillNote.textContent = 'Quill did not load (offline demo / CDN blocked) — attachQuillEditor warned to console and returned null, as documented.';
+      } else {
+        quillNote.textContent = 'Hidden textarea value updates live as you type above.';
+      }
+    }
+
+    // Trash TTL
+    const trashSample = [
+      { id: 1, name: 'Old draft', deletedAt: '2026-06-01' },
+      { id: 2, name: 'Recent delete', deletedAt: '2026-07-15' },
+      { id: 3, name: 'Ancient note', deletedAt: '2026-05-10' },
+    ];
+    const beforeEl = document.getElementById('trash-ttl-before');
+    if (beforeEl) {
+      beforeEl.textContent = 'Before: ' + trashSample.map((t) => t.name + ' (deleted ' + t.deletedAt + ')').join(', ');
+      document.getElementById('trash-ttl-run-btn').addEventListener('click', () => {
+        const kept = purgeExpiredTrash(trashSample, { days: 5, dateField: 'deletedAt' });
+        document.getElementById('trash-ttl-after').textContent = 'After purge (today = 2026-07-16): ' + (kept.length ? kept.map((t) => t.name).join(', ') : '(all expired, list empty)');
+      });
+    }
+
+    // Fuzzy Date Search
+    const fuzzyRecords = [
+      { name: 'Quarterly review', deadline: '2026-07-02' },
+      { name: 'Team offsite', deadline: '2026-07-16' },
+      { name: 'Budget signoff', deadline: '2026-08-01' },
+    ];
+    const fuzzyInput = document.getElementById('fuzzy-search-input');
+    const fuzzyResults = document.getElementById('fuzzy-search-results');
+    function renderFuzzyResults(query) {
+      const q = (query || '').toLowerCase().trim();
+      const matches = fuzzyRecords.filter((r) => !q || dateSearchBlob(r.deadline).toLowerCase().includes(q) || r.name.toLowerCase().includes(q));
+      fuzzyResults.innerHTML = matches.length
+        ? matches.map((r) => `<div class="demo-list-item">${r.name} — ${r.deadline}</div>`).join('')
+        : '<p class="demo-note">No matches.</p>';
+    }
+    if (fuzzyInput) {
+      fuzzyInput.addEventListener('input', (e) => renderFuzzyResults(e.target.value));
+      renderFuzzyResults('');
+    }
+
+    // Search-Filter-Highlight List
+    const sflItems = [
+      { id: 1, name: 'Alpha release notes', remark: 'internal only' },
+      { id: 2, name: 'Beta signup form', remark: 'public facing' },
+      { id: 3, name: 'Changelog archive', remark: 'internal only' },
+    ];
+    const sflInput = document.getElementById('sfl-search-input');
+    const sflResultsEl = document.getElementById('sfl-results');
+    if (sflInput) {
+      const filter = createSearchFilter(sflItems, {
+        fields: ['name', 'remark'],
+        render: (item, query) => `<div class="demo-list-item">${filter.highlight(item.name, query)} <span style="color:var(--text3);">(${item.remark})</span></div>`,
+      });
+      sflInput.addEventListener('input', (e) => {
+        filter.setQuery(e.target.value);
+        sflResultsEl.innerHTML = filter.getResults().join('');
+      });
+      sflResultsEl.innerHTML = filter.getResults().join('');
+    }
+
+    // Timezone-Aware DateTime Converter
+    const tzcDate = document.getElementById('tzc-date');
+    const tzcTime = document.getElementById('tzc-time');
+    const tzcZoneSel = document.getElementById('tzc-zone');
+    const tzcOffset = document.getElementById('tzc-offset');
+    const tzcPreview = document.getElementById('tzc-preview');
+    if (tzcDate) {
+      const HOME_ZONE = 'Asia/Bangkok';
+      const refreshTzcDemo = () => {
+        const zone = tzcZoneSel.value;
+        tzcOffset.textContent = gmtOffsetLabel(zone, tzcDate.value) || '—';
+        const p = convertPreview(tzcDate.value, tzcTime.value, HOME_ZONE, zone);
+        tzcPreview.textContent = p.text;
+        tzcPreview.style.color = p.shiftDays !== 0 ? '#b26a00' : 'var(--text)';
+      };
+      [tzcDate, tzcTime, tzcZoneSel].forEach((el) => el.addEventListener('input', refreshTzcDemo));
+      tzcZoneSel.addEventListener('change', refreshTzcDemo);
+      refreshTzcDemo();
+    }
+
+    // Smart Help Tooltip
+    if (window.initSmartTooltips) initSmartTooltips();
+
+    // Collapsible Section Toggle
+    const csToggle = document.getElementById('cs-demo-toggle');
+    if (csToggle) {
+      csToggle.addEventListener('click', () => {
+        const body = document.getElementById('cs-demo-body');
+        const open = body.style.display === 'none';
+        body.style.display = open ? 'block' : 'none';
+        csToggle.classList.toggle('open', open);
+      });
+    }
+
+    // Sample Data Autofill
+    const sdfBtn = document.getElementById('sdf-demo-btn');
+    if (sdfBtn) {
+      const filler = createSampleDataFiller(
+        [
+          { name: 'Sarah Williams', nationality: 'US', doc: 'AC567890' },
+          { name: 'Michael Johnson', nationality: 'GB', doc: 'CD234567' },
+          { name: 'Aroon Suksawat', nationality: 'TH', doc: 'AA112233' },
+        ],
+        { name: '#sdf-demo-name', nationality: '#sdf-demo-nat', doc: '#sdf-demo-doc' }
+      );
+      const sdfCount = document.getElementById('sdf-demo-count');
+      sdfBtn.addEventListener('click', () => {
+        filler.fill();
+        sdfCount.textContent = `Generated #${filler.index}`;
+      });
+    }
+
+    // Particle Background
+    const pbCanvas = document.getElementById('particle-bg-demo-canvas');
+    if (pbCanvas) {
+      createParticleBg(pbCanvas, { count: 90 });
+    }
+
+    // Scroll-Reveal Bars
+    const srSlot = document.getElementById('scroll-reveal-demo');
+    if (srSlot) {
+      const stats = [['Coverage', 78], ['Uptime', 94], ['Adoption', 52]];
+      srSlot.innerHTML = stats.map(([label, pct]) => `
+        <div class="bar-group">
+          <div class="bar-label"><span>${label}</span><span>${pct}%</span></div>
+          <div class="bar-track"><div class="bar-fill" data-w="${pct}%"></div></div>
+        </div>
+      `).join('');
+      initScrollRevealBars(srSlot);
+    }
+
+    // Pixel Grid
+    const pgSlot = document.getElementById('pixel-grid-demo-slot');
+    if (pgSlot) {
+      const grid = createPixelGrid(pgSlot, { rows: 14, cols: 28, filledPercent: 25 });
+      document.getElementById('pixel-grid-25').addEventListener('click', () => grid.update({ filledPercent: 25, randomize: false }));
+      document.getElementById('pixel-grid-62').addEventListener('click', () => grid.update({ filledPercent: 62, randomize: false }));
+      document.getElementById('pixel-grid-90').addEventListener('click', () => grid.update({ filledPercent: 90, randomize: false }));
+      document.getElementById('pixel-grid-random').addEventListener('click', () => grid.update({ filledPercent: 50, randomize: true }));
+    }
+  });
+</script>
+</body>
+</html>

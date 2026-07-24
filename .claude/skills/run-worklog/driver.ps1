@@ -33,7 +33,7 @@ function Ensure-Running {
     $tab = Get-WorkLogTab
     if ($tab) { return $tab.webSocketDebuggerUrl }
 
-    # Launch Chrome with debug port
+    # Launch Chrome with debug port in isolated profile
     Start-Process $CHROME -ArgumentList @(
         "--remote-debugging-port=$DEBUG_PORT",
         "--remote-debugging-address=127.0.0.1",
@@ -53,11 +53,23 @@ function Ensure-Running {
     throw "Work Log tab did not appear within 15 seconds"
 }
 
-# Stop command — kill debug Chrome
+# Stop command — kill ONLY chrome.exe processes whose --user-data-dir is exactly
+# our isolated profile. Get-Process does not expose CommandLine on this PS version
+# (System.Diagnostics.Process has no such property here), so a filter built on it
+# silently matches nothing — Get-CimInstance Win32_Process is the reliable source
+# for CommandLine. The value is parsed out (it can appear quoted or unquoted
+# depending on which chrome.exe child process wrote it) and compared for exact
+# equality rather than substring match, so a sibling profile whose path merely
+# starts with the same prefix can't be caught by this filter too.
 if ($Op -eq "stop") {
-    Get-Process chrome -ErrorAction SilentlyContinue |
-        Where-Object { $_.CommandLine -like "*$DEBUG_PORT*" } |
-        Stop-Process -Force -ErrorAction SilentlyContinue
+    Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" -ErrorAction SilentlyContinue |
+        Where-Object {
+            if ($_.CommandLine -match '--user-data-dir=(?:"([^"]*)"|(\S+))') {
+                $dir = if ($Matches[1]) { $Matches[1] } else { $Matches[2] }
+                $dir.TrimEnd('\') -eq $USER_DIR.TrimEnd('\')
+            }
+        } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
     Write-Output "stopped"
     exit 0
 }

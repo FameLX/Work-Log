@@ -1,0 +1,112 @@
+{
+  ".claude/permission-notify.ps1": {
+    "mtime": 1782277157.2655153,
+    "ast_hash": "adabea9c904f6441ded6df167d08289a",
+    "semantic_hash": "adabea9c904f6441ded6df167d08289a"
+  },
+  ".claude/settings.json": {
+    "mtime": 1783925100.6338067,
+    "ast_hash": "22163fc8a94c7102e0e7e70c5115ec14",
+    "semantic_hash": "22163fc8a94c7102e0e7e70c5115ec14"
+  },
+  ".claude/skills/run-worklog/cdp.cs": {
+    "mtime": 1781778543.0157819,
+    "ast_hash": "1d2cedee41f0119c6638029f69cb968b",
+    "semantic_hash": "1d2cedee41f0119c6638029f69cb968b"
+  },
+  ".claude/skills/run-worklog/driver.ps1": {
+    "mtime": 1783665727.3652575,
+    "ast_hash": "8ee89852520a6232d2420a3d7f3b406e",
+    "semantic_hash": "8ee89852520a6232d2420a3d7f3b406e"
+  },
+  "Misc/date-picker.js": {
+    "mtime": 1784081509.822666,
+    "ast_hash": "ded151778a2333f2c61bb1bb8237bc8a",
+    "semantic_hash": "ded151778a2333f2c61bb1bb8237bc8a"
+  },
+  "Misc/datetime-picker.js": {
+    "mtime": 1784086658.9089239,
+    "ast_hash": "e9e1a9dc7dde9b65ce6333d8d0eca343",
+    "semantic_hash": "e9e1a9dc7dde9b65ce6333d8d0eca343"
+  },
+  "Misc/easter-egg.js": {
+    "mtime": 1784089947.850539,
+    "ast_hash": "becad524a5715833abef6ace600ed49e",
+    "semantic_hash": "becad524a5715833abef6ace600ed49e"
+  },
+  "Misc/fame-easter-egg.js": {
+    "mtime": 1784091033.267918,
+    "ast_hash": "319d065cb1aa3fc7be59bf37618cb9fe",
+    "semantic_hash": "319d065cb1aa3fc7be59bf37618cb9fe"
+  },
+  "Misc/time-mask.js": {
+    "mtime": 1784086553.5093446,
+    "ast_hash": "0467d324788f5a41cd81b2be114c42d2",
+    "semantic_hash": "0467d324788f5a41cd81b2be114c42d2"
+  },
+  "Misc/time-picker.js": {
+    "mtime": 1784086569.7732358,
+    "ast_hash": "64f36e9cdb651bb96e5a770dd4e0bfca",
+    "semantic_hash": "64f36e9cdb651bb96e5a770dd4e0bfca"
+  },
+  ".claude/skills/run-worklog/SKILL.md": {
+    "mtime": 1781779254.4152813,
+    "ast_hash": "f4aca66a501da64dc0af864264e1f75c",
+    "semantic_hash": "f4aca66a501da64dc0af864264e1f75c"
+  },
+  "CLAUDE.md": {
+    "mtime": 1784018504.1506836,
+    "ast_hash": "6e4b440674ca7d2c9605f04d012b883c",
+    "semantic_hash": "6e4b440674ca7d2c9605f04d012b883c"
+  },
+  "FABLE5_THINKING.md": {
+    "mtime": 1784018019.878009,
+    "ast_hash": "0aad7524f652ebd9fe5953ce422ce7d3",
+    "semantic_hash": "0aad7524f652ebd9fe5953ce422ce7d3"
+  },
+  "Misc/claude-code-portable-setup.md": {
+    "mtime": 1783413049.3159628,
+    "ast_hash": "27fc051ca54184654699a39a5fdf7070",
+    "semantic_hash": "27fc051ca54184654699a39a5fdf7070"
+  },
+  "Misc/component-library.html": {
+    "mtime": 1784098165.208295,
+    "ast_hash": "e248ef3cf612fb3f5afa6a7b6c642bd6",
+    "semantic_hash": "e248ef3cf612fb3f5afa6a7b6c642bd6"
+  },
+  "Misc/fame-easter-egg-demo.html": {
+    "mtime": 1784098148.1145015,
+    "ast_hash": "cb10f487557b4bb7d8f707ba16af4a98",
+    "semantic_hash": "cb10f487557b4bb7d8f707ba16af4a98"
+  },
+  "Misc/fame-easter-egg-modal.html": {
+    "mtime": 1784091016.960049,
+    "ast_hash": "b9b3c548c7ac40c5a046da4dba1ad401",
+    "semantic_hash": "b9b3c548c7ac40c5a046da4dba1ad401"
+  },
+  "Misc/index.html": {
+    "mtime": 1782803117.341528,
+    "ast_hash": "2768818f37be8abe7e991f7557157ede",
+    "semantic_hash": "2768818f37be8abe7e991f7557157ede"
+  },
+  "index.html": {
+    "mtime": 1784091083.51124,
+    "ast_hash": "1aa164e3480fdc9d2df3b69fd9844c17",
+    "semantic_hash": "1aa164e3480fdc9d2df3b69fd9844c17"
+  },
+  "Misc/ce-logo.png": {
+    "mtime": 1782109813.4720755,
+    "ast_hash": "dc2fee3572ee195eac5027ffddee5d2e",
+    "semantic_hash": "dc2fee3572ee195eac5027ffddee5d2e"
+  },
+  "Misc/fame-signature.gif": {
+    "mtime": 1784091016.9432976,
+    "ast_hash": "37eee4d5ce0fd58b4bebe99b5b073f81",
+    "semantic_hash": "37eee4d5ce0fd58b4bebe99b5b073f81"
+  },
+  "ce-logo.png": {
+    "mtime": 1783060172.4232824,
+    "ast_hash": "dc2fee3572ee195eac5027ffddee5d2e",
+    "semantic_hash": "dc2fee3572ee195eac5027ffddee5d2e"
+  }
+}

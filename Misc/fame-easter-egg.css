@@ -1,0 +1,43 @@
+/* ── Fame Easter Egg Modal ─────────────────────────────────────────────────────
+   Assumes the host project already defines:
+     --surface, --text2, --text3   (theme tokens, same family as the rest of Misc/)
+     --radius-lg                    (border-radius token — not otherwise used in Misc/)
+     .btn.btn-primary                (an existing button style)
+   This is the version reused across Fame's own projects, not a from-scratch
+   generic template — see easter-egg.css for that one.
+*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

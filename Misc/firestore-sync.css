@@ -1,0 +1,58 @@
+/* ============================================================================
+ * firestore-sync.css — connection status pill for firestore-sync.js
+ * ----------------------------------------------------------------------------
+ * Extracted from the #db-status-pill markup/styling in
+ * Project/Work Log Shared/worklog-shared.html (.gcal-pill rules ~line 35-38,
+ * status pill markup ~line 190-193). Renamed to fs-status-* so it doesn't
+ * collide with gcal-connect.css's .gcal-pill.
+ *
+ * Uses theme tokens: --border, --surface2, --text, --text2, --text-muted,
+ * --accent, --accent-text, plus semantic --success/--success-bg,
+ * --warn/--warn-bg, --danger/--danger-bg for the three status states.
+ * Falls back to sane literal defaults if a token is undefined, so this file
+ * can be dropped into a page with no theme system at all.
+ * ==========================================================================*/
+
+.fs-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border, #e2e0d8);
+  background: var(--surface2, #f0efe9);
+  color: var(--text2, var(--text-muted, #6b6860));
+  cursor: default;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.fs-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .7;
+  flex-shrink: 0;
+}
+
+/* connecting — warn */
+.fs-status-pill.fs-status-connecting {
+  background: var(--warn-bg, #fef3c7);
+  color: var(--warn, #92400e);
+  border-color: rgba(146, 64, 14, .25);
+}
+
+/* connected — success */
+.fs-status-pill.fs-status-connected {
+  background: var(--success-bg, #d8f3dc);
+  color: var(--success, #2d6a4f);
+  border-color: rgba(45, 106, 79, .25);
+}
+
+/* error — danger */
+.fs-status-pill.fs-status-error {
+  background: var(--danger-bg, #fee2e2);
+  color: var(--danger, #991b1b);
+  border-color: rgba(153, 27, 27, .25);
+}

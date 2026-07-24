@@ -1,0 +1,28 @@
+/* ── Collapsible Section Toggle ────────────────────────────────────────────
+   Expects theme variables: --text3, --accent
+   A chevron-rotate disclosure for hiding rarely-used optional fields.
+   Deliberately tiny — pair with the ~8-line toggle function in this entry's
+   Usage snippet, no dedicated .js file.
+*/
+
+.cs-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.cs-toggle:hover { color: var(--accent); }
+
+.cs-chevron {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.15s ease;
+}
+.cs-toggle.open .cs-chevron { transform: rotate(90deg); }
+
+.cs-note {
+  color: var(--text3);
+  font-weight: 400;
+  margin-left: 2px;
+}

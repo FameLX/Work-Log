@@ -1,0 +1,92 @@
+/* ── Bulk Multi-Select + Floating Action Bar ─────────────────────────────────
+   Expects theme variables: --border, --surface, --surface2, --text, --text2,
+   --text-muted, --accent, --accent-text
+*/
+
+/* Item container, while select mode is active */
+.bulk-select-mode {
+  /* hook for callers that want to tweak layout while in select mode */
+}
+
+.bulk-select-checkbox {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.bulk-selected {
+  background: var(--surface2);
+}
+
+/* Floating action bar — hidden until selection is non-empty */
+.bulk-select-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.bulk-select-bar.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.bulk-select-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.bulk-select-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bulk-select-action-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bulk-select-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bulk-select-action-btn.danger {
+  border-color: transparent;
+  background: #d64545;
+  color: #fff;
+}
+
+.bulk-select-action-btn.danger:hover {
+  background: #b93a3a;
+  color: #fff;
+}

@@ -1,0 +1,42 @@
+/* ── Smart Help Tooltip (viewport-clamped) ─────────────────────────────────
+   Expects theme variables: --accent, --accent-text, --text, --surface
+   A single shared position:fixed bubble instead of a per-icon ::after —
+   works inside scrolling/overflow:auto panels where an in-flow tooltip
+   would get clipped, and auto-flips above/below to stay on screen.
+*/
+
+.st-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 5px;
+  vertical-align: middle;
+  cursor: help;
+  user-select: none;
+}
+
+#st-pop {
+  display: none;
+  position: fixed;
+  z-index: 10001;
+  max-width: 240px;
+  background: var(--text);
+  color: var(--surface);
+  padding: 9px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+  pointer-events: none;
+}

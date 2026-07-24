@@ -1,0 +1,42 @@
+/* ── Scroll-Reveal Progress Bars ───────────────────────────────────────────
+   DECORATIVE / VISUAL ONLY — baseline styling for the suggested markup
+   (.bar-group / .bar-label / .bar-track / .bar-fill) that scroll-reveal-bars.js
+   animates by default. These are generic class names — rename them via
+   opts.selector in the JS if they collide with something else on your page.
+
+   Expects theme variables (optional — falls back to fixed colors if unset):
+   --text-muted, --border, --accent
+*/
+
+.bar-group {
+  margin: 1.5rem 0;
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  color: var(--text-muted, #6b7280);
+}
+
+.bar-track {
+  background: var(--border, rgba(0, 0, 0, 0.08));
+  border-radius: 99px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #0d80aa, #ff6b35);
+  width: 0;
+  transition: width 1.5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-fill {
+    transition: none;
+  }
+}

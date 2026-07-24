@@ -1,0 +1,209 @@
+/* ── Due / Overdue Alert Modal ────────────────────────────────────────────────
+   Expects theme variables: --border, --surface, --surface2, --text, --text2,
+   --text-muted, --accent, --accent-text, --danger, --danger-bg, --warn,
+   --warn-bg, --success, --success-bg
+*/
+.due-alert-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.due-alert-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.due-alert-modal {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 24px;
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+}
+
+.due-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.due-alert-icon {
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.due-alert-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  margin: 0;
+}
+
+.due-alert-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+
+.due-alert-close:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.due-alert-list {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  min-height: 0;
+}
+
+.due-alert-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--surface2);
+}
+
+.due-alert-item.overdue {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.due-alert-item.today {
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.due-alert-item.soon {
+  border-color: var(--border);
+  background: var(--surface2);
+}
+
+.due-alert-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.due-alert-item-meta {
+  margin-bottom: 10px;
+}
+
+.due-alert-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+}
+
+.due-alert-badge.overdue {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--surface);
+}
+
+.due-alert-badge.today {
+  color: var(--warn);
+  border-color: var(--warn);
+  background: var(--surface);
+}
+
+.due-alert-badge.soon {
+  color: var(--warn);
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.due-alert-item-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.due-alert-date-input {
+  font-size: 12px;
+  padding: 5px 8px;
+  width: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.due-alert-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.due-alert-btn:hover {
+  background: var(--surface2);
+}
+
+.due-alert-dismiss-one {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.due-alert-dismiss-one:hover {
+  background: var(--success-bg);
+}
+
+.due-alert-footer {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.due-alert-dismiss-all {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.due-alert-dismiss-all:hover {
+  opacity: 0.88;
+}

@@ -1,0 +1,341 @@
+/* ── Recurrence Date Generator + Calendar Preview ─────────────────────────────
+   Styles for the UI layer only (createRecurrencePicker). generateRepeatDates
+   itself is pure JS with no visual surface.
+   Expects theme variables: --border, --surface, --surface2, --text, --text2,
+   --text-muted, --accent, --accent-text
+*/
+.rcp-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 360px;
+}
+
+.rcp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rcp-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.rcp-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.rcp-date-input,
+.rcp-number-input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  padding: 6px 8px;
+}
+
+.rcp-number-input {
+  width: 70px;
+}
+
+/* ── Mode selector ── */
+.rcp-mode-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.rcp-mode-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.rcp-mode-btn:hover {
+  border-color: var(--accent);
+}
+
+.rcp-mode-btn.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+/* ── Mode-specific option panels: only the active one is shown ── */
+.rcp-options {
+  display: flex;
+  flex-direction: column;
+}
+
+.rcp-mode-panel {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rcp-mode-panel.visible {
+  display: flex;
+}
+
+.rcp-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rcp-inline-unit {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.rcp-weekday-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rcp-weekday-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+
+.rcp-weekday-btn.active {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.rcp-radio-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rcp-radio-label {
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+
+.rcp-radio-label input[type='radio'] {
+  accent-color: var(--accent);
+}
+
+/* ── End condition ── */
+.rcp-end-field .rcp-inline-row {
+  align-items: center;
+}
+
+.rcp-end-date-input {
+  margin-right: 6px;
+}
+
+/* ── Calendar preview ── */
+.rcp-cal-wrap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 10px 12px;
+}
+
+.rcp-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.rcp-cal-nav-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.rcp-cal-nav-btn:hover {
+  background: var(--surface2);
+}
+
+.rcp-cal-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.rcp-cal-hdr-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.rcp-cal-hdr {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.4px;
+}
+
+.rcp-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  justify-items: center;
+}
+
+.rcp-cal-day {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.rcp-cal-day.selected {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.rcp-cal-day.start {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.rcp-cal-day.toggleable {
+  cursor: pointer;
+}
+
+.rcp-cal-day.toggleable:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.rcp-cal-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ── Confirm checklist ── */
+.rcp-checklist-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rcp-checklist {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rcp-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.rcp-checklist-item:hover {
+  background: var(--surface2);
+}
+
+.rcp-checklist-item input[type='checkbox'] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.rcp-checklist-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 10px 8px;
+  text-align: center;
+}
+
+/* ── Actions ── */
+.rcp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rcp-btn {
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.rcp-btn-secondary {
+  background: var(--surface);
+  color: var(--text2);
+}
+
+.rcp-btn-secondary:hover {
+  background: var(--surface2);
+}
+
+.rcp-btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.rcp-btn-primary:hover {
+  opacity: 0.88;
+}
+
+.rcp-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

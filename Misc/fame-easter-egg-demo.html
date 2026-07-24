@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Fame Easter Egg Modal — demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400..700;1,400..700&family=Inter:wght@400..700&display=swap" />
+<style>
+  :root {
+    --surface: #ffffff;
+    --text: #12181b;
+    --text2: #4b565c;
+    --text3: #838d92;
+    --border: #dde1e4;
+    --accent: #147d74;
+    --accent-text: #ffffff;
+    --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #151a1d;
+      --text: #e8ecee;
+      --text2: #aab4b8;
+      --text3: #74807f;
+      --border: #2a3236;
+      --accent: #45c7b8;
+      --accent-text: #06201d;
+    }
+  }
+  /* The host page's theme toggle only stamps data-theme on ITS OWN <html> —
+     invisible to this iframe's separate document — so the parent posts the
+     effective theme across (see the message listener below) and we mirror it
+     here too, overriding the OS-level media query in both directions. */
+  :root[data-theme="dark"] {
+    --surface: #151a1d;
+    --text: #e8ecee;
+    --text2: #aab4b8;
+    --text3: #74807f;
+    --border: #2a3236;
+    --accent: #45c7b8;
+    --accent-text: #06201d;
+  }
+  :root[data-theme="light"] {
+    --surface: #ffffff;
+    --text: #12181b;
+    --text2: #4b565c;
+    --text3: #838d92;
+    --border: #dde1e4;
+    --accent: #147d74;
+    --accent-text: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    background: transparent;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+  }
+  .trigger {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+  h2 { color: var(--text); }
+</style>
+<link rel="stylesheet" href="fame-easter-egg.css" />
+</head>
+<body>
+  <button class="trigger" type="button" onclick="easterEggClick()" aria-label="Secret trigger, click 4 times">◆</button>
+
+  <!-- Fame Easter Egg Modal (lightweight demo copy: references fame-signature.gif
+       instead of the inline base64 that fame-easter-egg-modal.html ships with,
+       so this demo page stays small) -->
+  <div class="modal-overlay" id="creator-modal">
+    <div class="modal" style="max-width:460px;width:calc(100vw - 32px);height:auto;padding:44px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15);user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;">
+      <img src="fame-signature.gif" style="width:120px;height:120px;object-fit:cover;border-radius:var(--radius-lg);margin:0 auto 20px;display:block;" alt="Easter egg" />
+      <div style="font-size:20px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;">Created by &#x1F98E;</div>
+      <h2 style="margin-bottom:4px;font-size:22px;font-weight:600;font-family:'Fraunces',Georgia,serif;">Phurint Panitnarakul</h2>
+      <div style="font-size:16px;color:var(--text2);margin-bottom:12px;">(Fame)</div>
+      <div style="font-size:16px;color:var(--text3);margin-bottom:28px;">Carrier Engagement</div>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn btn-primary" style="font-size:20px;padding:8px 16px;" onclick="closeCreatorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script src="fame-easter-egg.js"></script>
+<script>
+  // The modal's `position: fixed` is scoped to THIS iframe's own viewport, not
+  // the host page — so tell the parent when we open/close, and let it expand
+  // this iframe to cover the full window meanwhile (see component-library.html's
+  // message listener). Kept separate from fame-easter-egg.js so that file stays
+  // an exact, portable copy of what's actually used in other projects.
+  (function () {
+    var modal = document.getElementById('creator-modal');
+    var observer = new MutationObserver(function () {
+      var isOpen = modal.classList.contains('open');
+      window.parent.postMessage({ type: 'fame-easter-egg', open: isOpen }, '*');
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+
+    window.addEventListener('message', function (e) {
+      if (!e.data) return;
+      if (e.data.type === 'theme-sync') {
+        document.documentElement.dataset.theme = e.data.theme;
+      } else if (e.data.type === 'external-trigger-click') {
+        // Lets a host page's own element (e.g. its title/logo) drive this
+        // frame's click counter without duplicating the counting logic.
+        easterEggClick();
+      }
+    });
+    window.parent.postMessage({ type: 'fame-easter-egg-ready' }, '*');
+  })();
+</script>
+</body>
+</html>

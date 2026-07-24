@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Appearance Themes — demo</title>
+<link rel="stylesheet" href="theme-system.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  }
+  h2 { margin: 0 0 4px; font-size: 1.1rem; }
+  .settings-section .desc { font-size: 12px; color: var(--text2); margin: 0 0 16px; }
+  .sample-app {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    margin-bottom: 20px;
+  }
+  .sample-app-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); }
+  .sample-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .chip { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .chip.success { background: var(--success-bg); color: var(--success); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn); }
+  .chip.danger { background: var(--danger-bg); color: var(--danger); }
+  .chip.info { background: var(--info-bg); color: var(--info); }
+  .sample-card { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); font-size: 13px; color: var(--text2); }
+</style>
+</head>
+<body>
+  <div class="sample-app">
+    <div class="sample-app-title">Live preview — the rest of your app</div>
+    <div class="sample-row">
+      <button class="btn btn-primary">Primary action</button>
+      <button class="btn">Secondary</button>
+      <span class="chip success">Success</span>
+      <span class="chip warn">Warning</span>
+      <span class="chip danger">Danger</span>
+      <span class="chip info">Info</span>
+    </div>
+    <div class="sample-card">A card using --surface2, --border and --text2 — everything below re-themes this instantly.</div>
+  </div>
+
+  <div id="settings-slot"></div>
+
+<script src="theme-system.js"></script>
+<script>
+  loadTheme({ storagePrefix: 'complib_theme_demo' });
+  document.addEventListener('DOMContentLoaded', () => {
+    const slot = document.getElementById('settings-slot');
+    slot.appendChild(createThemeSystem(slot, { storagePrefix: 'complib_theme_demo' }));
+  });
+</script>
+</body>
+</html>

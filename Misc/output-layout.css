@@ -1,0 +1,146 @@
+/* ── Responsive Paginated Output Layout ──────────────────────────────────────
+   Expects theme variables: --border, --surface, --surface-2, --text,
+   --text-muted, --accent, --accent-text
+*/
+.ol-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+#output-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#output-toolbar .label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pager button {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pager button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pager #page-ind {
+  font-size: 12px;
+  color: var(--text-muted);
+  min-width: 48px;
+  text-align: center;
+}
+
+#scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+#items.two-up {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  column-gap: 16px;
+  align-items: start;
+}
+
+#items.two-up .item {
+  min-width: 0; /* stops grid blowout from long unwrapped content */
+  margin-bottom: 0;
+}
+
+.item {
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.item-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.item-copy {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.item-copy:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.item .body {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--text);
+  overflow-x: auto; /* per-column horizontal-scroll safety net */
+}
+
+.item .body pre {
+  margin: 0;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+
+.divider {
+  align-self: stretch;
+  background: var(--border);
+  width: 1px;
+}

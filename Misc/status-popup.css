@@ -1,0 +1,74 @@
+/* ── Click-to-Open Status Popup ───────────────────────────────────────────────
+   Expects theme variables: --border, --surface, --text, --text-muted, --accent
+*/
+
+.sp-badge {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sp-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.sp-overlay.open {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sp-sheet {
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 14px 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+  animation: sp-slide-up 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes sp-slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.sp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sp-btn {
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.sp-btn:hover {
+  filter: brightness(0.96);
+}
+
+.sp-btn.current {
+  outline: 2.5px solid currentColor;
+  outline-offset: 1px;
+}
+
+/* Widen the sheet to a centered popover on larger screens instead of a
+   full-width mobile sheet. */
+@media (min-width: 560px) {
+  .sp-overlay.open {
+    align-items: center;
+  }
+  .sp-sheet {
+    border-radius: 14px;
+    max-width: 360px;
+  }
+}

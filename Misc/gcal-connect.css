@@ -1,0 +1,39 @@
+/* gcal-connect.css — optional pill styling for the Connect to Google Calendar
+ * control. Uses generic theme vars (--surface2, --border, --text2, --ok-bg,
+ * --ok-text, --danger / --danger-bg). Rename to match your project's tokens. */
+.gcal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--border, #ddd);
+  background: var(--surface2, #f0f0f0);
+  color: var(--text2, #555);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.gcal-pill:hover { border-color: var(--border2, #bbb); }
+
+/* connected */
+.gcal-pill.connected {
+  background: var(--ok-bg, #d8f3dc);
+  color: var(--ok-text, #2d6a4f);
+  border-color: rgba(45, 106, 79, .25);
+}
+
+/* token expired — needs Reconnect */
+.gcal-pill.expired {
+  background: var(--danger-bg, #fee2e2);
+  color: var(--danger, #991b1b);
+  border-color: rgba(153, 27, 27, .25);
+}
+
+.gcal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .7;
+}

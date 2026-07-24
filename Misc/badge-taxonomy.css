@@ -1,0 +1,149 @@
+/* ── Configurable Badge Taxonomy ──────────────────────────────────────────────
+   Expects theme variables: --border, --surface, --surface2, --text, --text2,
+   --text-muted, --accent, --accent-text
+*/
+
+.bt-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Shared pill look, also used standalone by renderBadge() output. */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.badge-pill-unknown {
+  background: var(--surface2);
+  color: var(--text-muted);
+  border-color: var(--border);
+  font-style: italic;
+}
+
+.bt-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 10px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bt-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.bt-pill-label {
+  white-space: nowrap;
+}
+
+.bt-pill-del {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.65;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 0 0 2px;
+}
+
+.bt-pill-del:hover {
+  opacity: 1;
+}
+
+.bt-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger, #B91C1C);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.15s, max-height 0.15s;
+}
+
+.bt-error.show {
+  max-height: 24px;
+  opacity: 1;
+}
+
+.bt-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bt-key-input {
+  width: 130px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.bt-label-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.bt-key-input:focus,
+.bt-label-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.bt-color-input {
+  width: 36px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.bt-add-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bt-add-btn:hover {
+  filter: brightness(1.05);
+}

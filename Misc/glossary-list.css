@@ -1,0 +1,21 @@
+/* ── Glossary / Term Definition List ──────────────────────────────────────
+   Expects theme variables: --border, --text, --text2
+*/
+
+.gl-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.gl-item:last-child { border-bottom: none; }
+
+.gl-term {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.gl-def {
+  color: var(--text2);
+  font-size: 0.82rem;
+  margin-top: 3px;
+}

@@ -1,0 +1,87 @@
+/* ── Appearance Themes system ────────────────────────────────────────────────
+   Token defaults (Default preset) + Dark preset + one extra preset (Ocean) as
+   a worked example. Add more `:root.theme-<name> { ... }` blocks freely.
+
+   LESSON LEARNED (keep this true for every preset you add): give status colors
+   (success/danger/warning/info) genuinely different hue and enough
+   saturation/lightness separation from that preset's own surface/border
+   tones. A muted preset that picks all-desaturated, similar-lightness status
+   colors will make buttons/badges/chips blend together and become unreadable.
+*/
+:root {
+  --bg:#F7F6F3; --surface:#FFFFFF; --surface2:#F0EFE9;
+  --border:#E2E0D8; --border2:#C8C6BC;
+  --text:#1A1917; --text2:#6B6860; --text3:#9C9A92;
+  --accent:#1A1917; --accent-text:#FFFFFF;
+  --success:#2D6A4F; --success-bg:#D8F3DC;
+  --warn:#92400E; --warn-bg:#FEF3C7;
+  --danger:#991B1B; --danger-bg:#FEE2E2;
+  --info:#1E40AF; --info-bg:#DBEAFE;
+}
+
+:root.theme-dark {
+  --bg:#0F0E0C; --surface:#1A1917; --surface2:#262320;
+  --border:#3D3935; --border2:#4D4945;
+  --text:#F5F5F0; --text2:#B8B5AD; --text3:#7C7973;
+  --accent:#E8E4DE; --accent-text:#0F0E0C;
+  --success:#5EE5A8; --success-bg:#1A3D2E;
+  --warn:#FFD066; --warn-bg:#3D3010;
+  --danger:#FF6B6B; --danger-bg:#3D1515;
+  --info:#6BB6FF; --info-bg:#1A2E47;
+}
+
+:root.theme-ocean {
+  --bg:#EEF4F8; --surface:#FFFFFF; --surface2:#DCEAF2;
+  --border:#BFD8E6; --border2:#9DC2D6;
+  --text:#0E2A3D; --text2:#3E617A; --text3:#7592A6;
+  --accent:#0B5FA5; --accent-text:#FFFFFF;
+  --success:#0F7B4E; --success-bg:#CFF2DE;
+  --warn:#B45309; --warn-bg:#FDE6C5;
+  --danger:#B91C4A; --danger-bg:#FBD6E2;
+  --info:#5B21B6; --info-bg:#E6DBFB;
+}
+
+/* ── Theme picker grid ── */
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.theme-btn{padding:12px;border:2px solid var(--border);border-radius:14px;background:var(--surface);cursor:pointer;transition:all .2s;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.theme-btn:hover{border-color:var(--border2);}
+.theme-btn.active{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 0 3px rgba(0,0,0,.06);}
+.theme-preview{display:flex;gap:4px;height:24px;width:100%;}
+.theme-color{flex:1;border-radius:4px;border:1px solid rgba(0,0,0,.1);}
+.theme-name{font-size:12px;font-weight:500;color:var(--text);}
+
+/* ── Custom editor ── */
+.custom-theme-section{background:var(--surface2);padding:16px;border-radius:14px;border:1px solid var(--border);margin-top:16px;}
+.custom-theme-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.custom-theme-hint{font-size:12px;color:var(--text2);margin:0 0 12px;}
+.custom-theme-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
+.color-picker-group{display:flex;flex-direction:column;gap:6px;}
+.color-picker-label{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;}
+.color-picker-input{display:flex;align-items:center;gap:8px;}
+.color-picker-input input[type=color]{width:44px;height:44px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;background:var(--surface);}
+.color-picker-input input[type=text]{flex:1;font-size:12px;font-family:monospace;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
+
+.advanced-toggle-btn{width:100%;display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;}
+.advanced-toggle-btn .chevron{transition:transform .2s;width:16px;height:16px;}
+.advanced-toggle-btn.open .chevron{transform:rotate(180deg);}
+#advanced-theme-panel{padding:8px 0 4px;border-top:1px dashed var(--border);margin-top:4px;}
+.adv-group-label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px;}
+
+.custom-save-row{display:flex;gap:8px;align-items:center;margin-top:18px;flex-wrap:wrap;}
+.custom-save-row input[type=text]{flex:1;min-width:150px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;}
+
+.saved-theme-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:border-color .15s,box-shadow .15s;}
+.saved-theme-row.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,0,0,.05);}
+.saved-theme-row .theme-preview.saved{width:60px;height:22px;flex-shrink:0;}
+.saved-theme-name{flex:1;min-width:0;padding:6px 8px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);font-size:13px;}
+.saved-theme-name:hover,.saved-theme-name:focus{border-color:var(--border);background:var(--surface);}
+.saved-empty{font-size:12px;color:var(--text3);padding:8px 0;}
+
+/* ── Minimal .btn set so this file is self-contained ── */
+.btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;}
+.btn:hover{border-color:var(--border2);}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text);}
+.btn-sm{padding:6px 10px;font-size:12px;}
+.icon-btn{border:none;background:none;cursor:pointer;font-size:14px;padding:4px 8px;border-radius:6px;color:var(--text2);}
+.icon-btn:hover{background:var(--surface);}
+.icon.sm{width:14px;height:14px;}

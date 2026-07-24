@@ -1,0 +1,18 @@
+/* ── Heatmap / Pixel-Grid "Waffle Chart" ────────────────────────────────────
+   DECORATIVE / VISUAL ONLY. Cell colors are set inline by pixel-grid.js (they
+   come from opts.filledColor / opts.emptyColor, which are per-instance and
+   can't live in a static stylesheet) — this file only handles layout/shape.
+*/
+
+.pg-grid {
+  display: grid;
+  gap: 2px;
+  margin: 2rem auto;
+  max-width: 700px;
+}
+
+.pg-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}

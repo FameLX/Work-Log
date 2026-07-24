@@ -1,0 +1,62 @@
+/* ── Annotated Line Viewer ─────────────────────────────────────────────────
+   Expects theme variables: --border, --surface2, --text2, --text3, --accent,
+   --ok-text, --mono-face, --body-face
+   Label + code row pairs for explaining structured text (XML, JSON, config)
+   line by line. Collapses to stacked label-over-code below 640px.
+*/
+
+.al-container {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--mono-face);
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+
+.al-line {
+  position: relative;
+  padding-left: 168px;
+  min-height: 1.8em;
+  display: flex;
+  align-items: center;
+}
+
+.al-anno {
+  position: absolute;
+  left: 0;
+  width: 150px;
+  font-family: var(--body-face);
+  font-size: 0.72rem;
+  color: var(--text3);
+  padding-right: 14px;
+  border-right: 2px solid var(--border);
+  text-align: right;
+}
+
+.al-code {
+  color: var(--text2);
+  white-space: pre;
+}
+.al-tag { color: var(--accent); font-weight: 600; }
+.al-value { color: var(--ok-text); }
+
+@media (max-width: 640px) {
+  .al-line {
+    padding-left: 0;
+    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .al-anno {
+    position: static;
+    width: 100%;
+    border-right: none;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    text-align: left;
+  }
+}

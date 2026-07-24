@@ -1,0 +1,107 @@
+/* ── Custom Time Picker ──────────────────────────────────────────────────────
+   Expects theme variables: --border, --border2, --surface, --surface2,
+   --text, --text2, --text3, --accent, --accent-text
+*/
+.time-picker-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.time-picker-trigger {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.time-picker-modal {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: none;
+  width: 148px;
+}
+
+.time-picker-modal.open {
+  display: block;
+}
+
+.time-picker-content {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.time-picker-sep {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  padding-top: 6px;
+}
+
+.tp-col {
+  width: 60px;
+  height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.tp-col::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tp-col::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 4px;
+}
+
+.tp-btn {
+  width: 100%;
+  padding: 5px 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.1s;
+  flex-shrink: 0;
+}
+
+.tp-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.tp-btn.selected {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.tp-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: center;
+  padding: 2px 0 4px;
+}
