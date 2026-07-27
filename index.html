@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.7</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.8</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -2575,6 +2575,7 @@ function parseImportJSON(text){
   try{ data = JSON.parse(text); }catch(e){ toast('Invalid JSON file.'); return []; }
   if(!Array.isArray(data)){ toast('JSON file must contain an array of entries.'); return []; }
   return data.filter(e => e && e.name).map(e => ({
+    id: typeof e.id==='number' ? e.id : (typeof e.id==='string' && /^\d+$/.test(e.id) ? parseInt(e.id) : null),
     name: e.name, type: e.type||'', deadline: e.deadline||'', deadlineEnd: e.deadlineEnd||'',
     time: e.time||'', timeTo: e.timeTo||'', remark: e.remark||'', syncMode: e.syncMode==='task'?'task':'event',
     color: e.color||null, gcalColorId: e.gcalColorId
@@ -2619,11 +2620,12 @@ function parseImportCSV(text){
   const rows = parseCSVRows(text);
   if(rows.length < 2){ toast('CSV file has no data rows.'); return []; }
   const header = rows[0].map(h => h.trim().toLowerCase());
-  const idx = { name: header.indexOf('name'), type: header.indexOf('type'), deadline: header.indexOf('deadline'), time: header.indexOf('time'), remark: header.indexOf('remark') };
+  const idx = { id: header.indexOf('id'), name: header.indexOf('name'), type: header.indexOf('type'), deadline: header.indexOf('deadline'), time: header.indexOf('time'), remark: header.indexOf('remark') };
   if(idx.name === -1){ toast('CSV missing a "Name" column.'); return []; }
   return rows.slice(1).filter(r => r[idx.name]).map(r => {
     const { time, timeTo } = parseImportTime(idx.time>-1 ? r[idx.time] : '');
-    return { name: r[idx.name], type: idx.type>-1?(r[idx.type]||''):'', deadline: parseImportDate(idx.deadline>-1?r[idx.deadline]:''), deadlineEnd:'', time, timeTo, remark: idx.remark>-1?(r[idx.remark]||''):'', syncMode:'event', color:null };
+    const rawId = idx.id>-1 ? (r[idx.id]||'').replace(/^="?|"$/g,'') : '';
+    return { id: /^\d+$/.test(rawId) ? parseInt(rawId) : null, name: r[idx.name], type: idx.type>-1?(r[idx.type]||''):'', deadline: parseImportDate(idx.deadline>-1?r[idx.deadline]:''), deadlineEnd:'', time, timeTo, remark: idx.remark>-1?(r[idx.remark]||''):'', syncMode:'event', color:null };
   });
 }
 
@@ -2635,7 +2637,7 @@ async function parseImportXLSX(file){
   const ws = wb.worksheets[0];
   if(!ws) return [];
   const header = (ws.getRow(1).values||[]).map(v => String(v||'').trim().toLowerCase());
-  const idx = { name: header.indexOf('name'), type: header.indexOf('type'), deadline: header.indexOf('deadline'), time: header.indexOf('time'), remark: header.indexOf('remark') };
+  const idx = { id: header.indexOf('id'), name: header.indexOf('name'), type: header.indexOf('type'), deadline: header.indexOf('deadline'), time: header.indexOf('time'), remark: header.indexOf('remark') };
   if(idx.name === -1){ toast('Excel file missing a "Name" column.'); return []; }
   const out = [];
   ws.eachRow((row, rowNum) => {
@@ -2644,25 +2646,40 @@ async function parseImportXLSX(file){
     const name = v[idx.name];
     if(!name) return;
     const { time, timeTo } = parseImportTime(idx.time>-1 ? v[idx.time] : '');
-    out.push({ name: String(name), type: idx.type>-1?String(v[idx.type]||''):'', deadline: parseImportDate(idx.deadline>-1?v[idx.deadline]:''), deadlineEnd:'', time, timeTo, remark: idx.remark>-1?String(v[idx.remark]||''):'', syncMode:'event', color:null });
+    const rawId = idx.id>-1 ? String(v[idx.id]||'') : '';
+    out.push({ id: /^\d+$/.test(rawId) ? parseInt(rawId) : null, name: String(name), type: idx.type>-1?String(v[idx.type]||''):'', deadline: parseImportDate(idx.deadline>-1?v[idx.deadline]:''), deadlineEnd:'', time, timeTo, remark: idx.remark>-1?String(v[idx.remark]||''):'', syncMode:'event', color:null });
   });
   return out;
 }
 
+// name+deadline+time signature — used to catch duplicates from sources with no id (CSV/XLSX)
+// and as a fallback if an id happens not to match.
+function importSig(e){ return (e.name||'').trim().toLowerCase()+'|'+(e.deadline||'')+'|'+(e.time||''); }
+
 function finishImport(list, label){
   if(!list.length){ return; }
+  const existingIds = new Set(entries.map(e=>e.id).concat(archived.map(e=>e.id)).concat(trash.map(e=>e.id)));
+  const existingSigs = new Set(entries.map(importSig).concat(archived.map(importSig)).concat(trash.map(importSig)));
   const now = new Date().toISOString();
+  let added = 0, skipped = 0;
   list.forEach((e, i) => {
+    const isDup = (e.id && existingIds.has(e.id)) || existingSigs.has(importSig(e));
+    if(isDup){ skipped++; return; }
     const type = e.type || '';
+    const id = Date.now()+i;
     entries.unshift({
-      id: Date.now()+i, name: e.name, type, deadline: e.deadline||'', deadlineEnd: e.deadlineEnd||'',
+      id, name: e.name, type, deadline: e.deadline||'', deadlineEnd: e.deadlineEnd||'',
       time: e.time||'', timeTo: e.timeTo||'', remark: e.remark||'',
       color: e.color || typeColors[type] || null, gcalColorId: e.gcalColorId || typeGCalIds[type] || undefined,
       syncMode: e.syncMode==='task'?'task':'event', createdAt: now, updatedAt: now
     });
+    existingIds.add(id); existingSigs.add(importSig(e));
+    added++;
   });
   save(); render();
-  toast(`Imported ${list.length} ${label} ${list.length===1?'entry':'entries'}.`);
+  if(added && skipped) toast(`Imported ${added} ${label} ${added===1?'entry':'entries'}, skipped ${skipped} duplicate${skipped===1?'':'s'}.`, 3500);
+  else if(added) toast(`Imported ${added} ${label} ${added===1?'entry':'entries'}.`);
+  else toast(`No new entries — all ${skipped} already exist.`, 3500);
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────
@@ -3217,7 +3234,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.7', date: 'July 2026', latest: true,
+    version: 'v1.6.8', date: 'July 2026', latest: true,
+    items: [
+      'Import File now skips duplicates — matches by original ID (JSON/CSV/Excel all carry it) or by name+deadline+time if no ID is present, so re-importing the same file twice won\'t create copies'
+    ]
+  },
+  {
+    version: 'v1.6.7', date: 'July 2026', latest: false,
     items: [
       'New: Import File — sidebar button restores entries from your own JSON, CSV, or Excel exports. JSON restores everything; CSV/Excel restore name, type, deadline, time, remark only'
     ]
