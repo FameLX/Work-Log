@@ -29,7 +29,7 @@ function Get-WorkLogTab {
     } catch { return $null }
 }
 
-function Ensure-Running {
+function Start-WorkLogSession {
     $tab = Get-WorkLogTab
     if ($tab) { return $tab.webSocketDebuggerUrl }
 
@@ -74,7 +74,7 @@ if ($Op -eq "stop") {
     exit 0
 }
 
-$ws = Ensure-Running
+$ws = Start-WorkLogSession
 
 switch ($Op) {
     "screenshot" {
