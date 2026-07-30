@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inhouse Application — Carrier Engagement (Prototype)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app-root"></div>
+<div id="modal-root"></div>
+
+<!-- SheetJS: genuine multi-sheet .xlsx export for reports that don't need cell coloring
+     (Quick Sum, User Report). Falls back to CSV automatically if this can't load offline. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ExcelJS: SheetJS's free tier can't reliably WRITE cell fill colors, so the Progress
+     Report (which must match the reference workbook's color-coded rows/sections) uses this
+     instead. Falls back to the plain SheetJS export automatically if this can't load offline. -->
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<!-- jsPDF: renders the KM Export-to-PDF (human-readable content pages plus a final page that
+     embeds the underlying KM data as Base64 JSON, so the file can be re-imported). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- PDF.js: reads text back out of an uploaded KM export PDF for Import, to recover that
+     embedded Base64 JSON block. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

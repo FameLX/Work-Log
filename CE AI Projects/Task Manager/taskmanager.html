@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task Manager Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--theme-bg,#FFF8F2);color:#2d2d2d;}
+.app-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.app-header{background:var(--theme-header,#FFD3AC);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.1);flex-shrink:0;z-index:50;}
+.app-title{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:700;color:var(--theme-dark,#7A3E00);}
+.app-title i{color:var(--theme-dark,#7A3E00);}
+.header-date{font-size:11px;color:var(--theme-mid,#9A5B1A);font-weight:500;margin-top:2px;}
+.btn-add-task{background:var(--theme-dark,#E07020);color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:13px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2);flex-shrink:0;}
+.btn-add-task:hover{filter:brightness(0.88);}
+.bottom-nav{display:flex;background:var(--theme-nav,#FFF0E0);border-top:1px solid var(--theme-border,#F5D5B0);flex-shrink:0;z-index:50;}
+.bnav-btn{flex:1;padding:10px 4px 8px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:var(--theme-mid,#AAA);transition:color .15s;}
+.bnav-btn i{font-size:18px;}
+.bnav-btn.active{color:var(--theme-dark,#E07020);}
+.page{display:none;flex:1;overflow-y:auto;overflow-x:hidden;}
+.page.active{display:flex;flex-direction:column;}
+.notif-wrap{padding:8px 14px 0;flex-shrink:0;}
+.notif-item{border-radius:9px;padding:8px 12px;font-size:12px;font-weight:600;display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;border-left:4px solid;}
+.notif-danger{background:#FFEDED;color:#A32D2D;border-color:#E24B4A;}
+.notif-warn{background:#FFF5E0;color:#854F0B;border-color:#EF9F27;}
+.notif-item-icon{margin-top:1px;flex-shrink:0;}
+.notif-item-body{flex:1;}
+.notif-item-title{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+.notif-item-name{font-size:12px;font-weight:500;}
+.tab-stat-bar{display:flex;gap:5px;padding:8px 14px 0;flex-shrink:0;background:var(--theme-bg,#FFF8F2);}
+.tstab{flex:1;padding:0;border:none;border-radius:10px 10px 0 0;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:all .15s;min-width:0;}
+.tstab-inner{display:flex;flex-direction:column;align-items:center;padding:7px 4px 6px;width:100%;}
+.tsnum{font-size:18px;font-weight:700;line-height:1;}
+.tslbl{font-size:10px;font-weight:700;line-height:1.2;margin-top:2px;display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center;}
+.tslbl i{font-size:9px;}
+.tstab-today{background:#D1ECF1;color:#0C5460;}
+.tstab-deadline{background:#F8D7DA;color:#721C24;}
+.tstab-remaining{background:#FFECB3;color:#7B5800;}
+.tstab-done{background:#E8F5E9;color:#1B5E20;}
+.tsall{background:#E7C6FF;color:#5B1B8F;}
+.tsactive{transform:translateY(1px);box-shadow:0 2px 0 0 var(--theme-bg,#FFF8F2) inset;outline:2px solid rgba(0,0,0,0.12);outline-offset:-2px;}
+.search-bar{padding:8px 14px 5px;display:flex;gap:6px;align-items:center;flex-shrink:0;background:var(--theme-bg,#FFF8F2);}
+.search-input{flex:1;padding:7px 12px;border:1.5px solid var(--theme-border,#F5D5B0);border-radius:20px;font-family:'Inter',sans-serif;font-size:13px;background:var(--theme-input,#FFFAF5);color:#222;transition:border .15s;}
+.search-input:focus{border-color:var(--theme-header,#FFD3AC);outline:none;}
+.filter-btn{padding:7px 12px;border:1.5px solid var(--theme-border,#F5D5B0);border-radius:20px;background:var(--theme-input,#FFFAF5);font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;font-weight:600;color:#666;display:flex;align-items:center;gap:5px;}
+.filter-btn.active-filter{border-color:var(--theme-dark,#E07020);background:var(--theme-btn-light,#FFF3E0);color:var(--theme-dark,#C05A10);}
+.filter-panel{background:var(--theme-panel,#FFF5EC);border-bottom:1px solid var(--theme-border,#F5D5B0);padding:10px 14px;display:none;flex-wrap:wrap;gap:8px;flex-shrink:0;}
+.filter-panel.open{display:flex;}
+.filter-group{display:flex;flex-direction:column;gap:4px;min-width:130px;flex:1;}
+.filter-label{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.05em;}
+.filter-select{padding:5px 9px;border:1.5px solid var(--theme-border,#F5D5B0);border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;background:var(--theme-input,#FFFAF5);}
+.filter-clear{align-self:flex-end;padding:5px 12px;border:1px solid #FECACA;border-radius:8px;background:#FEF2F2;color:#DC2626;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.list-area{flex:1;overflow-y:auto;padding:6px 14px 80px;background:var(--theme-bg,#FFF8F2);}
+.inner-panel{display:none;}
+.inner-panel.active{display:block;}
+.task-card{background:#fff;border-radius:12px;border:1.5px solid #EEE;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .15s;}
+.task-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.09);}
+.task-card.tc-done{opacity:.55;}
+.task-card.tc-done .task-name{text-decoration:line-through;}
+.task-card.tc-cancel .task-name{text-decoration:line-through;color:#AAA;}
+.card-stripe-body{display:flex;}
+.priority-stripe{width:5px;border-radius:10px 0 0 10px;flex-shrink:0;}
+.card-body{flex:1;padding:9px 11px 5px 9px;}
+.card-title-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;}
+.task-name{font-size:14px;font-weight:700;color:#222;flex:1;line-height:1.3;}
+.done-check-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;}
+.done-check-wrap input{width:15px;height:15px;accent-color:#0F6E56;cursor:pointer;}
+.done-check-wrap span{font-size:10px;color:#0F6E56;font-weight:700;white-space:nowrap;}
+.task-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;}
+.tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;white-space:nowrap;border:1px solid transparent;}
+.tp1{background:#FFEDED;color:#A32D2D;border-color:#F0A0A0;}
+.tp2{background:#FFF5E0;color:#854F0B;border-color:#EFD080;}
+.tp3{background:#E6F1FB;color:#185FA5;border-color:#90C0EA;}
+.tp4{background:#F1F1F1;color:#5F5E5A;border-color:#CCC;}
+.tg-proj{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;}
+.tg-cntry{background:#F0FDF4;color:#166534;border-color:#BBF7D0;}
+.tg-usr{background:#FDF4FF;color:#7E22CE;border-color:#E9D5FF;}
+.tg-dl-hot{background:#FFEDED;color:#A32D2D;border-color:#F0A0A0;}
+.tg-dl-soon{background:#FFF5E0;color:#854F0B;border-color:#EFD080;}
+.tg-dl-ok{background:#F1F5F9;color:#475569;border-color:#CBD5E1;}
+.st-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
+.assign-line{font-size:10px;color:#999;margin-bottom:3px;}
+.assign-line strong{color:#666;}
+.workdays-wrap{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
+.wd-pill{font-size:10px;padding:1px 7px;border-radius:10px;background:#FFF3E0;color:#E65100;border:1px solid #FFB74D;font-weight:600;}
+.wd-today{background:#E07020;color:#fff;border-color:#E07020;}
+.wd-past{background:#F5F5F5;color:#BBB;border-color:#DDD;text-decoration:line-through;}
+.card-detail-text{font-size:11px;color:#555;line-height:1.5;padding:6px 11px 6px 14px;border-top:1px dashed #F0F0F0;}
+.card-detail-text p{margin-bottom:2px;}
+.card-detail-text ul,ol{padding-left:16px;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding:5px 11px 7px 9px;border-top:1px solid #F5F5F5;gap:5px;flex-wrap:wrap;}
+.cfa{display:flex;gap:5px;align-items:center;}
+.cbtn{padding:4px 10px;border-radius:7px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid transparent;transition:all .12s;text-decoration:none;}
+.cbtn-del{background:#FEF2F2;color:#DC2626;border-color:#FECACA;}
+.cbtn-del:hover{background:#FEE2E2;}
+.cbtn-edit{background:var(--theme-btn-light,#FFF3E0);color:var(--theme-dark,#C05A10);border-color:var(--theme-border,#FFB877);}
+.cbtn-edit:hover{filter:brightness(.95);}
+.cbtn-gcal{background:var(--theme-btn-light,#FFF3E0);color:var(--theme-dark,#C05A10);border-color:var(--theme-border,#FFB877);}
+.cbtn-gcal:hover{filter:brightness(.95);}
+.status-popup-overlay{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.4);}
+.status-popup-overlay.open{display:flex;align-items:flex-end;justify-content:center;}
+.status-popup{background:#fff;border-radius:16px 16px 0 0;padding:16px 14px 32px;width:100%;max-width:500px;animation:slideUp .22s cubic-bezier(.4,0,.2,1);}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.sp-handle{width:36px;height:4px;background:#DDD;border-radius:4px;margin:0 auto 12px;}
+.sp-title{font-size:13px;font-weight:700;color:#555;margin-bottom:10px;text-align:center;}
+.sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sp-btn{padding:10px 8px;border-radius:10px;border:1.5px solid transparent;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;}
+.sp-btn:hover{filter:brightness(.96);}
+.sp-btn.current{outline:2.5px solid currentColor;outline-offset:1px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;overflow-y:auto;padding:16px;}
+.modal-overlay.open{display:block;}
+.modal-box{background:#fff;border-radius:16px;padding:18px 16px 24px;max-width:540px;margin:0 auto 20px;box-shadow:0 8px 40px rgba(0,0,0,.2);}
+.modal-title{font-size:15px;font-weight:700;color:var(--theme-dark,#7A3E00);margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.modal-title i{color:var(--theme-dark,#E07020);}
+.form-group{margin-bottom:10px;}
+.form-label{font-size:10px;font-weight:700;color:#999;margin-bottom:4px;display:block;letter-spacing:.05em;text-transform:uppercase;}
+.form-control{width:100%;padding:8px 10px;border:1.5px solid #E5E5E5;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;color:#222;background:#FAFAFA;transition:border .15s;}
+.form-control:focus{border-color:var(--theme-header,#FFD3AC);outline:none;background:#fff;}
+.form-row{display:flex;gap:9px;}
+.form-row .form-group{flex:1;min-width:0;}
+.ppills{display:flex;gap:5px;flex-wrap:wrap;}
+.ppill{padding:5px 11px;border-radius:20px;border:1.5px solid transparent;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+.ppill.sel{outline:2.5px solid currentColor;outline-offset:1px;}
+.pp1{background:#FFEDED;color:#A32D2D;border-color:#F0A0A0;}
+.pp2{background:#FFF5E0;color:#854F0B;border-color:#EFD080;}
+.pp3{background:#E6F1FB;color:#185FA5;border-color:#90C0EA;}
+.pp4{background:#F1F1F1;color:#5F5E5A;border-color:#CCC;}
+.date-multi-box{border:1.5px solid #E5E5E5;border-radius:8px;padding:7px 9px;background:#FAFAFA;}
+.dmadd-row{display:flex;gap:5px;}
+.dmadd-row input{flex:1;padding:6px 9px;border:1px solid #DDD;border-radius:7px;font-size:12px;font-family:'Inter',sans-serif;background:#fff;}
+.dmadd-row button{padding:6px 12px;border:none;border-radius:7px;background:var(--theme-dark,#E07020);color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.dmadd-row button:hover{filter:brightness(.88);}
+.sel-dates{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.sdpill{background:var(--theme-btn-light,#FFF3E0);color:var(--theme-dark,#C05A10);border:1px solid var(--theme-border,#FFB877);border-radius:10px;padding:2px 7px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px;}
+.sdpill button{background:none;border:none;cursor:pointer;color:var(--theme-dark,#C05A10);font-size:12px;line-height:1;padding:0;}
+.modal-footer{display:flex;gap:8px;margin-top:14px;}
+.btn-cancel{flex:1;padding:10px;border:1.5px solid #EEE;border-radius:9px;background:#fff;color:#888;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-cancel:hover{background:#F5F5F5;}
+.btn-save{flex:2;padding:10px;border:none;border-radius:9px;background:var(--theme-dark,#E07020);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.btn-save:hover{filter:brightness(.88);}
+.gcal-info{background:var(--theme-btn-light,#FFF3E0);border:1px solid var(--theme-border,#FFB877);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--theme-dark,#1A6B35);margin-top:8px;display:flex;gap:7px;align-items:flex-start;line-height:1.5;}
+.config-page-inner{padding:12px 14px 80px;background:var(--theme-bg,#FFF8F2);min-height:100%;}
+.config-section{background:#fff;border-radius:12px;border:1.5px solid #EEE;padding:14px;margin-bottom:12px;}
+.config-section-title{font-size:13px;font-weight:700;color:var(--theme-dark,#7A3E00);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.config-section-title i{color:var(--theme-dark,#E07020);}
+.cfg-add-row{display:flex;gap:6px;margin-bottom:8px;}
+.cfg-add-row input{flex:1;padding:7px 10px;border:1.5px solid #DDD;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;background:#FAFAFA;}
+.cfg-add-row button{padding:7px 14px;border:none;border-radius:8px;background:var(--theme-dark,#E07020);color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.cfg-add-row button:hover{filter:brightness(.88);}
+.cfg-items{display:flex;flex-wrap:wrap;gap:6px;}
+.cfg-pill{background:var(--theme-btn-light,#FFF3E0);color:var(--theme-dark,#C05A10);border:1px solid var(--theme-border,#FFB877);border-radius:10px;padding:4px 10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+.cfg-pill button{background:none;border:none;cursor:pointer;color:#DC2626;font-size:13px;line-height:1;padding:0;}
+.cfg-status-pill{border-radius:10px;padding:4px 10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;border:1.5px solid transparent;}
+.cfg-status-pill button{background:none;border:none;cursor:pointer;color:#DC2626;font-size:13px;line-height:1;padding:0;}
+.color-swatch{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.1);flex-shrink:0;}
+.empty-state{text-align:center;padding:36px 20px;color:#BBB;}
+.empty-state i{font-size:38px;margin-bottom:8px;display:block;}
+.ql-toolbar.ql-snow{border-radius:8px 8px 0 0!important;border-color:#DDD!important;}
+.ql-container.ql-snow{border-radius:0 0 8px 8px!important;border-color:#DDD!important;font-family:'Inter',sans-serif!important;font-size:13px!important;}
+.ql-editor{min-height:80px;}
+</style>
+</head>
+
+<body>
+<div class="app-shell">
+
+<!-- HEADER -->
+<div class="app-header">
+  <div>
+    <div class="app-title"><i class="fa-solid fa-list-check"></i> Task Manager Pro</div>
+    <div class="header-date" id="header-date"></div>
+  </div>
+  <button class="btn-add-task" onclick="openModal()">
+    <i class="fa-solid fa-plus"></i> Add Task
+  </button>
+</div>
+
+<!-- PAGE: TASKS -->
+<div class="page active" id="page-tasks">
+  <div class="notif-wrap" id="notif-wrap"></div>
+  <div class="search-bar">
+    <input class="search-input" id="search-input" placeholder="🔍 Search tasks..." oninput="applyFilter()" />
+    <button class="filter-btn" id="filter-toggle-btn" onclick="toggleFilterPanel()">
+      <i class="fa-solid fa-sliders"></i> Filter
+    </button>
+  </div>
+  <div class="filter-panel" id="filter-panel">
+    <div class="filter-group">
+      <div class="filter-label">Priority</div>
+      <select class="filter-select" id="fil-priority" onchange="applyFilter()">
+        <option value="">All</option>
+        <option value="1">Before Routine</option>
+        <option value="2">Routine</option>
+        <option value="3">After Routine</option>
+        <option value="4">Low</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Status</div>
+      <select class="filter-select" id="fil-status" onchange="applyFilter()"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Country</div>
+      <select class="filter-select" id="fil-country" onchange="applyFilter()"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Project</div>
+      <select class="filter-select" id="fil-project" onchange="applyFilter()"><option value="">All</option></select>
+    </div>
+    <button class="filter-clear" onclick="clearFilter()"><i class="fa-solid fa-xmark"></i> Clear</button>
+  </div>
+  <div class="tab-stat-bar" id="stats-row">
+    <button class="tstab tstab-today tsactive" onclick="switchInner('today')" id="itab-today">
+      <div class="tstab-inner"><div class="tsnum" id="cnt-today">0</div><div class="tslbl"><i class="fa-solid fa-sun"></i> Today</div></div>
+    </button>
+    <button class="tstab tstab-deadline" onclick="switchInner('deadline')" id="itab-deadline">
+      <div class="tstab-inner"><div class="tsnum" id="cnt-deadline">0</div><div class="tslbl"><i class="fa-solid fa-fire"></i> Near DL</div></div>
+    </button>
+    <button class="tstab tstab-remaining" onclick="switchInner('remaining')" id="itab-remaining">
+      <div class="tstab-inner"><div class="tsnum" id="cnt-remaining">0</div><div class="tslbl"><i class="fa-solid fa-hourglass-half"></i> Remaining</div></div>
+    </button>
+    <button class="tstab tstab-done" onclick="switchInner('done')" id="itab-done">
+      <div class="tstab-inner"><div class="tsnum" id="cnt-done">0</div><div class="tslbl"><i class="fa-solid fa-circle-check"></i> Done</div></div>
+    </button>
+    <button class="tstab tsall" onclick="switchInner('all')" id="itab-all">
+      <div class="tstab-inner"><div class="tsnum" id="cnt-all">0</div><div class="tslbl"><i class="fa-solid fa-table-list"></i> All</div></div>
+    </button>
+  </div>
+  <div class="list-area">
+    <div class="inner-panel active" id="ipanel-today"></div>
+    <div class="inner-panel" id="ipanel-deadline"></div>
+    <div class="inner-panel" id="ipanel-remaining"></div>
+    <div class="inner-panel" id="ipanel-done"></div>
+    <div class="inner-panel" id="ipanel-all"></div>
+  </div>
+</div>
+
+<!-- PAGE: CONFIG -->
+<div class="page" id="page-config">
+  <div class="config-page-inner">
+    <div style="font-size:16px;font-weight:700;color:#7A3E00;display:flex;align-items:center;gap:8px;padding:4px 0 12px;">
+      <i class="fa-solid fa-gear" style="color:var(--theme-dark,#E07020)"></i> Configuration
+    </div>
+
+    <!-- HEADER COLOR -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-solid fa-palette" style="color:var(--theme-dark,#E07020)"></i> Header Color</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:160px;">
+          <div style="font-size:11px;color:#999;margin-bottom:5px;">Paste hex color code (e.g. #FFD3AC)</div>
+          <div style="display:flex;gap:7px;align-items:center;">
+            <input id="cfg-header-hex" maxlength="7" placeholder="#FFD3AC"
+              style="flex:1;padding:8px 10px;border:1.5px solid #DDD;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;background:#FAFAFA;letter-spacing:.05em;"
+              oninput="previewHeaderColor(this.value)" />
+            <div id="cfg-header-swatch" style="width:38px;height:38px;border-radius:8px;border:1.5px solid #DDD;background:#FFD3AC;flex-shrink:0;"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button onclick="applyHeaderColor()" style="padding:8px 16px;border:none;border-radius:8px;background:var(--theme-dark,#E07020);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;"><i class="fa-solid fa-check"></i> Apply</button>
+          <button onclick="resetHeaderColor()" style="padding:8px 14px;border:1.5px solid #DDD;border-radius:8px;background:#fff;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">Reset</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:#AAA;">Preset colors:
+        <span style="display:inline-flex;gap:5px;margin-left:4px;flex-wrap:wrap;">
+          <button onclick="setHeaderPreset('#FFD3AC')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#FFD3AC;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#B3E5FC')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#B3E5FC;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#C8E6C9')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#C8E6C9;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#F8BBD0')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#F8BBD0;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#E1BEE7')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#E1BEE7;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#FFF9C4')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#FFF9C4;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#CFD8DC')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#CFD8DC;cursor:pointer;"></button>
+          <button onclick="setHeaderPreset('#FFFFFF')" style="width:22px;height:22px;border-radius:5px;border:1.5px solid #CCC;background:#FFF;cursor:pointer;"></button>
+        </span>
+      </div>
+    </div>
+
+    <!-- COUNTRY -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-solid fa-flag" style="color:#166534"></i> Country</div>
+      <div class="cfg-add-row">
+        <input id="cfg-new-country" placeholder="e.g. SGP, MYS..." />
+        <button onclick="cfgAddCountry()"><i class="fa-solid fa-plus"></i> Add</button>
+      </div>
+      <div class="cfg-items" id="cfg-countries"></div>
+    </div>
+
+    <!-- PROJECT -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-solid fa-folder-open" style="color:#1D4ED8"></i> Project</div>
+      <div class="cfg-add-row">
+        <input id="cfg-new-project" placeholder="New project name..." />
+        <button onclick="cfgAddProject()"><i class="fa-solid fa-plus"></i> Add</button>
+      </div>
+      <div class="cfg-items" id="cfg-projects"></div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-solid fa-users" style="color:#7E22CE"></i> Members</div>
+      <div class="cfg-add-row">
+        <input id="cfg-new-member" placeholder="Member name..." />
+        <button onclick="cfgAddMember()"><i class="fa-solid fa-plus"></i> Add</button>
+      </div>
+      <div class="cfg-items" id="cfg-members"></div>
+    </div>
+
+    <!-- PRIORITY -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-solid fa-bars-staggered" style="color:var(--theme-dark,#E07020)"></i> Priority Management</div>
+      <div id="cfg-priorities" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div style="border-top:1px solid #F0F0F0;padding-top:10px;">
+        <div style="font-size:11px;font-weight:700;color:#999;margin-bottom:6px;text-transform:uppercase;">Add Custom Priority</div>
+        <div class="cfg-add-row" style="flex-wrap:wrap;gap:6px;">
+          <input id="cfg-new-pri-label" placeholder="Label (e.g. Urgent)" style="flex:1;min-width:120px;" />
+          <input id="cfg-new-pri-bg" type="color" value="#FCE4EC" style="width:38px;height:36px;padding:2px;border:1.5px solid #DDD;border-radius:8px;cursor:pointer;" />
+          <input id="cfg-new-pri-txt" type="color" value="#880E4F" style="width:38px;height:36px;padding:2px;border:1.5px solid #DDD;border-radius:8px;cursor:pointer;" />
+          <button onclick="cfgAddPriority()"><i class="fa-solid fa-plus"></i> Add</button>
+        </div>
+        <div style="font-size:10px;color:#AAA;margin-top:5px;">Built-in priorities cannot be removed. Custom ones can.</div>
+      </div>
+    </div>
+
+    <!-- STATUS MANAGE -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-solid fa-tags" style="color:#7E22CE"></i> Status Management</div>
+      <div id="cfg-statuses" style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+      <div style="border-top:1px solid #F0F0F0;padding-top:10px;">
+        <div style="font-size:11px;font-weight:700;color:#999;margin-bottom:6px;text-transform:uppercase;">Add Custom Status</div>
+        <div class="cfg-add-row" style="flex-wrap:wrap;gap:6px;">
+          <input id="cfg-new-status-key" placeholder="Key (no spaces, e.g. review)" style="max-width:130px;" />
+          <input id="cfg-new-status-label" placeholder="Label (e.g. In Review)" style="flex:1;min-width:120px;" />
+          <input id="cfg-new-status-bg" type="color" value="#E6F1FB" style="width:38px;height:36px;padding:2px;border:1.5px solid #DDD;border-radius:8px;cursor:pointer;" />
+          <input id="cfg-new-status-txt" type="color" value="#185FA5" style="width:38px;height:36px;padding:2px;border:1.5px solid #DDD;border-radius:8px;cursor:pointer;" />
+          <button onclick="cfgAddStatus()"><i class="fa-solid fa-plus"></i> Add</button>
+        </div>
+        <div style="font-size:10px;color:#AAA;margin-top:5px;">Tip: Pick background + text color for the badge.</div>
+      </div>
+    </div>
+
+    <!-- GOOGLE CALENDAR — replaced with OAuth connect UI -->
+    
+    <!-- GCAL CONNECT -->
+    <div class="config-section">
+      <div class="config-section-title"><i class="fa-brands fa-google" style="color:#1A6B35"></i> Google Calendar</div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:#555;margin-bottom:8px;" id="gcal-connect-status">Not connected</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="gcal-connect-btn" onclick="openGCalModal()"
+            style="padding:8px 16px;border:none;border-radius:8px;background:#1A6B35;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;display:inline-flex;align-items:center;gap:6px;">
+            <i class="fa-brands fa-google"></i> Connect Google Calendar
+          </button>
+          <button onclick="gcalDisconnect()"
+            style="padding:8px 14px;border:1.5px solid #FECACA;border-radius:8px;background:#FEF2F2;color:#DC2626;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">
+            Disconnect
+          </button>
+        </div>
+      </div>
+
+      <div style="background:#FFF5E0;border:1px solid #EFD080;border-radius:8px;padding:10px 12px;font-size:12px;color:#854F0B;line-height:1.7;margin-bottom:10px;">
+        <strong>How it works:</strong> After connecting, click <strong>"Add to Calendar"</strong> on any task card to push it as a Google Calendar event. Tasks are created with a <strong>✓ Task:</strong> prefix. The deadline date and start time are used for the event. If an event already exists on that date, it will be skipped (no duplicates). Editing a task and re-syncing will update the existing event.
+      </div>
+
+      <div style="font-size:11px;color:#999;line-height:1.6;">
+        <strong>Token expiry:</strong> Google tokens expire after ~1 hour. If Calendar sync stops working, click Reconnect and re-authorise. This is a Google security rule and cannot be changed in a browser-only app.
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="bnav-btn active" onclick="switchPage('tasks')" id="bnav-tasks">
+    <i class="fa-solid fa-list-check"></i> Tasks
+  </button>
+  <button class="bnav-btn" onclick="switchPage('config')" id="bnav-config">
+    <i class="fa-solid fa-gear"></i> Configure
+  </button>
+</div>
+</div>
+
+<!-- STATUS BOTTOM SHEET -->
+<div class="status-popup-overlay" id="status-popup-overlay" onclick="closeStatusPopup(event)">
+  <div class="status-popup" onclick="event.stopPropagation()">
+    <div class="sp-handle"></div>
+    <div class="sp-title">Change Status</div>
+    <div class="sp-grid" id="sp-grid"></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i><span id="modal-title-text">Add New Task</span></div>
+    <div class="form-group">
+      <label class="form-label">Task Name *</label>
+      <input class="form-control" id="f-name" placeholder="e.g. Report Progress Monthly..." />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Priority</label>
+      <div class="ppills">
+        <div class="ppill pp1" data-p="1" onclick="selectP(this)">Before Routine</div>
+        <div class="ppill pp2 sel" data-p="2" onclick="selectP(this)">Routine</div>
+        <div class="ppill pp3" data-p="3" onclick="selectP(this)">After Routine</div>
+        <div class="ppill pp4" data-p="4" onclick="selectP(this)">Low</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Assigned From</label>
+        <select class="form-control" id="f-from"><option value="">-- Select --</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assigned To</label>
+        <select class="form-control" id="f-to"><option value="">-- Select --</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Country</label>
+        <select class="form-control" id="f-country"><option value="">-- Select --</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Project</label>
+        <select class="form-control" id="f-project"><option value="">-- Select --</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" id="f-status"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deadline</label>
+        <input class="form-control" id="f-deadline" type="date" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Start Time</label>
+        <input class="form-control" id="f-start-time" type="time" value="09:00" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Finish Time</label>
+        <input class="form-control" id="f-end-time" type="time" value="10:00" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Scheduled Work Days (multi-select)</label>
+      <div class="date-multi-box">
+        <div class="dmadd-row">
+          <input type="date" id="f-wd-input" />
+          <button onclick="addWD()">+ Add Day</button>
+        </div>
+        <div class="sel-dates" id="sel-dates"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Detail</label>
+      <div id="quill-editor"></div>
+    </div>
+    <div class="gcal-info">
+      <i class="fa-brands fa-google" style="margin-top:2px;flex-shrink:0;color:#1A6B35;"></i>
+      <div style="flex:1;">
+        <div style="font-weight:700;margin-bottom:3px;">📅 Google Calendar Sync</div>
+        <div>Each <strong>scheduled work day</strong> creates a Google Calendar event at your set start time. Connect Calendar in Configure → Google Calendar, then click <strong>Add to Calendar</strong> on task cards.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveTask()"><i class="fa-solid fa-floppy-disk"></i> Save Task</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- GCAL CONNECT MODAL -->
+<div id="gcal-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:950;overflow-y:auto;padding:16px;" onclick="if(event.target===this)closeGCalModal()">
+  <div style="background:#fff;border-radius:16px;padding:20px 18px 24px;max-width:500px;margin:0 auto 20px;box-shadow:0 8px 40px rgba(0,0,0,.2);">
+    <div style="font-size:15px;font-weight:700;color:#7A3E00;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+      <i class="fa-brands fa-google" style="color:#1A6B35;"></i> Connect Google Calendar
+    </div>
+    <div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:8px;padding:9px 12px;font-size:12px;color:#1A6B35;margin-bottom:14px;line-height:1.6;">
+      <strong>✓ The Google Calendar API is completely free</strong> — no subscription needed. You only need a free Google account.
+    </div>
+    <div style="font-size:13px;color:#555;margin-bottom:12px;font-weight:600;">One-time setup (about 5 minutes):</div>
+    <ol style="font-size:12px;color:#555;line-height:1.9;padding-left:18px;margin-bottom:14px;">
+      <li>Go to <a href="https://console.cloud.google.com" target="_blank" style="color:#1D4ED8;">console.cloud.google.com</a> and sign in. Click <strong>New Project</strong>, give it any name, click Create.</li>
+      <li>In the search bar type <strong>Google Calendar API</strong>, click it, then click <strong>Enable</strong>.</li>
+      <li>Go to <strong>APIs &amp; Services → Credentials → Create Credentials → OAuth client ID</strong>. Choose <em>Web application</em>. Under <strong>Authorised JavaScript origins</strong> add your hosted URL (e.g. <code style="background:#F5F5F5;padding:1px 5px;border-radius:4px;">https://yourusername.github.io</code>). Click Create.</li>
+      <li>Copy the <strong>Client ID</strong> shown (ends in <code style="background:#F5F5F5;padding:1px 5px;border-radius:4px;">.apps.googleusercontent.com</code>) and paste it below.</li>
+    </ol>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">OAuth Client ID</label>
+      <input type="text" id="gcal-client-id" placeholder="xxxx.apps.googleusercontent.com"
+        style="width:100%;padding:8px 10px;border:1.5px solid #E5E5E5;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;background:#FAFAFA;" />
+    </div>
+    <div id="gcal-token-section" style="display:none;margin-bottom:10px;">
+      <div style="font-size:12px;color:#555;margin:8px 0;line-height:1.6;">A Google sign-in window opened. After you approve, copy everything after <code style="background:#F5F5F5;padding:1px 5px;border-radius:4px;">access_token=</code> in the redirect URL and paste below:</div>
+      <label style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Access token</label>
+      <input type="text" id="gcal-token-input" placeholder="ya29.a0…"
+        style="width:100%;padding:8px 10px;border:1.5px solid #E5E5E5;border-radius:8px;font-family:Inter,sans-serif;font-size:13px;background:#FAFAFA;" />
+    </div>
+    <div id="gcal-modal-btns" style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn-cancel" onclick="closeGCalModal()">Cancel</button>
+      <button class="btn-save" style="flex:2;" onclick="gcalAuthorise()"><i class="fa-brands fa-google"></i> Authorise with Google</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+// ══════════ DEFAULT PRIORITIES ══════════
+const DEFAULT_PRIORITIES = [
+  {key:'1', label:'Before Routine', bg:'#FFEDED', txt:'#A32D2D', bdr:'#F0A0A0', stripe:'#E24B4A'},
+  {key:'2', label:'Routine',        bg:'#FFF5E0', txt:'#854F0B', bdr:'#EFD080', stripe:'#EF9F27'},
+  {key:'3', label:'After Routine',  bg:'#E6F1FB', txt:'#185FA5', bdr:'#90C0EA', stripe:'#378ADD'},
+  {key:'4', label:'Low Priority',   bg:'#F1F1F1', txt:'#5F5E5A', bdr:'#CCC',    stripe:'#AAAAAA'},
+];
+
+const DEFAULT_STATUSES = [
+  {key:'pending',         label:'Pending',               bg:'#FFF5E0',txt:'#854F0B',bdr:'#EFD080'},
+  {key:'inprogress',      label:'In-Progress',            bg:'#E6F1FB',txt:'#185FA5',bdr:'#90C0EA'},
+  {key:'waitapprove',     label:'Wait for Approve',       bg:'#FDF4FF',txt:'#7E22CE',bdr:'#E9D5FF'},
+  {key:'completed',       label:'Completed',              bg:'#E8F5E9',txt:'#2E7D32',bdr:'#A5D6A7'},
+  {key:'hold',            label:'Hold',                   bg:'#F1F1F1',txt:'#5F5E5A',bdr:'#CCC'},
+  {key:'cancel',          label:'Cancel',                 bg:'#FFEDED',txt:'#A32D2D',bdr:'#F0A0A0'},
+  {key:'pending-month',   label:'Pending for this Month', bg:'#FFF0E0',txt:'#C05A10',bdr:'#F7C78A'},
+  {key:'monthly-complete',label:'Monthly Complete',       bg:'#E0F7FA',txt:'#006064',bdr:'#80DEEA'},
+];
+
+// ══════════ STATE ══════════
+let countries  = JSON.parse(localStorage.getItem('tm_countries') ||'null') || ['TH','LA','PNG','LBR'];
+let projects   = JSON.parse(localStorage.getItem('tm_projects')  ||'null') || ['APP','iAPI','PNR','TDAC','ALP','SFTP','C.I.Q.','Website','CE','CX'];
+let members    = JSON.parse(localStorage.getItem('tm_members')   ||'null') || ["P'Aom","P'Wan","Matoom","Fern","Tode","Fame","P'Best"];
+let statuses   = JSON.parse(localStorage.getItem('tm_statuses')  ||'null') || DEFAULT_STATUSES.map(s=>({...s}));
+let priorities = JSON.parse(localStorage.getItem('tm_priorities')||'null') || DEFAULT_PRIORITIES.map(p=>({...p}));
+let tasks      = JSON.parse(localStorage.getItem('tm_tasks_v6')  ||'null') || [];
+let nextId     = tasks.length ? Math.max(...tasks.map(t=>t.id))+1 : 1;
+let selP='2', editId=null, wdBuf=[], quill=null, statusTargetId=null;
+
+let gcalToken = localStorage.getItem('tm_gcal_token') || null;
+
+const save   = ()=>localStorage.setItem('tm_tasks_v6',   JSON.stringify(tasks));
+const saveC  = ()=>localStorage.setItem('tm_countries',   JSON.stringify(countries));
+const saveP  = ()=>localStorage.setItem('tm_projects',    JSON.stringify(projects));
+const saveM  = ()=>localStorage.setItem('tm_members',     JSON.stringify(members));
+const saveS  = ()=>localStorage.setItem('tm_statuses',    JSON.stringify(statuses));
+const savePri= ()=>localStorage.setItem('tm_priorities',  JSON.stringify(priorities));
+
+const todayStr = ()=>new Date().toISOString().slice(0,10);
+const tmrwStr  = ()=>{const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+const daysDiff = d=>Math.ceil((new Date(d+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/86400000);
+const fmtD  = d=>{if(!d)return'-';return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});}
+const fmtDS = d=>{if(!d)return'';return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});}
+
+function getPriority(key){return priorities.find(p=>p.key===String(key))||{key:String(key),label:'Priority '+key,bg:'#EEE',txt:'#555',bdr:'#CCC',stripe:'#AAA'};}
+const PRI_STRIPE = new Proxy({},{get:(_,k)=>getPriority(k).stripe});
+const PRI_LABEL  = new Proxy({},{get:(_,k)=>getPriority(k).label});
+function getStatus(key){return statuses.find(s=>s.key===key)||{key,label:key,bg:'#EEE',txt:'#555',bdr:'#CCC'};}
+
+
+// ══════════ GOOGLE CALENDAR — OAuth Token Connect ══════════
+function openGCalModal(){ document.getElementById('gcal-modal-overlay').style.display='block'; }
+function closeGCalModal(){ document.getElementById('gcal-modal-overlay').style.display='none'; }
+
+function gcalAuthorise(){
+  const cid = document.getElementById('gcal-client-id').value.trim();
+  if(!cid){ showToast('Paste your Client ID first.'); return; }
+  const scope    = encodeURIComponent('https://www.googleapis.com/auth/calendar.events');
+  const redirect = encodeURIComponent(window.location.href.split('#')[0]);
+  window.open(
+    `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(cid)}&redirect_uri=${redirect}&response_type=token&scope=${scope}&prompt=consent`,
+    '_blank','width=520,height=620'
+  );
+  document.getElementById('gcal-token-section').style.display = 'block';
+  document.getElementById('gcal-modal-btns').innerHTML =
+    `<button class="btn-cancel" onclick="closeGCalModal()">Cancel</button>
+     <button class="btn-save" style="flex:1;" onclick="gcalSaveToken()">Connect</button>`;
+}
+
+function gcalSaveToken(){
+  const t = document.getElementById('gcal-token-input').value.trim();
+  if(!t){ showToast('Paste the access_token first.'); return; }
+  gcalToken = t;
+  localStorage.setItem('tm_gcal_token', t);
+  updateGCalStatus();
+  closeGCalModal();
+  showToast('Google Calendar connected!');
+}
+
+function gcalDisconnect(){
+  gcalToken = null;
+  localStorage.removeItem('tm_gcal_token');
+  updateGCalStatus();
+  showToast('Google Calendar disconnected.');
+}
+
+function updateGCalStatus(){
+  const statusEl = document.getElementById('gcal-connect-status');
+  const btnEl    = document.getElementById('gcal-connect-btn');
+  if(!statusEl || !btnEl) return;
+  if(gcalToken){
+    statusEl.innerHTML = '<span style="color:#1A6B35;font-weight:700;">✓ Connected</span> <span style="color:#999;font-size:11px;">— token active (expires ~1hr)</span>';
+    btnEl.textContent = 'Reconnect';
+    btnEl.style.background = '#FFF5E0';
+    btnEl.style.color = '#854F0B';
+  } else {
+    statusEl.innerHTML = '<span style="color:#999;">Not connected</span>';
+    btnEl.textContent = 'Connect Google Calendar';
+    btnEl.style.background = '#1A6B35';
+    btnEl.style.color = '#fff';
+  }
+}
+
+// Show simple toast notification
+function showToast(msg, dur=2400){
+  let el = document.getElementById('tm-toast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'tm-toast';
+    el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);background:#333;color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2);opacity:0;transition:all .25s;pointer-events:none;z-index:1000;white-space:nowrap;font-family:Inter,sans-serif;font-weight:500;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(-50%) translateY(16px)'; }, dur);
+}
+
+// Adapter: convert Task Manager task → worklog entry format for GCal functions
+function taskToEntry(t){
+  return {
+    id:          t.id,
+    name:        t.name,
+    type:        'Task',
+    deadline:    t.deadline || (t.workDays&&t.workDays.length ? t.workDays[t.workDays.length-1] : ''),
+    time:        t.startTime || '',
+    remark:      [
+      t.project  ? 'Project: '+t.project   : '',
+      t.country  ? 'Country: '+t.country   : '',
+      t.assignedTo ? 'Assigned to: '+t.assignedTo : '',
+      t.detail   ? t.detail.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim().slice(0,200) : ''
+    ].filter(Boolean).join(' | '),
+    gcalEventId: t.gcalEventId || null
+  };
+}
+
+function buildGCalEvent(entry){
+  const isTask = entry.type === 'Task';
+  const title = isTask ? `✓ Task: ${entry.name}` : entry.name;
+  const desc = [
+    entry.type ? `Type: ${entry.type}` : '',
+    entry.remark || '',
+    isTask ? 'Created from Work Log (Task)' : ''
+  ].filter(Boolean).join('\n');
+  const colorId = isTask ? '2' : undefined;
+  let start, end;
+  if(entry.time){
+    // Timed event — use dateTime
+    start = {dateTime: `${entry.deadline}T${entry.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone};
+    end   = {dateTime: `${entry.deadline}T${entry.time}:00`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone};
+  } else {
+    // All-day event
+    start = {date: entry.deadline};
+    end   = {date: entry.deadline};
+  }
+  return {summary:title, description:desc, start, end, ...(colorId&&{colorId})};
+}
+
+async function pushToGCal(entry){
+  if(!gcalToken||!entry?.deadline){ showToast('No deadline set on this task.'); return; }
+  try{
+    const dayStart = entry.deadline+'T00:00:00Z';
+    const dayEnd   = entry.deadline+'T23:59:59Z';
+    const listRes  = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${dayStart}&timeMax=${dayEnd}&singleEvents=true`,
+      {headers:{Authorization:`Bearer ${gcalToken}`}}
+    );
+    if(listRes.ok){
+      const listData = await listRes.json();
+      const titleToCheck = (entry.type==='Task'?'\u2713 Task: ':'')+entry.name;
+      const dup = (listData.items||[]).find(ev=>ev.summary===titleToCheck);
+      if(dup){
+        const realTask = tasks.find(x=>x.id===entry.id);
+        if(realTask){ realTask.gcalEventId = dup.id; save(); }
+        showToast(`Already in Calendar on ${entry.deadline} — skipped.`);
+        return;
+      }
+    }
+    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
+      method:'POST', headers:{Authorization:`Bearer ${gcalToken}`,'Content-Type':'application/json'},
+      body:JSON.stringify(buildGCalEvent(entry))
+    });
+    if(res.ok){
+      const created = await res.json();
+      const realTask = tasks.find(x=>x.id===entry.id);
+      if(realTask){ realTask.gcalEventId = created.id; save(); }
+      const label = entry.type==='Task' ? 'Task' : 'Event';
+      showToast(`"${entry.name}" added to Google Calendar as ${label}.`);
+    } else {
+      const err = await res.json();
+      showToast('Calendar error — ' + (err.error?.message||'token may have expired.'));
+    }
+  }catch(e){ showToast('Could not reach Google Calendar.'); }
+}
+
+async function patchGCal(entry){
+  if(!gcalToken||!entry?.gcalEventId) return;
+  try{
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events/${entry.gcalEventId}`,
+      {method:'PATCH', headers:{Authorization:`Bearer ${gcalToken}`,'Content-Type':'application/json'},
+       body:JSON.stringify(buildGCalEvent(entry))}
+    );
+    if(res.ok) showToast(`Calendar event updated for "${entry.name}".`);
+    else showToast('Calendar update failed — token may have expired.');
+  }catch{ showToast('Could not reach Google Calendar.'); }
+}
+
+async function deleteFromGCal(entry){
+  if(!gcalToken||!entry?.gcalEventId) return;
+  try{
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events/${entry.gcalEventId}`,
+      {method:'DELETE', headers:{Authorization:`Bearer ${gcalToken}`}}
+    );
+    if(res.ok||res.status===204) showToast(`Calendar event removed for "${entry.name}".`);
+    else showToast('Calendar delete failed — token may have expired. Remove manually.');
+  }catch{ showToast('Could not reach Google Calendar.'); }
+}
+
+// ══════════ CONFIG ══════════
+function cfgAddCountry(){const v=document.getElementById('cfg-new-country').value.trim().toUpperCase();if(v&&!countries.includes(v)){countries.push(v);saveC();}document.getElementById('cfg-new-country').value='';renderConfig();refreshSelects();}
+function cfgRemoveCountry(i){countries.splice(i,1);saveC();renderConfig();refreshSelects();}
+function cfgAddProject(){const v=document.getElementById('cfg-new-project').value.trim();if(v&&!projects.includes(v)){projects.push(v);saveP();}document.getElementById('cfg-new-project').value='';renderConfig();refreshSelects();}
+function cfgRemoveProject(i){projects.splice(i,1);saveP();renderConfig();refreshSelects();}
+function cfgAddMember(){const v=document.getElementById('cfg-new-member').value.trim();if(v&&!members.includes(v)){members.push(v);saveM();}document.getElementById('cfg-new-member').value='';renderConfig();refreshSelects();}
+function cfgRemoveMember(i){members.splice(i,1);saveM();renderConfig();refreshSelects();}
+function cfgAddStatus(){
+  const key=document.getElementById('cfg-new-status-key').value.trim().replace(/\s+/g,'-').toLowerCase();
+  const label=document.getElementById('cfg-new-status-label').value.trim();
+  const bg=document.getElementById('cfg-new-status-bg').value;
+  const txt=document.getElementById('cfg-new-status-txt').value;
+  if(!key||!label){alert('Please enter both key and label.');return;}
+  if(statuses.find(s=>s.key===key)){alert('Key already exists.');return;}
+  statuses.push({key,label,bg,txt,bdr:bg});saveS();
+  document.getElementById('cfg-new-status-key').value='';
+  document.getElementById('cfg-new-status-label').value='';
+  renderConfig();refreshSelects();
+}
+function cfgRemoveStatus(i){
+  const builtIn=['pending','inprogress','waitapprove','completed','hold','cancel','pending-month','monthly-complete'];
+  if(builtIn.includes(statuses[i].key)){alert('Cannot remove built-in status.');return;}
+  statuses.splice(i,1);saveS();renderConfig();refreshSelects();
+}
+function cfgAddPriority(){
+  const label=document.getElementById('cfg-new-pri-label').value.trim();
+  if(!label){alert('Please enter a priority label.');return;}
+  const bg=document.getElementById('cfg-new-pri-bg').value;
+  const txt=document.getElementById('cfg-new-pri-txt').value;
+  const maxKey=priorities.reduce((m,p)=>Math.max(m,Number(p.key)||0),0);
+  const key=String(maxKey+1);
+  priorities.push({key,label,bg,txt,bdr:bg,stripe:txt});savePri();
+  document.getElementById('cfg-new-pri-label').value='';
+  renderConfig();refreshPriorityPills();
+}
+function cfgRemovePriority(i){
+  const builtIn=['1','2','3','4'];
+  if(builtIn.includes(priorities[i].key)){alert('Cannot remove built-in priority.');return;}
+  priorities.splice(i,1);savePri();renderConfig();refreshPriorityPills();
+}
+
+function renderConfig(){
+  document.getElementById('cfg-countries').innerHTML=countries.map((c,i)=>`<span class="cfg-pill">${c}<button onclick="cfgRemoveCountry(${i})">×</button></span>`).join('');
+  document.getElementById('cfg-projects').innerHTML=projects.map((p,i)=>`<span class="cfg-pill">${p}<button onclick="cfgRemoveProject(${i})">×</button></span>`).join('');
+  document.getElementById('cfg-members').innerHTML=members.map((m,i)=>`<span class="cfg-pill" style="background:#FDF4FF;color:#7E22CE;border-color:#E9D5FF;">${m}<button onclick="cfgRemoveMember(${i})">×</button></span>`).join('');
+  document.getElementById('cfg-priorities').innerHTML=priorities.map((p,i)=>`<span class="cfg-status-pill" style="background:${p.bg};color:${p.txt};border-color:${p.bdr};"><span class="color-swatch" style="background:${p.stripe};border:none;"></span>${p.label}<button onclick="cfgRemovePriority(${i})">×</button></span>`).join('');
+  document.getElementById('cfg-statuses').innerHTML=statuses.map((s,i)=>`<span class="cfg-status-pill" style="background:${s.bg};color:${s.txt};border-color:${s.bdr};"><span class="color-swatch" style="background:${s.bg};border-color:${s.bdr}"></span>${s.label}<button onclick="cfgRemoveStatus(${i})">×</button></span>`).join('');
+  updateGCalStatus();
+}
+
+function refreshPriorityPills(){
+  const wrap=document.querySelector('.ppills');
+  if(!wrap)return;
+  wrap.innerHTML=priorities.map(p=>`<div class="ppill" data-p="${p.key}" onclick="selectP(this)" style="background:${p.bg};color:${p.txt};border-color:${p.bdr};">${p.label}</div>`).join('');
+  wrap.querySelectorAll('.ppill').forEach(el=>el.classList.toggle('sel',el.dataset.p===selP));
+}
+
+function refreshSelects(){
+  const fcs=document.getElementById('fil-country'),fps=document.getElementById('fil-project'),fss=document.getElementById('fil-status');
+  if(fcs){const v=fcs.value;fcs.innerHTML='<option value="">All</option>';countries.forEach(c=>fcs.innerHTML+=`<option value="${c}">${c}</option>`);fcs.value=v;}
+  if(fps){const v=fps.value;fps.innerHTML='<option value="">All</option>';projects.forEach(p=>fps.innerHTML+=`<option value="${p}">${p}</option>`);fps.value=v;}
+  if(fss){const v=fss.value;fss.innerHTML='<option value="">All</option>';statuses.forEach(s=>fss.innerHTML+=`<option value="${s.key}">${s.label}</option>`);fss.value=v;}
+  const mc=document.getElementById('f-country'),mp=document.getElementById('f-project'),ms=document.getElementById('f-status');
+  const mfrom=document.getElementById('f-from'),mto=document.getElementById('f-to');
+  if(mc){const v=mc.value;mc.innerHTML='<option value="">-- Select --</option>';countries.forEach(c=>mc.innerHTML+=`<option value="${c}">${c}</option>`);mc.value=v;}
+  if(mp){const v=mp.value;mp.innerHTML='<option value="">-- Select --</option>';projects.forEach(p=>mp.innerHTML+=`<option value="${p}">${p}</option>`);mp.value=v;}
+  if(ms){const v=ms.value;ms.innerHTML='';statuses.forEach(s=>ms.innerHTML+=`<option value="${s.key}">${s.label}</option>`);ms.value=v||'pending';}
+  if(mfrom){const v=mfrom.value;mfrom.innerHTML='<option value="">-- Select --</option>';members.forEach(m=>mfrom.innerHTML+=`<option value="${m}">${m}</option>`);mfrom.value=v;}
+  if(mto){const v=mto.value;mto.innerHTML='<option value="">-- Select --</option>';members.forEach(m=>mto.innerHTML+=`<option value="${m}">${m}</option>`);mto.value=v;}
+}
+
+// ══════════ FILTER ══════════
+function toggleFilterPanel(){const p=document.getElementById('filter-panel'),b=document.getElementById('filter-toggle-btn');p.classList.toggle('open');b.classList.toggle('active-filter',p.classList.contains('open'));}
+function clearFilter(){document.getElementById('search-input').value='';['fil-priority','fil-status','fil-country','fil-project'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('filter-toggle-btn').classList.remove('active-filter');applyFilter();}
+function applyFilter(){renderLists();}
+function getFiltered(){
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
+  const fp=document.getElementById('fil-priority').value||'';
+  const fs=document.getElementById('fil-status').value||'';
+  const fc=document.getElementById('fil-country').value||'';
+  const fpr=document.getElementById('fil-project').value||'';
+  return tasks.filter(t=>{
+    if(q&&!t.name.toLowerCase().includes(q))return false;
+    if(fp&&t.priority!==fp)return false;
+    if(fs&&t.status!==fs)return false;
+    if(fc&&t.country!==fc)return false;
+    if(fpr&&t.project!==fpr)return false;
+    return true;
+  });
+}
+
+// ══════════ STATUS POPUP ══════════
+function openStatusPopup(id){
+  statusTargetId=id;
+  const t=tasks.find(x=>x.id===id);
+  document.getElementById('sp-grid').innerHTML=statuses.map(s=>`<button class="sp-btn${t.status===s.key?' current':''}" style="background:${s.bg};color:${s.txt};border-color:${s.bdr};" onclick="applyStatus('${s.key}')">${s.label}</button>`).join('');
+  document.getElementById('status-popup-overlay').classList.add('open');
+}
+function closeStatusPopup(e){document.getElementById('status-popup-overlay').classList.remove('open');}
+function applyStatus(key){
+  const t=tasks.find(x=>x.id===statusTargetId);
+  if(t){t.status=key;t.done=(key==='completed'||key==='monthly-complete');save();}
+  document.getElementById('status-popup-overlay').classList.remove('open');
+  render();
+}
+
+// ══════════ COMPLETE CHECKBOX ══════════
+function toggleComplete(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.done=!t.done;t.status=t.done?'completed':'inprogress';save();render();}
+
+// ══════════ DELETE ══════════
+function deleteTask(id){
+  if(!confirm('Delete this task?'))return;
+  const t=tasks.find(x=>x.id===id);
+  if(t && gcalToken) deleteFromGCal(taskToEntry(t));
+  tasks=tasks.filter(x=>x.id!==id);save();render();
+}
+
+// ══════════ WORK DAYS ══════════
+function addWD(){const v=document.getElementById('f-wd-input').value;if(!v)return;if(!wdBuf.includes(v)){wdBuf.push(v);wdBuf.sort();}document.getElementById('f-wd-input').value='';renderWDPreview();}
+function removeWD(d){wdBuf=wdBuf.filter(x=>x!==d);renderWDPreview();}
+function renderWDPreview(){document.getElementById('sel-dates').innerHTML=wdBuf.map(d=>`<span class="sdpill">${fmtDS(d)}<button onclick="removeWD('${d}')">×</button></span>`).join('');}
+
+// ══════════ QUILL ══════════
+function initQuill(){if(quill)return;quill=new Quill('#quill-editor',{theme:'snow',modules:{toolbar:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],['clean']]}});}
+
+// ══════════ MODAL ══════════
+function openModal(id){
+  editId=id||null;initQuill();refreshSelects();refreshPriorityPills();wdBuf=[];
+  if(id){
+    const t=tasks.find(x=>x.id===id);
+    document.getElementById('modal-title-text').textContent='Edit Task';
+    document.getElementById('f-name').value=t.name||'';
+    document.getElementById('f-country').value=t.country||'';
+    document.getElementById('f-project').value=t.project||'';
+    document.getElementById('f-from').value=t.assignedFrom||'';
+    document.getElementById('f-to').value=t.assignedTo||'';
+    document.getElementById('f-status').value=t.status||'pending';
+    document.getElementById('f-deadline').value=t.deadline||'';
+    document.getElementById('f-start-time').value=t.startTime||'09:00';
+    document.getElementById('f-end-time').value=t.endTime||'10:00';
+    selP=t.priority||'2';
+    wdBuf=[...(t.workDays||[])];
+    quill.root.innerHTML=t.detail||'';
+  } else {
+    document.getElementById('modal-title-text').textContent='Add New Task';
+    ['f-name','f-deadline'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('f-country').value='';document.getElementById('f-project').value='';
+    document.getElementById('f-from').value='';document.getElementById('f-to').value='';
+    document.getElementById('f-status').value='pending';
+    document.getElementById('f-start-time').value='09:00';
+    document.getElementById('f-end-time').value='10:00';
+    selP='2';quill.root.innerHTML='';
+  }
+  document.querySelectorAll('.ppill').forEach(p=>p.classList.toggle('sel',p.dataset.p===selP));
+  renderWDPreview();
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function closeModalOutside(e){if(e.target.id==='modal')closeModal();}
+function selectP(el){document.querySelectorAll('.ppill').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');selP=el.dataset.p;}
+
+function saveTask(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){document.getElementById('f-name').focus();return;}
+  const payload={
+    name,priority:selP,
+    assignedFrom:document.getElementById('f-from').value.trim(),
+    assignedTo:document.getElementById('f-to').value.trim(),
+    country:document.getElementById('f-country').value,
+    project:document.getElementById('f-project').value,
+    status:document.getElementById('f-status').value,
+    deadline:document.getElementById('f-deadline').value,
+    startTime:document.getElementById('f-start-time').value||'09:00',
+    endTime:document.getElementById('f-end-time').value||'10:00',
+    workDays:[...wdBuf],
+    detail:quill?quill.root.innerHTML:'',
+    done:document.getElementById('f-status').value==='completed'
+  };
+  let saved;
+  if(editId){
+    const idx=tasks.findIndex(x=>x.id===editId);
+    // preserve gcalEventId if it exists
+    payload.gcalEventId = tasks[idx].gcalEventId || null;
+    tasks[idx]={...tasks[idx],...payload};
+    saved=tasks[idx];
+    // if connected and has deadline and existing cal event, patch it
+    if(gcalToken && saved.deadline && saved.gcalEventId) patchGCal(taskToEntry(saved));
+  } else {
+    saved={id:nextId++,...payload};tasks.push(saved);
+  }
+  save();closeModal();render();
+}
+
+// ══════════ CARD BUILDER ══════════
+function dlTag(t){
+  if(!t.deadline)return'';
+  const d=daysDiff(t.deadline);
+  if(d<0)return`<span class="tag tg-dl-hot"><i class="fa-solid fa-circle-xmark"></i> Overdue ${Math.abs(d)}d</span>`;
+  if(d===0)return`<span class="tag tg-dl-hot"><i class="fa-solid fa-triangle-exclamation"></i> Due Today!</span>`;
+  if(d===1)return`<span class="tag tg-dl-soon"><i class="fa-solid fa-bell"></i> Due Tomorrow!</span>`;
+  if(d<=7)return`<span class="tag tg-dl-soon"><i class="fa-regular fa-clock"></i> Due in ${d}d</span>`;
+  return`<span class="tag tg-dl-ok"><i class="fa-regular fa-calendar"></i> Due ${fmtD(t.deadline)}</span>`;
+}
+function wdPills(t){
+  if(!t.workDays||!t.workDays.length)return'';
+  const td=todayStr();
+  const timeStr=(t.startTime&&t.endTime)?`<span style="font-size:10px;color:#555;font-weight:600;background:#FFF3E0;border:1px solid #FFB877;border-radius:8px;padding:1px 7px;margin-left:4px;"><i class="fa-regular fa-clock"></i> ${t.startTime}–${t.endTime}</span>`:'';
+  const pills=t.workDays.map(d=>{const cls=d===td?'wd-pill wd-today':d<td?'wd-pill wd-past':'wd-pill';return`<span class="${cls}">${fmtDS(d)}${d===td?' ✦':''}</span>`;}).join('');
+  return`<div style="margin-top:3px;font-size:10px;color:#999;display:flex;align-items:flex-start;gap:4px;flex-wrap:wrap;"><span><i class="fa-regular fa-calendar-check"></i> Work days:</span><div class="workdays-wrap" style="flex:1;">${pills}${timeStr}</div></div>`;
+}
+
+function buildCard(t){
+  const s=getStatus(t.status||'pending');
+  const done=(t.status==='completed'||t.done);
+  const cancelled=(t.status==='cancel');
+  const div=document.createElement('div');
+  div.className=`task-card${done?' tc-done':''}${cancelled?' tc-cancel':''}`;
+  const det=(t.detail&&t.detail.replace(/<[^>]*>/g,'').trim())?`<div class="card-detail-text">${t.detail}</div>`:'';
+  const gcalBtn = gcalToken
+    ? `<button class="cbtn cbtn-gcal" onclick="pushToGCal(taskToEntry(tasks.find(x=>x.id===${t.id})))"><i class="fa-brands fa-google"></i> Add to Calendar</button>`
+    : `<button class="cbtn cbtn-gcal" onclick="switchPage('config');showToast('Connect Google Calendar in Configure first.')" style="opacity:.6;"><i class="fa-brands fa-google"></i> Add to Calendar</button>`;
+  div.innerHTML=`
+    <div class="card-stripe-body">
+      <div class="priority-stripe" style="background:${PRI_STRIPE[t.priority]}"></div>
+      <div class="card-body">
+        <div class="card-title-row">
+          <div class="task-name">${t.name}</div>
+          <label class="done-check-wrap" title="Mark complete">
+            <input type="checkbox" ${t.done?'checked':''} onchange="toggleComplete(${t.id})">
+            <span>Done</span>
+          </label>
+        </div>
+        <div class="task-tags">
+          <span class="tag" style="background:${getPriority(t.priority).bg};color:${getPriority(t.priority).txt};border-color:${getPriority(t.priority).bdr};">${PRI_LABEL[t.priority]}</span>
+          <span class="st-badge" style="background:${s.bg};color:${s.txt};border-color:${s.bdr};" onclick="openStatusPopup(${t.id})">${s.label} <i class="fa-solid fa-chevron-up" style="font-size:8px;opacity:.7"></i></span>
+          ${t.country?`<span class="tag tg-cntry"><i class="fa-solid fa-flag"></i> ${t.country}</span>`:''}
+          ${t.project?`<span class="tag tg-proj"><i class="fa-solid fa-folder-open"></i> ${t.project}</span>`:''}
+          ${t.assignedTo?`<span class="tag tg-usr"><i class="fa-solid fa-user"></i> ${t.assignedTo}</span>`:''}
+          ${dlTag(t)}
+        </div>
+        ${t.assignedFrom?`<div class="assign-line"><i class="fa-solid fa-arrow-right-to-bracket"></i> From: <strong>${t.assignedFrom}</strong></div>`:''}
+        ${wdPills(t)}
+      </div>
+    </div>
+    ${det}
+    <div class="card-footer">
+      <div class="cfa">
+        <button class="cbtn cbtn-del" onclick="deleteTask(${t.id})"><i class="fa-solid fa-trash-can"></i> Delete</button>
+        <button class="cbtn cbtn-edit" onclick="openModal(${t.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+      </div>
+      <div class="cfa">${gcalBtn}</div>
+    </div>`;
+  return div;
+}
+
+// ══════════ RENDER ══════════
+const sortByPriority = arr=>[...arr].sort((a,b)=>Number(a.priority)-Number(b.priority));
+
+function renderNotifs(){
+  const td=todayStr(),tm=tmrwStr();
+  const dToday=tasks.filter(t=>!t.done&&t.deadline===td);
+  const dTmrw=tasks.filter(t=>!t.done&&t.deadline===tm);
+  let h='';
+  dToday.forEach(t=>{h+=`<div class="notif-item notif-danger"><div class="notif-item-icon"><i class="fa-solid fa-circle-exclamation"></i></div><div class="notif-item-body"><div class="notif-item-title">⚠️ Due Today</div><div class="notif-item-name">${t.name}${t.project?' · '+t.project:''}</div></div></div>`;});
+  dTmrw.forEach(t=>{h+=`<div class="notif-item notif-warn"><div class="notif-item-icon"><i class="fa-solid fa-bell"></i></div><div class="notif-item-body"><div class="notif-item-title">🔔 Due Tomorrow</div><div class="notif-item-name">${t.name}${t.project?' · '+t.project:''}</div></div></div>`;});
+  document.getElementById('notif-wrap').innerHTML=h;
+}
+
+function renderList(el,arr,emptyMsg){
+  el.innerHTML='';
+  if(!arr.length){el.innerHTML=`<div class="empty-state"><i class="fa-solid fa-face-smile"></i><p>${emptyMsg}</p></div>`;return;}
+  sortByPriority(arr).forEach(t=>el.appendChild(buildCard(t)));
+}
+
+function renderLists(){
+  const filtered=getFiltered();
+  const td=todayStr();
+  renderNotifs();
+  const todayT    = filtered.filter(t=>t.workDays&&t.workDays.includes(td));
+  const todayUndone = todayT.filter(t=>!t.done);
+  const hot       = filtered.filter(t=>t.deadline&&!t.done&&daysDiff(t.deadline)<=7);
+  const remaining = filtered.filter(t=>!t.done);
+  const done      = filtered.filter(t=>t.done);
+  renderList(document.getElementById('ipanel-today'),    todayT,    'No tasks scheduled for today 🎉');
+  renderList(document.getElementById('ipanel-deadline'), hot,       'No tasks near deadline 👍');
+  renderList(document.getElementById('ipanel-remaining'),remaining, 'No remaining tasks — all done! 🎉');
+  renderList(document.getElementById('ipanel-done'),     done,      'No completed tasks yet.');
+  renderList(document.getElementById('ipanel-all'),      filtered,  'No tasks found. Add one!');
+  document.getElementById('cnt-today').textContent     = todayUndone.length;
+  document.getElementById('cnt-deadline').textContent  = hot.length;
+  document.getElementById('cnt-remaining').textContent = remaining.length;
+  document.getElementById('cnt-done').textContent      = done.length;
+  document.getElementById('cnt-all').textContent       = filtered.length;
+}
+function render(){renderLists();}
+
+// ══════════ TAB / PAGE ══════════
+function switchInner(tab){
+  ['today','deadline','remaining','done','all'].forEach(t=>{
+    document.getElementById('itab-'+t).classList.toggle('tsactive',t===tab);
+    document.getElementById('ipanel-'+t).classList.toggle('active',t===tab);
+  });
+}
+function switchPage(page){
+  ['tasks','config'].forEach(p=>{
+    document.getElementById('page-'+p).classList.toggle('active',p===page);
+    document.getElementById('bnav-'+p).classList.toggle('active',p===page);
+  });
+  if(page==='config'){
+    renderConfig();
+    const cur=localStorage.getItem('tm_header_color')||'#FFD3AC';
+    const inp=document.getElementById('cfg-header-hex');
+    const sw=document.getElementById('cfg-header-swatch');
+    if(inp)inp.value=cur;if(sw)sw.style.background=cur;
+  }
+}
+
+// ══════════ HEADER COLOR ══════════
+function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return{r,g,b};}
+function lighten(hex,amount){const{r,g,b}=hexToRgb(hex);const mix=v=>Math.round(v+(255-v)*amount);return`#${mix(r).toString(16).padStart(2,'0')}${mix(g).toString(16).padStart(2,'0')}${mix(b).toString(16).padStart(2,'0')}`;}
+function darken(hex,amount){const{r,g,b}=hexToRgb(hex);const mix=v=>Math.round(v*(1-amount));return`#${mix(r).toString(16).padStart(2,'0')}${mix(g).toString(16).padStart(2,'0')}${mix(b).toString(16).padStart(2,'0')}`;}
+function applyTheme(hex){
+  const root=document.documentElement;
+  root.style.setProperty('--theme-header',hex);
+  root.style.setProperty('--theme-dark',darken(hex,.40));
+  root.style.setProperty('--theme-mid',darken(hex,.22));
+  root.style.setProperty('--theme-bg',lighten(hex,.70));
+  root.style.setProperty('--theme-panel',lighten(hex,.55));
+  root.style.setProperty('--theme-nav',lighten(hex,.45));
+  root.style.setProperty('--theme-input',lighten(hex,.82));
+  root.style.setProperty('--theme-border',lighten(hex,.30));
+  root.style.setProperty('--theme-btn-light',lighten(hex,.60));
+  document.querySelector('.app-header').style.background=hex;
+}
+function applyHeaderColor(hex){
+  const color=hex||document.getElementById('cfg-header-hex').value.trim();
+  if(!/^#[0-9A-Fa-f]{6}$/.test(color)){alert('Please enter a valid hex color, e.g. #FFD3AC');return;}
+  applyTheme(color);localStorage.setItem('tm_header_color',color);
+  document.getElementById('cfg-header-swatch').style.background=color;
+  document.getElementById('cfg-header-hex').value=color;
+}
+function resetHeaderColor(){
+  const def='#FFD3AC';applyTheme(def);localStorage.removeItem('tm_header_color');
+  document.getElementById('cfg-header-swatch').style.background=def;
+  document.getElementById('cfg-header-hex').value=def;
+}
+function previewHeaderColor(val){if(/^#[0-9A-Fa-f]{6}$/.test(val))document.getElementById('cfg-header-swatch').style.background=val;}
+function setHeaderPreset(hex){document.getElementById('cfg-header-hex').value=hex;document.getElementById('cfg-header-swatch').style.background=hex;applyHeaderColor(hex);}
+function loadHeaderColor(){const saved=localStorage.getItem('tm_header_color')||'#FFD3AC';applyTheme(saved);}
+
+// ══════════ INIT ══════════
+document.getElementById('header-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+loadHeaderColor();
+refreshSelects();
+render();
+updateGCalStatus();
+</script>
+</body>
+</html>
