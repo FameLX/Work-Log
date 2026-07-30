@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.8</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.10</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -985,6 +985,10 @@ svg.icon.sm{width:13px;height:13px;}
     </button>
     <h2>Trash</h2>
     <span id="trash-count" style="font-size:12px;color:var(--text3);"></span>
+    <button class="btn btn-sm btn-danger" id="trash-clear-btn" onclick="clearTrash()" style="gap:5px;">
+      <svg class="icon sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Clear Trash
+    </button>
   </div>
   <div class="trash-body" id="trash-body"></div>
 </div>
@@ -1410,6 +1414,15 @@ function restoreFromTrash(id){
   toast('Entry restored to active.');
 }
 
+function clearTrash(){
+  if(!trash.length) return;
+  const count = trash.length;
+  if(!confirm(`Permanently delete ${count} ${count===1?'entry':'entries'} from Trash? This cannot be undone.`)) return;
+  trash = [];
+  saveTrash(); renderTrash(); updateTrashBadge();
+  toast(`Trash cleared — ${count} ${count===1?'entry':'entries'} permanently deleted.`);
+}
+
 function openTrash(){ renderTrash(); document.getElementById('trash-overlay').classList.add('open'); }
 function closeTrash(){ document.getElementById('trash-overlay').classList.remove('open'); }
 
@@ -1421,7 +1434,9 @@ function updateTrashBadge(){
 function renderTrash(){
   const body = document.getElementById('trash-body');
   const countEl = document.getElementById('trash-count');
+  const clearBtn = document.getElementById('trash-clear-btn');
   updateTrashBadge();
+  if(clearBtn) clearBtn.style.display = trash.length ? '' : 'none';
   if(!trash.length){
     body.innerHTML = '<div class="empty-state"><div class="empty-icon">🗑️</div><p>Trash is empty.</p></div>';
     if(countEl) countEl.textContent = '';
@@ -2658,8 +2673,8 @@ function importSig(e){ return (e.name||'').trim().toLowerCase()+'|'+(e.deadline|
 
 function finishImport(list, label){
   if(!list.length){ return; }
-  const existingIds = new Set(entries.map(e=>e.id).concat(archived.map(e=>e.id)).concat(trash.map(e=>e.id)));
-  const existingSigs = new Set(entries.map(importSig).concat(archived.map(importSig)).concat(trash.map(importSig)));
+  const existingIds = new Set(entries.map(e=>e.id).concat(archived.map(e=>e.id)));
+  const existingSigs = new Set(entries.map(importSig).concat(archived.map(importSig)));
   const now = new Date().toISOString();
   let added = 0, skipped = 0;
   list.forEach((e, i) => {
@@ -3234,7 +3249,19 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.8', date: 'July 2026', latest: true,
+    version: 'v1.6.10', date: 'July 2026', latest: true,
+    items: [
+      'New: Clear Trash button in the Trash view — permanently deletes everything in Trash right away instead of waiting for the 5-day auto-purge (confirmation required)'
+    ]
+  },
+  {
+    version: 'v1.6.9', date: 'July 2026', latest: false,
+    items: [
+      'Fix: Import duplicate check no longer looks at Trash — a re-imported entry that matches something you deleted is now added back instead of being silently skipped'
+    ]
+  },
+  {
+    version: 'v1.6.8', date: 'July 2026', latest: false,
     items: [
       'Import File now skips duplicates — matches by original ID (JSON/CSV/Excel all carry it) or by name+deadline+time if no ID is present, so re-importing the same file twice won\'t create copies'
     ]
