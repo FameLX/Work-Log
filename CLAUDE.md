@@ -13,7 +13,7 @@ Operating discipline for all models — read and follow literally:
 | Work Log | HTML app (prod) | Active | v1.6.1 | Copy from dev after user approval, push origin |
 | Work Log Shared | HTML read-only | Active | TBD | Independent version, own backup cycle |
 | APP Test Case Testing | HTML (CIRQ XML multi-file) | Active | TBD | See CIRQ XML section below |
-| Check-in Push | HTML app (APP+PNR combined) | Active | v1.0.0 | `Project/Check-in Push/checkin-push.html` — see Check-in Push section |
+| Check-in Push | HTML app (APP+PNR combined) | Active | v1.1.0 | `Project/Check-in Push/checkin-push.html` — see Check-in Push section |
 | Data Progress Report | HTML report | Active | TBD | Standalone, independent version |
 | Project Manager | HTML app | — | TBD | Standalone |
 | Task Manager | HTML app | — | TBD | Standalone |
@@ -264,17 +264,19 @@ Date formats from Excel: DOB as `DDMonYYYY` (e.g. `01Jan1990`), expiry as `DD-Mo
 `Project/Check-in Push/checkin-push.html` — single-file HTML app, no deps. One traveller entry generates BOTH certification messages side by side:
 
 - **Left output**: APP CIRQ `CheckInTravellerRequest` XML (check-in only — no Cancel/Re-check-in; those stay in the CIRQ Builder).
-- **Right output**: PNRGOV EDIFACT message(s). Transit/Transfer emit TWO messages, one per reporting flight, each carrying the full two-leg itinerary.
-- **Export as Batch File**: same ALP xlsx v5 batch export as the CIRQ builders (two files for two-leg journeys).
+- **Right output**: PNRGOV EDIFACT message (Main Flight = reporting flight).
+- **Export as Batch File**: same ALP xlsx v5 batch export as the CIRQ builders.
 
 Built from `CIRQ_XML_Builder_Test.html` (form, pickers, tz conversion, batch export, `buildXML`) + the PNR EDIFACT Checker's built-in generator (`buildPnrMessage`, ported minus negative-test breaks; recipient fixed `PNRTHAICUSTOMS`). Key rules:
 
+- **Form structure (v1.1.0)** mirrors the PNR Checker generator: **Main Flight** (the reporting flight) → **Bookings** (add more than one; each has Record Locator, Booking Date, Flight Legs and Travellers). A booking with no legs carries just the Main Flight; explicit legs become extra itinerary TVLs. EQN = booking count; each booking = one SRC group. APP XML takes every traveller across all bookings, each stamped with its booking's locator in `com:PNR`.
+- **Transit / Transfer are parked** — greyed "In progress" in the Direction dropdown until reworked under the booking model. Inbound/Outbound only for now.
 - All fields start **blank** — deliberately no flight presets.
 - Times typed in GMT+7; both outputs carry port-local times via the same `toPortLocal`/`AIRPORT_TZ` conversion.
-- **PNR Settings**: submission timing T-72/T-24/T-6/T-0 (UNB prep = departure minus band; boarding TRI/SSD/TBD only at T-0), booking date (blank → dep −5 d), change-history toggle (ABI/DAT/SAC).
-- Per-traveller collapsed **PNR Details**: seat (blank → auto `0<n>A`), bag weight/tag (blank → no TBD), phone/email/address (blank → omitted), payment (credit card → masked FOP, last 4 digits only), lap-infant flag (PNR only — TIF indicator + SSR INFT; not added to APP XML).
-- Crew traveller types generate APP XML + batch only; the PNR pane shows a "no PNR for crew" note.
-- Generated EDIFACT verified against the PNR checker: baseline pass; PNR_01/04A/04D/07/09/10A/10D pass in their scenarios.
+- **PNR Settings**: submission timing T-72/T-24/T-6/T-0 (UNB prep = departure minus band; boarding TRI/SSD/TBD only at T-0), change-history toggle (ABI/DAT/SAC). Booking date lives on each booking (blank → dep −5 d).
+- Per-traveller collapsed **PNR Details** (auto-filled by "+ Generate Traveller", wiped by its Clear button): seat (blank → auto `0<n>A`), bag weight 2–60 kg with 1–3 comma-separated tag numbers matching the weight (≤23 kg = 1, ≤46 = 2, else 3 — each tag its own TBD tag group), phone/email/address (blank → omitted), payment (credit card → masked FOP, last 4 digits only), lap-infant flag (PNR only — TIF indicator + SSR INFT; not added to APP XML).
+- Crew traveller types hide the PNR Details blocks and generate APP XML + batch only; the PNR pane shows a "no PNR for crew" note.
+- Generated EDIFACT verified against the PNR checker: baseline pass; PNR_01/04A/04D/05/07/09/10A/10D pass in their scenarios (05 = multi-booking).
 
 ---
 
@@ -366,7 +368,7 @@ Bump version **before every push/release/significant snapshot:**
 | Project Manager | Not yet versioned |
 | Task Manager | Not yet versioned |
 | Pretty UI (Worklog UI test) | Not yet versioned |
-| Check-in Push | v1.0.0 |
+| Check-in Push | v1.1.0 |
 
 ---
 
