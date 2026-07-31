@@ -13,6 +13,7 @@ Operating discipline for all models — read and follow literally:
 | Work Log | HTML app (prod) | Active | v1.6.1 | Copy from dev after user approval, push origin |
 | Work Log Shared | HTML read-only | Active | TBD | Independent version, own backup cycle |
 | APP Test Case Testing | HTML (CIRQ XML multi-file) | Active | TBD | See CIRQ XML section below |
+| Check-in Push | HTML app (APP+PNR combined) | Active | v1.0.0 | `Project/Check-in Push/checkin-push.html` — see Check-in Push section |
 | Data Progress Report | HTML report | Active | TBD | Standalone, independent version |
 | Project Manager | HTML app | — | TBD | Standalone |
 | Task Manager | HTML app | — | TBD | Standalone |
@@ -258,6 +259,25 @@ Date formats from Excel: DOB as `DDMonYYYY` (e.g. `01Jan1990`), expiry as `DD-Mo
 
 ---
 
+## Project: Check-in Push (APP + PNR combined generator)
+
+`Project/Check-in Push/checkin-push.html` — single-file HTML app, no deps. One traveller entry generates BOTH certification messages side by side:
+
+- **Left output**: APP CIRQ `CheckInTravellerRequest` XML (check-in only — no Cancel/Re-check-in; those stay in the CIRQ Builder).
+- **Right output**: PNRGOV EDIFACT message(s). Transit/Transfer emit TWO messages, one per reporting flight, each carrying the full two-leg itinerary.
+- **Export as Batch File**: same ALP xlsx v5 batch export as the CIRQ builders (two files for two-leg journeys).
+
+Built from `CIRQ_XML_Builder_Test.html` (form, pickers, tz conversion, batch export, `buildXML`) + the PNR EDIFACT Checker's built-in generator (`buildPnrMessage`, ported minus negative-test breaks; recipient fixed `PNRTHAICUSTOMS`). Key rules:
+
+- All fields start **blank** — deliberately no flight presets.
+- Times typed in GMT+7; both outputs carry port-local times via the same `toPortLocal`/`AIRPORT_TZ` conversion.
+- **PNR Settings**: submission timing T-72/T-24/T-6/T-0 (UNB prep = departure minus band; boarding TRI/SSD/TBD only at T-0), booking date (blank → dep −5 d), change-history toggle (ABI/DAT/SAC).
+- Per-traveller collapsed **PNR Details**: seat (blank → auto `0<n>A`), bag weight/tag (blank → no TBD), phone/email/address (blank → omitted), payment (credit card → masked FOP, last 4 digits only), lap-infant flag (PNR only — TIF indicator + SSR INFT; not added to APP XML).
+- Crew traveller types generate APP XML + batch only; the PNR pane shows a "no PNR for crew" note.
+- Generated EDIFACT verified against the PNR checker: baseline pass; PNR_01/04A/04D/07/09/10A/10D pass in their scenarios.
+
+---
+
 ## All projects: Versioning & 10-day backup retention
 
 Every project in this workspace gets independent versioning + automatic backup. **No variants** — each distinct app/tool is its own project with its own version.
@@ -289,6 +309,7 @@ Every project in this workspace gets independent versioning + automatic backup. 
 | Project Manager | HTML app | `#version-badge` in topbar + file comment line 1 | `PROJECT_BACKUP/` |
 | Task Manager | HTML app | `#version-badge` in topbar + file comment line 1 | `PROJECT_BACKUP/` |
 | Pretty UI (Worklog UI test) | Theme test file | File comment line 1 (top) | `PROJECT_BACKUP/` |
+| Check-in Push | HTML app (APP+PNR) | Topbar version pill + file comment line 1 | `PROJECT_BACKUP/` |
 
 ### Backup workflow (every update)
 
@@ -345,6 +366,7 @@ Bump version **before every push/release/significant snapshot:**
 | Project Manager | Not yet versioned |
 | Task Manager | Not yet versioned |
 | Pretty UI (Worklog UI test) | Not yet versioned |
+| Check-in Push | v1.0.0 |
 
 ---
 
