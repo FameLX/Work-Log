@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.11</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.12</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -2627,7 +2627,7 @@ function parseImportDate(s){
 // "HH:MM" or "HH:MM - HH:MM" -> {time, timeTo}
 function parseImportTime(s){
   const parts = String(s||'').split('-').map(x=>x.trim()).filter(Boolean);
-  return { time: parts[0]||'', timeTo: parts[1]||'' };
+  return { time: padHM(parts[0]), timeTo: padHM(parts[1]) };
 }
 
 // Best-effort: CSV export drops deadlineEnd/syncMode/color, so those come back empty.
@@ -2835,6 +2835,17 @@ async function syncAllToGCal(silent=false){
   toast(`Done! ${synced} ${synced===1?'entry':'entries'} synced to Google Calendar.`);
 }
 
+// Normalizes a time string to zero-padded "HH:MM" for the Google API, which
+// rejects e.g. "1:00" (needs "01:00") -- entries can get an unpadded time from
+// the AI Assistant or Import File, which don't enforce the picker's format.
+function padHM(t){
+  const m = String(t||'').trim().match(/^(\d{1,2}):(\d{1,2})$/);
+  if(!m) return '';
+  const hh = Math.min(23, parseInt(m[1])||0);
+  const mm = Math.min(59, parseInt(m[2])||0);
+  return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+}
+
 function buildGCalEvent(entry){
   const desc = [entry.type ? `Type: ${entry.type}` : '', entry.remark || ''].filter(Boolean).join('\n');
   // Always use the current colour mapping for this type, not whatever was
@@ -2842,11 +2853,12 @@ function buildGCalEvent(entry){
   // colour in Settings takes effect the next time this entry is synced.
   const colorId = typeGCalIds[entry.type] || entry.gcalColorId || undefined;
   let start, end;
-  if(entry.time){
+  const time = padHM(entry.time);
+  if(time){
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const endDate = entry.deadlineEnd || entry.deadline;
-    const endTime = entry.timeTo || entry.time;
-    start = {dateTime: `${entry.deadline}T${entry.time}:00`, timeZone: tz};
+    const endTime = padHM(entry.timeTo) || time;
+    start = {dateTime: `${entry.deadline}T${time}:00`, timeZone: tz};
     end   = {dateTime: `${endDate}T${endTime}:00`, timeZone: tz};
   } else if(entry.deadlineEnd){
     // Multi-day all-day event: GCal end date is exclusive, so add 1 day
@@ -3261,7 +3273,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.11', date: 'July 31, 2026', latest: true,
+    version: 'v1.6.12', date: 'July 31, 2026', latest: true,
+    items: [
+      'Fix: entries with a start time not in the app\'s picker (e.g. added via the AI Assistant or Import File) could get a malformed time and fail to sync to Google Calendar with "Invalid start time" -- times are now normalised everywhere an entry can be created or edited, not just from the time picker'
+    ]
+  },
+  {
+    version: 'v1.6.11', date: 'July 31, 2026', latest: false,
     items: [
       'Fix: Google Calendar/Tasks update and delete errors now show the real reason from Google instead of always guessing "token may have expired" — makes it possible to tell a genuine expired session from a permission or account mismatch'
     ]
@@ -3663,7 +3681,7 @@ function executeAITool(name, args){
   try{
     if(name==='add_entry'){
       const type = args.type || '';
-      const entry = { id: Date.now()+Math.floor(Math.random()*1000), name: args.name||'Untitled', type, deadline: args.deadline||'', deadlineEnd: args.deadlineEnd||'', time: args.time||'', timeTo: args.timeTo||'', remark: args.remark||'', color: typeColors[type]||null, gcalColorId: typeGCalIds[type]||undefined, syncMode: args.syncMode==='task'?'task':'event', createdAt: nowIso, updatedAt: nowIso };
+      const entry = { id: Date.now()+Math.floor(Math.random()*1000), name: args.name||'Untitled', type, deadline: args.deadline||'', deadlineEnd: args.deadlineEnd||'', time: padHM(args.time), timeTo: padHM(args.timeTo), remark: args.remark||'', color: typeColors[type]||null, gcalColorId: typeGCalIds[type]||undefined, syncMode: args.syncMode==='task'?'task':'event', createdAt: nowIso, updatedAt: nowIso };
       entries.unshift(entry); pinnedId = entry.id; save(); render();
       if(gcalToken && entry.deadline){ entry.syncMode==='task' ? pushToGTask(entry) : pushToGCal(entry); }
       return {ok:true, id:entry.id, message:`Added "${entry.name}"`};
@@ -3671,7 +3689,7 @@ function executeAITool(name, args){
     if(name==='edit_entry'){
       const e = entries.find(x=>x.id===args.id) || archived.find(x=>x.id===args.id);
       if(!e) return {ok:false, message:`No entry found with id ${args.id}`};
-      ['name','type','deadline','deadlineEnd','time','timeTo','remark'].forEach(k=>{ if(args[k]!==undefined && args[k]!==null) e[k]=args[k]; });
+      ['name','type','deadline','deadlineEnd','time','timeTo','remark'].forEach(k=>{ if(args[k]!==undefined && args[k]!==null) e[k]=(k==='time'||k==='timeTo')?padHM(args[k]):args[k]; });
       if(args.type!==undefined){ e.color = typeColors[e.type]||null; e.gcalColorId = typeGCalIds[e.type]||undefined; }
       e.updatedAt = nowIso; save(); render();
       if(gcalToken && e.deadline){ if(e.syncMode==='task' && e.gcalTaskId) patchGTask(e); else if(e.syncMode!=='task' && e.gcalEventId) patchGCal(e); }
