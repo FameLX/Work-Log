@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.12</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.13</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -2917,7 +2917,16 @@ async function patchGCal(entry, silent=false){
     }
     else{
       const err = await res.json().catch(()=>null);
-      if(!silent) toast('Calendar update failed — ' + (err?.error?.message || `HTTP ${res.status}`));
+      const msg = err?.error?.message || '';
+      if(res.status===400 && /invalid start time/i.test(msg)){
+        // The event on GCal's side is stuck in a state PATCH can't reconcile
+        // (e.g. it was created as an all-day event and can't be converted to
+        // a timed one in place) — clear the stale ID and create fresh instead.
+        entry.gcalEventId = null;
+        save();
+        await pushToGCal(entry, silent);
+      }
+      else if(!silent) toast('Calendar update failed — ' + (msg || `HTTP ${res.status}`));
     }
   }catch{ if(!silent) toast('Could not reach Google Calendar.'); }
 }
@@ -3273,7 +3282,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.12', date: 'July 31, 2026', latest: true,
+    version: 'v1.6.13', date: 'July 31, 2026', latest: true,
+    items: [
+      'Fix: some entries kept failing to sync to Google Calendar with "Invalid start time" even with well-formed data -- caused by the GCal-side event being stuck in an all-day/timed mismatch that a normal update can\'t fix. It now recovers automatically by recreating the event fresh instead of failing every time'
+    ]
+  },
+  {
+    version: 'v1.6.12', date: 'July 31, 2026', latest: false,
     items: [
       'Fix: entries with a start time not in the app\'s picker (e.g. added via the AI Assistant or Import File) could get a malformed time and fail to sync to Google Calendar with "Invalid start time" -- times are now normalised everywhere an entry can be created or edited, not just from the time picker'
     ]
