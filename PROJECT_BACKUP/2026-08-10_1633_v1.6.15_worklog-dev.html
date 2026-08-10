@@ -706,7 +706,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.14</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.15</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -973,6 +973,26 @@ svg.icon.sm{width:13px;height:13px;}
     <div class="modal-actions" id="gcal-modal-actions">
       <button class="btn" onclick="closeGCalModal()">Cancel</button>
       <button class="btn btn-primary" onclick="gcalAuthorise()">Authorise with Google</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mode Switch (Event/Task) disconnected warning -->
+<div class="modal-overlay" id="mode-switch-warn-modal">
+  <div class="modal">
+    <h2>Google Calendar not connected</h2>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px;">
+      This entry is already synced to Google, but there's no live connection right now
+      (not connected, or the session expired). Switching it between Event and Task without
+      one means the old copy on Google can't be removed — it would stay on your calendar
+      as a duplicate you'd have to delete manually.
+    </p>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;">
+      Connect Google Calendar first, then save the change so the old copy is cleaned up automatically.
+    </p>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModeSwitchWarn()">Don't save changes</button>
+      <button class="btn btn-primary" onclick="closeModeSwitchWarn();openGCalModal()">Connect Google Calendar</button>
     </div>
   </div>
 </div>
@@ -1494,10 +1514,23 @@ function startEdit(id){
 
 function cancelEdit(){ editingId = null; render(); }
 
-function saveEdit(id){
+async function saveEdit(id){
   const e = entries.find(x=>x.id===id); if(!e) return;
   const name = v('edit-name-'+id);
   if(!name){ toast('Name cannot be empty.'); return; }
+  const newMode = (v('edit-syncmode-'+id) === 'task') ? 'task' : 'event';
+  const modeChanged = newMode !== (e.syncMode==='task' ? 'task' : 'event');
+  // Switching mode on an already-synced entry needs a LIVE Google connection
+  // to clean up the old copy — a stored token may have expired hours ago, so
+  // verify it now rather than trusting its presence. Disconnected or expired:
+  // warn and abort the save (edit stays open).
+  if(modeChanged && (e.gcalEventId || e.gcalTaskId)){
+    if(gcalToken && !gcalExpired) await verifyGCalToken();
+    if(!gcalToken || gcalExpired){
+      document.getElementById('mode-switch-warn-modal').classList.add('open');
+      return;
+    }
+  }
   e.name = name;
   e.type = v('edit-type-'+id);
   e.time = v('edit-time-'+id);
@@ -1505,8 +1538,6 @@ function saveEdit(id){
   e.remark = v('edit-remark-'+id);
   e.color = typeColors[e.type] || e.color || null;
   e.gcalColorId = typeGCalIds[e.type] || undefined;
-  const newMode = (v('edit-syncmode-'+id) === 'task') ? 'task' : 'event';
-  const modeChanged = newMode !== (e.syncMode==='task' ? 'task' : 'event');
   e.syncMode = newMode;
   if(newMode==='task'){
     e.deadline = v('edit-deadline-task-'+id);
@@ -2803,6 +2834,11 @@ function openGCalModal(){
 }
 function closeGCalModal(){ document.getElementById('gcal-modal').classList.remove('open'); }
 
+function closeModeSwitchWarn(){ document.getElementById('mode-switch-warn-modal').classList.remove('open'); }
+document.getElementById('mode-switch-warn-modal')?.addEventListener('click', (ev)=>{
+  if(ev.target.id === 'mode-switch-warn-modal') closeModeSwitchWarn();
+});
+
 function gcalDisconnect(){
   gcalToken = null;
   localStorage.removeItem('wl2dev_gcal_token');
@@ -3324,9 +3360,16 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.6.14', date: 'August 10, 2026', latest: true,
+    version: 'v1.6.15', date: 'August 10, 2026', latest: true,
     items: [
-      'New: switch an entry between Event and Task while editing — no more delete-and-recreate. If Google is connected, the old calendar event (or task) is removed and the entry is recreated as the new kind automatically'
+      'Fix: the Event/Task switch warning never appeared when the stored Google session had expired — the app treated the dead token as "connected", skipped the warning, and the old copy was orphaned silently. The switch now verifies the connection is actually live first, and an expired session shows the warning like a disconnected one'
+    ]
+  },
+  {
+    version: 'v1.6.14', date: 'August 10, 2026', latest: false,
+    items: [
+      'New: switch an entry between Event and Task while editing — no more delete-and-recreate. If Google is connected, the old calendar event (or task) is removed and the entry is recreated as the new kind automatically',
+      'Switching a synced entry while disconnected now warns first — the old copy on Google couldn\'t be cleaned up, so the app asks you to connect (or not save) instead of leaving a duplicate behind'
     ]
   },
   {
