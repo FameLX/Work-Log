@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.8 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.9 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -855,7 +855,7 @@ svg.icon.sm{width:13px;height:13px;}
   #select-mode-btn{height:36px !important;}
   .sort-select{height:36px;}
   .sort-dir-btn{width:36px;height:36px;}
-  .btn-sync-all{width:36px;height:36px;}
+  .btn-sync-all{width:36px;height:36px;margin-left:auto;}
   /* Fixed row heights: the toolbar's control rows must not change height
      between Calendar and List, or everything below them shifts. */
   .toolbar{align-items:stretch;}
@@ -880,7 +880,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.8</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.9</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1070,9 +1070,6 @@ svg.icon.sm{width:13px;height:13px;}
     </div>
     <div class="toolbar">
       <div class="filter-bar" id="filter-bar"></div>
-      <button class="btn-sync-all" id="sync-all-btn" onclick="syncAllToGCal()" title="Sync all entries to Google Calendar" style="display:none;">
-        <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </button>
       <button class="btn btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="gap:5px;height:28px;padding:0 10px;flex-shrink:0;" title="Select entries for bulk archive/delete">
         <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
         Select
@@ -1085,6 +1082,9 @@ svg.icon.sm{width:13px;height:13px;}
       </select>
       <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="Toggle sort direction">
         <svg class="icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      </button>
+      <button class="btn-sync-all" id="sync-all-btn" onclick="syncAllToGCal()" title="Sync all entries to Google Calendar" style="display:none;">
+        <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       </button>
       <input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" oninput="setSearch(this.value)"/>
     </div>
@@ -4475,7 +4475,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.8', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.9', date: 'August 17, 2026', latest: true,
+    items: [
+      'Sync-all button moved to sit right beside the search box (PC) / flush right of its row (phone), so the space kept for the list-only controls blends into the normal gap in Calendar view instead of reading as a hole'
+    ]
+  },
+  {
+    version: 'v1.7.8', date: 'August 17, 2026', latest: false,
     items: [
       'Fix: Select / sort / direction now hide and show together in one go when switching views — they were fading out one after another because their hover animation was also animating the hide'
     ]
