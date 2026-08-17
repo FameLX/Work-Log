@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.2 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.3 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -812,7 +812,8 @@ svg.icon.sm{width:13px;height:13px;}
   .edit-row2 input,.edit-row2 select{min-width:0;width:100%;}
   /* The floating + sits over the bottom-right corner; give the list enough
      bottom room that the last card's Save/Cancel can scroll clear of it. */
-  body:not(.cal-fit) .entries{padding:12px 12px 96px;}
+  .entries{padding:12px;}
+  body:not(.cal-fit) .entries{padding-bottom:96px;}
   /* Small buttons (due-alert Archive/Extend, chips' actions) were 28px tall —
      under a thumb that's a miss. 36px is the compromise that keeps dense
      rows dense. */
@@ -823,7 +824,23 @@ svg.icon.sm{width:13px;height:13px;}
   }
   /* Calendar: keep real day columns instead of squeezing to unreadable
      slivers — the grid scrolls horizontally, weekday header scrolls in sync. */
-  .toolbar{flex-wrap:wrap;row-gap:8px;}
+  /* Header + toolbar at phone width. Real-phone finding: the filter chips
+     were squeezed into a sliver next to the search box and stacked under it;
+     the stat strip kept its desktop indent when it wrapped to its own line;
+     the header spacer split the buttons across two ragged rows; the bulk bar
+     wrapped "0 selected" onto two lines. Everything flows left, one thing per
+     row where it needs it, 12px gutters to match the list. */
+  .main-header{padding:12px 12px 0;gap:8px;}
+  .main-header-spacer{display:none;}
+  .stat-strip{margin-left:0;flex:1 1 100%;gap:12px;font-size:13px;}
+  .toolbar{flex-wrap:wrap;row-gap:8px;padding:8px 12px 10px;}
+  .filter-bar{flex:1 1 100%;}
+  .search-input{flex:1 1 140px;min-width:0;height:36px;}
+  .sort-select{height:36px;}
+  .sort-dir-btn{width:36px;height:36px;}
+  .bulk-bar{flex-wrap:wrap;padding:10px 12px;gap:8px;}
+  .bulk-bar>span{flex:1 1 100%;}
+  .bulk-bar>div{display:none;}
   .cal-header{flex-wrap:wrap;row-gap:8px;}
   .cal-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .cal-weekdays,.cal-week-days{min-width:560px;}
@@ -841,7 +858,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.2</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.3</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -4433,7 +4450,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.2', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.3', date: 'August 17, 2026', latest: true,
+    items: [
+      'Phone (from real-device screenshots): filter chips no longer get squeezed under the search box — chips take their own row, search + sort share the next; header buttons flow left in one tidy wrap instead of splitting into ragged rows; stat strip loses its desktop indent; select-mode bar puts the count on its own line; list, calendar and header all share the same 12px side gutters'
+    ]
+  },
+  {
+    version: 'v1.7.2', date: 'August 17, 2026', latest: false,
     items: [
       'Phone (touch pass, found by driving the app with emulated finger taps and swipes): the Edit / Quick-add forms no longer overflow — Type gets its own line and the two dates pair up beneath it, instead of Type squashed to a bare arrow and End date running off the right edge',
       'Phone: the floating + button no longer covers the Save/Cancel of the last card while editing — the list scrolls clear of it',
