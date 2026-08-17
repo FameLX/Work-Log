@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.1 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.2 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -803,6 +803,21 @@ svg.icon.sm{width:13px;height:13px;}
      44px comfortable-tap floor on a phone. Grow the hit area, not the glyph. */
   .icon-btn{width:40px;height:40px;}
   .cal-nav-btn{min-width:40px;min-height:40px;}
+  /* Edit / quick-add forms: the Type | Start | End 3-up row can't fit three
+     native date pickers in a ~360px modal — Type squashed to a bare chevron
+     and End date ran off the right edge. Type takes its own line, dates pair
+     up underneath. */
+  .edit-row2{grid-template-columns:1fr 1fr;}
+  .edit-row2>:first-child{grid-column:1/-1;}
+  .edit-row2 input,.edit-row2 select{min-width:0;width:100%;}
+  /* The floating + sits over the bottom-right corner; give the list enough
+     bottom room that the last card's Save/Cancel can scroll clear of it. */
+  body:not(.cal-fit) .entries{padding:12px 12px 96px;}
+  /* Small buttons (due-alert Archive/Extend, chips' actions) were 28px tall —
+     under a thumb that's a miss. 36px is the compromise that keeps dense
+     rows dense. */
+  .btn{min-height:40px;}
+  .btn-sm{min-height:36px;}
   .theme-grid {
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
@@ -826,7 +841,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.1</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.2</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -4418,7 +4433,15 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.1', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.2', date: 'August 17, 2026', latest: true,
+    items: [
+      'Phone (touch pass, found by driving the app with emulated finger taps and swipes): the Edit / Quick-add forms no longer overflow — Type gets its own line and the two dates pair up beneath it, instead of Type squashed to a bare arrow and End date running off the right edge',
+      'Phone: the floating + button no longer covers the Save/Cancel of the last card while editing — the list scrolls clear of it',
+      'Phone: small buttons (due-today alert Archive / Extend) grow to a comfortable tap height'
+    ]
+  },
+  {
+    version: 'v1.7.1', date: 'August 17, 2026', latest: false,
     items: [
       'Accessibility: faint grey helper text (section labels, counts, weekday headers, empty states) darkened in every theme to meet the WCAG AA 4.5:1 contrast floor; Dusty Pink secondary text too',
       'Phone width: the topbar title no longer wraps into three lines — right-hand buttons collapse to icons and the calendar pill to its status dot instead; icon buttons grow to a 40px tap area',
