@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.4 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.5 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -182,10 +182,6 @@
   --task-mode: #7A5A78;
   --task-mode-bg: #EDE1EA;
 }
-/* Reserve the scrollbar's width at all times: List view scrolls the page and
-   Calendar view doesn't, so without this the whole layout jumped 15px
-   sideways on every Calendar <-> List switch. */
-html{scrollbar-gutter:stable;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;}
 a{color:inherit;}
 
@@ -193,6 +189,10 @@ a{color:inherit;}
 .app{display:grid;grid-template-columns:320px 1fr;grid-template-rows:auto 1fr;min-height:100vh;}
 /* Calendar mode pins the shell to the viewport so the month grid can flex to fit any screen */
 body.cal-fit .app{height:100vh;}
+/* Desktop: pin the shell to the viewport in List view too, so the sidebar
+   and the entries list each scroll on their own instead of the whole page.
+   No page scrollbar in either view = nothing shifts on Calendar <-> List. */
+@media(min-width:701px){ .app{height:100vh;} }
 .topbar{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;}
 .topbar-logo{font-size:15px;font-weight:500;letter-spacing:-.3px;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;}
 .topbar-logo span{opacity:.4;}
@@ -863,7 +863,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.4</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.5</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1060,7 +1060,6 @@ svg.icon.sm{width:13px;height:13px;}
         <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
         Select
       </button>
-      <input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" oninput="setSearch(this.value)"/>
       <select class="sort-select" id="sort-select" onchange="setSortAndRender(this.value)">
         <option value="newest">Newest first</option>
         <option value="oldest">Oldest first</option>
@@ -1070,6 +1069,7 @@ svg.icon.sm{width:13px;height:13px;}
       <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="Toggle sort direction">
         <svg class="icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
       </button>
+      <input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" oninput="setSearch(this.value)"/>
     </div>
     <div class="entries" id="entries-list"></div>
   </main>
@@ -4460,7 +4460,14 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.4', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.5', date: 'August 17, 2026', latest: true,
+    items: [
+      'PC: the New Entry sidebar and the entries list each scroll on their own in List view (as Calendar already did) — the page itself never scrolls, so nothing shifts when switching views',
+      'PC: the search box is pinned to the far right of its row; the sort controls now sit to its left, so it stays put when they appear or disappear'
+    ]
+  },
+  {
+    version: 'v1.7.4', date: 'August 17, 2026', latest: false,
     items: [
       'Fix: the Event/Task switch warned "Google Calendar not connected" no matter how many times you reconnected — the liveness check was calling an endpoint our permission scope is not allowed to read (Google answered 403), so a live connection looked dead. Now checks via the events endpoint we do have access to. Affected PC and phone alike',
       'Fix: switching Calendar <-> List no longer shifts the header — the Select button moved down beside the sort controls (all list-only tools together), and the page now reserves its scrollbar width so nothing jumps 15px sideways on PC'
