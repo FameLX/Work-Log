@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.0 --><!DOCTYPE html>
+<!-- Work Log DEV v1.8.1 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -881,7 +881,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.8.0</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.8.1</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1771,7 +1771,14 @@ function commitNewEntry(entry){
   // window, and a busy day can cap the new entry into "+N more" with no chip
   // ever rendered to scroll to. Pop the day's full list open instead, which
   // always shows the true set and is a fixed-position modal either way.
-  if(viewLayout === 'calendar' && calView === 'month' && entry.deadline){
+  // Only when the calendar is actually on screen (not the Archive list, which
+  // keeps viewLayout='calendar' but renders a list) and the new entry passes
+  // the active filter/search — otherwise the popup would say "Nothing on
+  // this day" right after "Entry added".
+  const visibleInCal = viewMode === 'active'
+    && (selectedFilterTypes.length === 0 || selectedFilterTypes.includes(entry.type))
+    && matchesSearch(entry, searchQuery);
+  if(viewLayout === 'calendar' && calView === 'month' && entry.deadline && visibleInCal){
     openCalDay(entry.deadline);
   }
   if(gcalToken && entry.deadline){
@@ -1888,19 +1895,33 @@ function startEdit(id){
 
 function cancelEdit(){ editingId = null; render(); }
 
+let saveEditInFlight = false;
 async function saveEdit(id){
-  const e = entries.find(x=>x.id===id); if(!e) return false;
+  // Re-entry guard: a double-click during the network verify below would
+  // otherwise pass both calls through and create two Google objects.
+  if(saveEditInFlight) return false;
+  const e0 = entries.find(x=>x.id===id); if(!e0) return false;
   const name = v('edit-name-'+id);
   if(!name){ toast('Name cannot be empty.'); return false; }
   const newMode = (v('edit-syncmode-'+id) === 'task') ? 'task' : 'event';
-  const modeChanged = newMode !== (e.syncMode==='task' ? 'task' : 'event');
+  const modeChanged = newMode !== (e0.syncMode==='task' ? 'task' : 'event');
+  // Snapshot every field NOW. After the await the edit form may be gone
+  // (Cancel, a sync-driven re-render, a view toggle) and v() would return ''.
+  const snap = {
+    type: v('edit-type-'+id), time: v('edit-time-'+id), timeTo: v('edit-time-to-'+id),
+    remark: v('edit-remark-'+id),
+    deadline: newMode==='task' ? v('edit-deadline-task-'+id) : v('edit-deadline-'+id),
+    deadlineEnd: newMode==='task' ? '' : v('edit-deadline-end-'+id)
+  };
   // Switching mode on an already-synced entry needs a LIVE Google connection
   // to clean up the old copy — a stored token may have expired hours ago, so
   // verify it now rather than trusting its presence. Disconnected or expired:
   // warn and abort the save (edit stays open).
-  if(modeChanged && (e.gcalEventId || e.gcalTaskId)){
+  if(modeChanged && (e0.gcalEventId || e0.gcalTaskId)){
     let liveStatus = 'disconnected';
-    if(gcalToken && !gcalExpired) liveStatus = await verifyGCalToken();
+    saveEditInFlight = true;
+    try{ if(gcalToken && !gcalExpired) liveStatus = await verifyGCalToken(); }
+    finally{ saveEditInFlight = false; }
     // Fail closed: offline ('network') counts as no live connection too —
     // proceeding would silently orphan the old copy on Google.
     if(!gcalToken || gcalExpired || liveStatus !== 'ok'){
@@ -1908,21 +1929,18 @@ async function saveEdit(id){
       return false;
     }
   }
+  // Re-resolve: a merge during the await may have swapped the object.
+  const e = entries.find(x=>x.id===id); if(!e) return false;
   e.name = name;
-  e.type = v('edit-type-'+id);
-  e.time = v('edit-time-'+id);
-  e.timeTo = v('edit-time-to-'+id);
-  e.remark = v('edit-remark-'+id);
+  e.type = snap.type;
+  e.time = snap.time;
+  e.timeTo = snap.timeTo;
+  e.remark = snap.remark;
   e.color = typeColors[e.type] || e.color || null;
   e.gcalColorId = typeGCalIds[e.type] || undefined;
   e.syncMode = newMode;
-  if(newMode==='task'){
-    e.deadline = v('edit-deadline-task-'+id);
-    e.deadlineEnd = '';
-  } else {
-    e.deadline = v('edit-deadline-'+id);
-    e.deadlineEnd = v('edit-deadline-end-'+id);
-  }
+  e.deadline = snap.deadline;
+  e.deadlineEnd = snap.deadlineEnd;
   touchEntry(e);
   editingId = null;
   if(modeChanged){
@@ -2710,7 +2728,10 @@ function render(){
   }
 
   // Filter chips (chips only — sync/search/sort are static toolbar controls)
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${(t==='All'?selectedFilterTypes.length===0:selectedFilterTypes.includes(t))?' active':''}" onclick="toggleFilterType('${esc(t)}')">${esc(t)}</button>`).join('');
+  // Type name lives in a data attribute, not inside an inline JS string —
+  // esc() turns ' into &#39; which the HTML parser decodes right back to '
+  // inside onclick="…('…')", giving a SyntaxError for names like O'Brien.
+  fb.innerHTML = types.map(t=>`<button class="filter-chip${(t==='All'?selectedFilterTypes.length===0:selectedFilterTypes.includes(t))?' active':''}" data-type="${esc(t)}" onclick="toggleFilterType(this.dataset.type)">${esc(t)}</button>`).join('');
   const syncAllEl = document.getElementById('sync-all-btn');
   if(syncAllEl) syncAllEl.style.display = (gcalToken && viewMode==='active') ? '' : 'none';
 
@@ -3040,7 +3061,9 @@ function calMonthHTML(dated, listHeight){
   // Height-aware chip capacity: each of the 6 week rows gets an equal share
   // of the grid, so compute how many 22px chips fit under the day number
   // (28px) per row. Bar lanes and the "+N more" line are subtracted per week.
-  const rowH = Math.max(78, ((listHeight || 560) - 82) / 6);
+  // Constants measured from the live DOM (1400x1000): list padding + calendar
+  // header + weekday row = 102px of chrome above the 6 week rows.
+  const rowH = Math.max(78, ((listHeight || 560) - 102) / 6);
 
   // 6 fixed week rows, with leading/trailing days from adjacent months
   const weeks = [];
@@ -3084,7 +3107,10 @@ function calMonthHTML(dated, listHeight){
 
     // Chips that fit below the day number and this week's bar lanes; when
     // not everything fits, one chip slot is traded for the "+N more" line.
-    const fitAll = Math.max(0, Math.floor((rowH - 26 - barArea) / 20));
+    // Cell = padding-top 28 (+ bar lanes) + chips + padding-bottom 4 + 1px
+    // border; each chip is 20.5px with a 2px flex gap (stride 22.5, no gap
+    // after the last). Undercounting these clipped the last chip on tall windows.
+    const fitAll = Math.max(0, Math.floor((rowH - 33 - barArea + 2) / 22.5));
     html += `<div class="cal-week"><div class="cal-week-days">` +
       days.map(day => {
         const other = day.m !== calMonth;
@@ -3628,7 +3654,14 @@ function checkGCalAuthExpired(res){
     pill.classList.remove('connected');
     pill.classList.add('expired');
     document.getElementById('gcal-pill-text').textContent = 'Reconnect Google Calendar';
-    openGCalModal();
+    // Surface the reconnect modal — but never on top of an in-progress
+    // reconnect (openGCalModal would reset the paste box / auth link and
+    // swap the buttons mid-flow) or over another modal the user is in.
+    // The pill has already turned red in those cases; that's enough.
+    const gcalModalOpen = document.getElementById('gcal-modal').classList.contains('open');
+    const otherModalOpen = !!document.querySelector('.modal-overlay.open:not(#gcal-modal), .settings-overlay.open, .trash-overlay.open, .due-modal-overlay.open');
+    if(!gcalModalOpen && !otherModalOpen) openGCalModal();
+    else if(!gcalModalOpen) toast('Google Calendar session expired — click the pill to reconnect.', 5000);
   }
 }
 function clearGCalExpired(){
@@ -3757,11 +3790,18 @@ function gcalApplyToken(t){
     // creating duplicate calendar events.
     clearTimeout(syncDebounceTimer);
     for(let i = 0; i < 40 && syncInProgress; i++) await new Promise(r => setTimeout(r, 250));
-    const pulled = await performSync();
+    let pulled = await performSync();
     if(!pulled){
-      // Without a completed pull we can't know which entries already exist on
-      // Google — pushing now would create duplicates. Sync retries later.
-      toast('Cloud sync didn\'t finish — calendar push postponed to avoid duplicates.', 3500);
+      // One retry: most failures here are transient (first-load race, flaky
+      // network). If it still fails, say clearly WHY the push is on hold and
+      // that the Sync-all button (toolbar) does it manually. Never push blind:
+      // without a completed pull we can't know which entries already exist on
+      // Google, and pushing would create duplicates.
+      await new Promise(r => setTimeout(r, 1500));
+      pulled = await performSync();
+    }
+    if(!pulled){
+      toast('Cloud sync (Drive) did not finish, so the calendar push is on hold. Check the Drive permission was granted, or use the Sync-all button when ready.', 6000);
       return;
     }
     // Only push entries that have never been synced — entries with a gcalEventId
@@ -3848,6 +3888,9 @@ async function pushToGCal(entry, silent=false){
     if(res.ok){
       const created = await res.json();
       entry.gcalEventId = created.id;
+      // Bump the timestamp: without it the id can lose a merge tie to an
+      // id-less copy on another device, which then creates a duplicate event.
+      touchEntry(entry);
       save();
       if(!silent) toast(`"${entry.name}" added to Google Calendar.`);
     } else {
@@ -3929,7 +3972,7 @@ async function pushToGTask(entry, silent=false){
     checkGCalAuthExpired(res);
     if(res.ok){
       const created = await res.json();
-      entry.gcalTaskId = created.id; save();
+      entry.gcalTaskId = created.id; touchEntry(entry); save();
       if(!silent) toast(`"${entry.name}" added to Google Tasks.`);
     } else {
       const err = await res.json();
@@ -4149,8 +4192,21 @@ function mergeSync(remote){
   return {pulled, pushed, removed};
 }
 
+function editUiOpen(){
+  return editingId !== null || document.getElementById('cal-edit-modal')?.classList.contains('open');
+}
 async function performSync(manual = false){
   if(syncInProgress){ if(manual) toast('Sync already running.'); return false; }
+  // Never merge under an open edit (inline card OR calendar edit modal): the
+  // form is a snapshot, so Save would overwrite whatever the merge pulled in
+  // and stamp it newest — silently reverting the other device's change.
+  // Retry after the edit closes.
+  if(editUiOpen()){
+    if(manual){ toast('Finish the open edit first, then sync.'); return false; }
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = setTimeout(() => performSync(), 4000);
+    return false;
+  }
   if(!gcalToken || gcalExpired){
     if(manual) toast('Connect Google Calendar first — sync needs a live connection.');
     return false;
@@ -4174,12 +4230,19 @@ async function performSync(manual = false){
     // change since the last upload, merge-detected local-newer entries, or no
     // remote file yet. Pure pulls and no-op syncs skip the write entirely.
     if(syncDirty || stats.pushed > 0 || !syncFileId){
-      const newId = await driveUploadSync(syncFileId, buildSyncPayload());
+      // Clear the flag BEFORE the upload starts, so a save that lands while
+      // the upload is in flight re-arms it and is picked up by the follow-up
+      // pass. Clearing after the await used to swallow those saves.
+      const wasDirty = syncDirty;
+      syncDirty = false;
+      const payload = buildSyncPayload();
+      let newId;
+      try{ newId = await driveUploadSync(syncFileId, payload); }
+      catch(err){ if(wasDirty) syncDirty = true; throw err; }
       if(newId && newId !== syncFileId){
         syncFileId = newId;
         localStorage.setItem('wl2dev_sync_file_id', newId);
       }
-      syncDirty = false;
     }
     localStorage.setItem('wl2dev_last_sync', new Date().toISOString());
     if(stats.pulled || stats.removed){
@@ -4496,8 +4559,19 @@ function saveSettings(){
   localStorage.setItem('wl2dev_custom_types', JSON.stringify(customTypes));
   localStorage.setItem('wl2dev_custom_type_order', JSON.stringify(customTypeOrder));
   localStorage.setItem('wl2dev_type_order', JSON.stringify(typeOrder));
-  localStorage.setItem('wl2dev_settings_updated', new Date().toISOString());
-  scheduleSync();
+  // Only stamp settings_updated when the SYNCED part (types, order, colours,
+  // GCal ids) actually changed. Themes stay per-device, so a theme-only save
+  // must not advance the stamp — otherwise this device's possibly-stale type
+  // list wins "newest" on the next merge and deletes types added elsewhere.
+  // And mark data dirty, or a type-only change never uploads at all (the
+  // upload guard needs syncDirty || pushed || no file).
+  const typeFingerprint = () => JSON.stringify({customTypes, typeOrder, customTypeOrder, typeColors, typeGCalIds});
+  const before = settingsSnapshot ? JSON.stringify({customTypes:settingsSnapshot.customTypes, typeOrder:settingsSnapshot.typeOrder, customTypeOrder:settingsSnapshot.customTypeOrder, typeColors:settingsSnapshot.typeColors, typeGCalIds:settingsSnapshot.typeGCalIds}) : null;
+  if(before === null || before !== typeFingerprint()){
+    localStorage.setItem('wl2dev_settings_updated', new Date().toISOString());
+    syncDirty = true;
+    scheduleSync();
+  }
 
   // Commit the previewed theme (deferred until Save)
   if(pendingCustomEdited){
@@ -4520,7 +4594,14 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.8.0', date: 'August 17, 2026', latest: true,
+    version: 'v1.8.1', date: 'August 17, 2026', latest: true,
+    items: [
+      'Code review round 3 (10 fixes). Sync: saving an Event/Task switch can no longer save blank fields or create two Google copies (double-click / cancel mid-save); a freshly pushed Google id now wins on other devices instead of spawning a duplicate calendar event; adding a custom type alone now syncs, and a theme-only save can no longer overwrite newer types from another device; background sync waits while an edit (card or calendar popup) is open instead of pulling under it; Clear Trash during a sync now reaches other devices',
+      'Small: type names with an apostrophe work in the filter chips; the auto reconnect box no longer interrupts a reconnect already in progress or stacks over another dialog; adding an entry with a filter on (or from the Archive) no longer pops an empty day box; if Drive fails at connect it retries once and explains, instead of a silent skip; the last calendar chip is no longer clipped on tall windows'
+    ]
+  },
+  {
+    version: 'v1.8.0', date: 'August 17, 2026', latest: false,
     items: [
       'New: deleting an entry (single, from the calendar popup, or bulk-select) now asks first — a small confirmation that names the entry, says it is kept 5 days, and tells you where Trash is (Settings → Trash)',
       'The card delete button tooltip said "Delete permanently" — it never was; now reads "Move to Trash"'
