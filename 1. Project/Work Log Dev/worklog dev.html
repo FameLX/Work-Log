@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.7 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.8 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -398,6 +398,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 /* Calendar view: list-only toolbar controls keep their footprint (both
    breakpoints) so nothing above, beside or below them moves on switch */
 body.cal-tools #select-mode-btn,body.cal-tools #sort-select,body.cal-tools #sort-dir-btn{visibility:hidden;pointer-events:none;}
+/* Their hover rules use `transition:all`, which also animates visibility —
+   each control then vanished on its own schedule (staggered flicker on
+   switch). Limit the transition to colours so hide/show is instant. */
+#select-mode-btn,#sort-select,#sort-dir-btn{transition-property:background-color,border-color,color;}
 
 /* Settings overlay */
 .settings-overlay{position:fixed;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
@@ -876,7 +880,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.7</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.8</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -4471,7 +4475,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.7', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.8', date: 'August 17, 2026', latest: true,
+    items: [
+      'Fix: Select / sort / direction now hide and show together in one go when switching views — they were fading out one after another because their hover animation was also animating the hide'
+    ]
+  },
+  {
+    version: 'v1.7.7', date: 'August 17, 2026', latest: false,
     items: [
       'Switching Calendar <-> List now moves nothing at all, PC and phone: the list-only controls (Select / sort / direction) keep their space instead of disappearing, every toolbar control has the same fixed height, and the sync button no longer drops down a few pixels in List view. Verified by measuring every header/toolbar/list element in both views, connected and disconnected, on both screen sizes'
     ]
