@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.3 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.4 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -182,6 +182,10 @@
   --task-mode: #7A5A78;
   --task-mode-bg: #EDE1EA;
 }
+/* Reserve the scrollbar's width at all times: List view scrolls the page and
+   Calendar view doesn't, so without this the whole layout jumped 15px
+   sideways on every Calendar <-> List switch. */
+html{scrollbar-gutter:stable;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;}
 a{color:inherit;}
 
@@ -835,7 +839,8 @@ svg.icon.sm{width:13px;height:13px;}
   .stat-strip{margin-left:0;flex:1 1 100%;gap:12px;font-size:13px;}
   .toolbar{flex-wrap:wrap;row-gap:8px;padding:8px 12px 10px;}
   .filter-bar{flex:1 1 100%;}
-  .search-input{flex:1 1 140px;min-width:0;height:36px;}
+  .search-input{flex:1 1 60px;min-width:0;height:36px;}
+  #select-mode-btn{height:36px !important;}
   .sort-select{height:36px;}
   .sort-dir-btn{width:36px;height:36px;}
   .bulk-bar{flex-wrap:wrap;padding:10px 12px;gap:8px;}
@@ -858,7 +863,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.3</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.4</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1030,10 +1035,6 @@ svg.icon.sm{width:13px;height:13px;}
       <span class="entry-count" id="entry-count">0</span>
       <div class="stat-strip" id="stat-strip"></div>
       <div class="main-header-spacer"></div>
-      <button class="btn btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="gap:5px;">
-        <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
-        Select
-      </button>
       <button class="btn btn-sm" id="view-toggle-btn" onclick="toggleView()" style="gap:5px;background:var(--surface);">
         <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>
         <span id="view-toggle-label">View Archive</span><span id="archive-count" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:1px 7px;margin-left:2px;"></span>
@@ -1054,6 +1055,10 @@ svg.icon.sm{width:13px;height:13px;}
       <div class="filter-bar" id="filter-bar"></div>
       <button class="btn-sync-all" id="sync-all-btn" onclick="syncAllToGCal()" title="Sync all entries to Google Calendar" style="display:none;">
         <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="btn btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="gap:5px;height:28px;padding:0 10px;flex-shrink:0;" title="Select entries for bulk archive/delete">
+        <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
+        Select
       </button>
       <input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" oninput="setSearch(this.value)"/>
       <select class="sort-select" id="sort-select" onchange="setSortAndRender(this.value)">
@@ -3577,7 +3582,12 @@ function clearGCalExpired(){
 async function verifyGCalToken(){
   if(!gcalToken) return 'disconnected';
   try{
-    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary', {
+    // Must be an endpoint the `calendar.events` scope is allowed to hit.
+    // `GET calendars/primary` (calendars.get) needs the broader `calendar` /
+    // `calendar.readonly` scope and answered 403 with our token — which made
+    // this report 'error' for a perfectly live connection, so the Event/Task
+    // switch warned "not connected" no matter how many times you reconnected.
+    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1&fields=kind', {
       headers: {Authorization: `Bearer ${gcalToken}`}
     });
     checkGCalAuthExpired(res);
@@ -4450,7 +4460,14 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.3', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.4', date: 'August 17, 2026', latest: true,
+    items: [
+      'Fix: the Event/Task switch warned "Google Calendar not connected" no matter how many times you reconnected — the liveness check was calling an endpoint our permission scope is not allowed to read (Google answered 403), so a live connection looked dead. Now checks via the events endpoint we do have access to. Affected PC and phone alike',
+      'Fix: switching Calendar <-> List no longer shifts the header — the Select button moved down beside the sort controls (all list-only tools together), and the page now reserves its scrollbar width so nothing jumps 15px sideways on PC'
+    ]
+  },
+  {
+    version: 'v1.7.3', date: 'August 17, 2026', latest: false,
     items: [
       'Phone (from real-device screenshots): filter chips no longer get squeezed under the search box — chips take their own row, search + sort share the next; header buttons flow left in one tidy wrap instead of splitting into ragged rows; stat strip loses its desktop indent; select-mode bar puts the count on its own line; list, calendar and header all share the same 12px side gutters'
     ]
