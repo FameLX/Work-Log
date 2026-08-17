@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.0 --><!DOCTYPE html>
+<!-- Work Log DEV v1.7.1 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -18,7 +18,7 @@
   --border2: #C8C6BC;
   --text: #1A1917;
   --text2: #6B6860;
-  --text3: #9C9A92;
+  --text3: #706D65;
   --accent: #1A1917;
   --accent-text: #FFFFFF;
   --success: #2D6A4F;
@@ -51,7 +51,7 @@
   --border2: #4D4945;
   --text: #F5F5F0;
   --text2: #B8B5AD;
-  --text3: #7C7973;
+  --text3: #8F8C86;
   --accent: #E8E4DE;
   --accent-text: #0F0E0C;
   --success: #5EE5A8;
@@ -79,8 +79,8 @@
   --border: #E8D5D1;
   --border2: #DCC0BA;
   --text: #3D2B28;
-  --text2: #8B6F6A;
-  --text3: #B8A3A0;
+  --text2: #7C625E;
+  --text3: #7F6A66;
   --accent: #C05C6F;
   --accent-text: #FFFFFF;
   --success: #5C7B5C;
@@ -108,7 +108,7 @@
   --border2: #57698F;
   --text: #E0E1DD;
   --text2: #A9ABA5;
-  --text3: #7A7D75;
+  --text3: #8F928A;
   --accent: #778DA9;
   --accent-text: #0D1B2A;
   --success: #6BBF9A;
@@ -136,7 +136,7 @@
   --border2: #57698F;
   --text: #E0E1DD;
   --text2: #A9ABA5;
-  --text3: #7A7D75;
+  --text3: #8F928A;
   --accent: #00E5FF;
   --accent-text: #06222B;
   --success: #4FE0B0;
@@ -164,7 +164,7 @@
   --border2: #ADA084;
   --text: #232C28;
   --text2: #5B564A;
-  --text3: #948C7A;
+  --text3: #5F584C;
   --accent: #A87860;
   --accent-text: #FFFFFF;
   --success: #4A6B47;
@@ -773,6 +773,11 @@ svg.icon.sm{width:13px;height:13px;}
   transform: translateY(1px);
 }
 
+/* Reduced motion: keep every state change (open/close, slide-in, toast)
+   but land it instantly instead of animating there. */
+@media(prefers-reduced-motion:reduce){
+  .sidebar,.settings-overlay,.ai-panel,.modal-overlay,.toast,#creator-modal .modal{transition-duration:.01s !important;animation-duration:.01s !important;}
+}
 @media(max-width:700px){
   .app{grid-template-columns:1fr;}
   /* The New Entry form leaves the page flow entirely: hidden behind a
@@ -783,6 +788,21 @@ svg.icon.sm{width:13px;height:13px;}
   .icon-btn.sidebar-mobile-close{display:flex;position:absolute;top:14px;right:14px;}
   .fab-add{display:flex;}
   .ai-panel{width:100%;top:56px;}
+  /* Topbar at phone width: the title was wrapping onto three lines against
+     the logo. Keep the title on one line and shrink the right-hand controls
+     instead — GCal pill collapses to its status dot, Settings/AI buttons to
+     icons only. */
+  .topbar{padding:0 12px;gap:8px;}
+  .topbar-logo{white-space:nowrap;font-size:14px;}
+  .topbar-logo img{height:26px !important;}
+  .gcal-pill{padding:8px;gap:0;}
+  .gcal-pill #gcal-pill-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .topbar .btn.btn-sm{padding:8px;margin-left:0 !important;min-width:40px;justify-content:center;}
+  .topbar .btn.btn-sm .btn-label{display:none;}
+  /* Touch targets: 30px icon buttons are fine under a mouse but below the
+     44px comfortable-tap floor on a phone. Grow the hit area, not the glyph. */
+  .icon-btn{width:40px;height:40px;}
+  .cal-nav-btn{min-width:40px;min-height:40px;}
   .theme-grid {
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
@@ -806,7 +826,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.0</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.1</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -814,11 +834,11 @@ svg.icon.sm{width:13px;height:13px;}
     </button>
     <button class="btn btn-sm" onclick="openSettings()" style="gap:5px;margin-left:8px;" title="Settings">
       <svg class="icon sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
+      <span class="btn-label">Settings</span>
     </button>
-    <button class="btn btn-sm" onclick="toggleAI()" id="ai-toggle-btn" style="gap:5px;margin-left:4px;">
+    <button class="btn btn-sm" onclick="toggleAI()" id="ai-toggle-btn" style="gap:5px;margin-left:4px;" title="Ask AI">
       <svg class="icon sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Ask AI
+      <span class="btn-label">Ask AI</span>
     </button>
   </header>
 
@@ -1533,6 +1553,12 @@ new MutationObserver(muts => {
 // after ALL let/const state declarations, so nothing is accessed in its TDZ.
 function init(){
   a11yFixIconButtons(document.body);
+  // Every overlay is a dialog to assistive tech; label it from its heading.
+  document.querySelectorAll('.modal-overlay, .settings-overlay, .trash-overlay, .due-modal-overlay').forEach(ov => {
+    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+    const h = ov.querySelector('h1,h2,h3,.modal-title,.settings-title');
+    if(h){ if(!h.id) h.id = ov.id + '-title'; ov.setAttribute('aria-labelledby', h.id); }
+  });
   document.getElementById('f-deadline').value = today();
   document.getElementById('f-deadline-task').value = today();
   // Sync sort direction button icon to default asc
@@ -4392,7 +4418,16 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.0', date: 'August 17, 2026', latest: true,
+    version: 'v1.7.1', date: 'August 17, 2026', latest: true,
+    items: [
+      'Accessibility: faint grey helper text (section labels, counts, weekday headers, empty states) darkened in every theme to meet the WCAG AA 4.5:1 contrast floor; Dusty Pink secondary text too',
+      'Phone width: the topbar title no longer wraps into three lines — right-hand buttons collapse to icons and the calendar pill to its status dot instead; icon buttons grow to a 40px tap area',
+      'Keyboard: Esc now closes whatever is on top (any modal, Settings, Trash, the mobile form), one layer per press; Tab stays inside an open modal instead of wandering into the page behind it; every dialog announces itself to screen readers',
+      'Honours the system reduced-motion setting: panels and modals still open and close, just without the slide/fade'
+    ]
+  },
+  {
+    version: 'v1.7.0', date: 'August 17, 2026', latest: false,
     items: [
       'Google Calendar session expiry now pops up the reconnect modal directly (instead of a toast you could miss)',
       'Type colour picker\'s Google Calendar colour list is now fetched live from Google instead of a hardcoded set of 11, so it stays current if Google adds more',
@@ -4891,9 +4926,58 @@ document.getElementById('creator-modal')?.addEventListener('click', (e) => {
 document.getElementById('settings-unsaved-modal')?.addEventListener('click', (e) => {
   if(e.target.id === 'settings-unsaved-modal') cancelUnsavedPrompt();
 });
+// Escape closes whichever layer is on top. Ordered top-down by z-index so a
+// confirm modal (100+) sitting over Settings (150 — but its unsaved-changes
+// prompt is a modal-overlay above it) closes before the layer beneath it,
+// and the mobile sidebar (90) / AI panel go last. Each entry: [id, closer].
+// Only the FIRST open layer closes per keypress — one Esc, one layer.
+const ESC_LAYERS = [
+  ['settings-unsaved-modal', () => cancelUnsavedPrompt()],
+  ['creator-modal',          () => closeCreatorModal()],
+  ['changelog-modal',        () => closeChangelog()],
+  ['mode-switch-warn-modal', () => closeModeSwitchWarn()],
+  ['cal-edit-modal',         () => closeCalEditModal()],
+  ['cal-quickadd-modal',     () => closeCalQuickAdd()],
+  ['cal-entry-modal',        () => closeCalEntry()],
+  ['cal-day-modal',          () => closeCalDay()],
+  ['gcal-modal',             () => closeGCalModal()],
+  ['repeat-modal-overlay',   () => closeRepeatModal()],
+  ['due-modal',              () => closeDueModal()],
+  ['trash-overlay',          () => closeTrash()],
+  ['settings-overlay',       () => closeSettings()],
+  ['sidebar',                () => closeMobileSidebar()],
+];
+function topOpenLayer(){
+  for(const [id, close] of ESC_LAYERS){
+    const el = document.getElementById(id);
+    if(!el) continue;
+    const open = id === 'sidebar' ? el.classList.contains('mobile-open') : el.classList.contains('open');
+    if(open) return {el, close};
+  }
+  return null;
+}
 document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape' && document.getElementById('creator-modal').classList.contains('open')){
-    closeCreatorModal();
+  if(e.key === 'Escape'){
+    // Don't steal Esc from an open <select> / datalist / the time picker
+    // dropdown — those need it to dismiss themselves first.
+    const tp = document.querySelector('.time-picker-modal.open');
+    if(tp){ tp.classList.remove('open'); return; }
+    const top = topOpenLayer();
+    if(top){ e.preventDefault(); top.close(); }
+    return;
+  }
+  // Focus trap: Tab inside an open modal cycles within it instead of
+  // escaping to the page underneath, which is invisible but still tabbable.
+  if(e.key === 'Tab'){
+    const top = topOpenLayer();
+    if(!top || top.el.id === 'sidebar') return;
+    const focusables = [...top.el.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+      .filter(x => x.offsetParent !== null);
+    if(!focusables.length) return;
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if(!top.el.contains(document.activeElement)){ e.preventDefault(); first.focus(); return; }
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
   }
 });
 
