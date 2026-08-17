@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.7.9 --><!DOCTYPE html>
+<!-- Work Log DEV v1.8.0 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -412,6 +412,7 @@ body.no-scroll{overflow:hidden;}
    the mode-switch warning's Connect button */
 #gcal-modal{z-index:205;}
 #mode-switch-warn-modal{z-index:210;}
+#trash-confirm-modal{z-index:210;}
 .settings-topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;}
 .settings-topbar h2{font-size:15px;font-weight:500;flex:1;}
 .settings-body{flex:1;overflow-y:auto;padding:32px 24px;max-width:720px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:32px;}
@@ -880,7 +881,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.7.9</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.8.0</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -1233,6 +1234,21 @@ svg.icon.sm{width:13px;height:13px;}
 </div>
 
 <!-- Mode Switch (Event/Task) disconnected warning -->
+<!-- Move to Trash confirmation (single + bulk) -->
+<div class="modal-overlay" id="trash-confirm-modal">
+  <div class="modal">
+    <h2 id="trash-confirm-title">Move to Trash?</h2>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px;" id="trash-confirm-body"></p>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;">
+      Kept in <b>Trash</b> for <b>5 days</b> — restore any time before then from <b>Settings → Trash</b>.
+    </p>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeTrashConfirm()">Cancel</button>
+      <button class="btn btn-primary" id="trash-confirm-ok" onclick="trashConfirmOk()" style="background:var(--danger);border-color:var(--danger);color:#fff;">Move to Trash</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="mode-switch-warn-modal">
   <div class="modal">
     <h2>Google Calendar not connected</h2>
@@ -1765,14 +1781,40 @@ function commitNewEntry(entry){
   return entry;
 }
 
-function deleteEntry(id){
+// Pending trash action shown in the confirmation modal: {kind:'single', id}
+// or {kind:'bulk'}. Cleared on Cancel / Esc / backdrop click.
+let trashPending = null;
+function openTrashConfirm(pending, bodyText){
+  trashPending = pending;
+  document.getElementById('trash-confirm-body').innerHTML = bodyText;
+  document.getElementById('trash-confirm-modal').classList.add('open');
+}
+function closeTrashConfirm(){
+  trashPending = null;
+  document.getElementById('trash-confirm-modal').classList.remove('open');
+}
+function trashConfirmOk(){
+  const p = trashPending; closeTrashConfirm();
+  if(!p) return;
+  if(p.kind === 'single') deleteEntry(p.id, true);
+  else if(p.kind === 'bulk') bulkDelete(true);
+}
+document.getElementById('trash-confirm-modal')?.addEventListener('click', (ev)=>{
+  if(ev.target.id === 'trash-confirm-modal') closeTrashConfirm();
+});
+
+function deleteEntry(id, confirmed){
   const entry = entries.find(e=>e.id===id); if(!entry) return;
+  if(!confirmed){
+    openTrashConfirm({kind:'single', id}, `<b>${esc(entry.name)}</b> will be moved to Trash.`);
+    return;
+  }
   if(gcalToken) entry.syncMode==='task' ? deleteFromGTask(entry) : deleteFromGCal(entry);
   entry.deletedAt = new Date().toISOString();
   trash.unshift(entry);
   entries = entries.filter(e=>e.id!==id);
   saveTrash(); save(); render(); updateTrashBadge();
-  toast('Moved to Trash. Restore within 5 days from Settings.');
+  toast('Moved to Trash — restore from Settings → Trash within 5 days.');
 }
 
 function restoreFromTrash(id){
@@ -2249,10 +2291,13 @@ function updateBulkBar(){
   document.getElementById('bulk-count').textContent = `${count} selected`;
 }
 
-async function bulkDelete(){
+async function bulkDelete(confirmed){
   if(!selectedIds.size) return;
   const count = selectedIds.size;
-  if(!confirm(`Move ${count} ${count===1?'entry':'entries'} to Trash?`)) return;
+  if(!confirmed){
+    openTrashConfirm({kind:'bulk'}, `<b>${count} ${count===1?'entry':'entries'}</b> will be moved to Trash.`);
+    return;
+  }
   const toDelete = [...selectedIds].map(id=>entries.find(e=>e.id===id)).filter(Boolean);
   if(gcalToken){
     await Promise.all(toDelete.map(e=>e.syncMode==='task' ? deleteFromGTask(e,true) : deleteFromGCal(e,true)));
@@ -2796,7 +2841,7 @@ function entryHTML(e, isArchived=false){
             :''}
             <button class="icon-btn" title="Edit entry" onclick="startEdit(${e.id})">${editIcon()}</button>
             <button class="icon-btn" title="Archive entry" onclick="archiveEntry(${e.id})" style="color:var(--text3);">${archiveIcon()}</button>
-            <button class="icon-btn del" title="Delete permanently" onclick="deleteEntry(${e.id})">${trashIcon()}</button>
+            <button class="icon-btn del" title="Move to Trash" onclick="deleteEntry(${e.id})">${trashIcon()}</button>
           `}
           ${selectCb}
         </div>
@@ -4475,7 +4520,14 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.7.9', date: 'August 17, 2026', latest: true,
+    version: 'v1.8.0', date: 'August 17, 2026', latest: true,
+    items: [
+      'New: deleting an entry (single, from the calendar popup, or bulk-select) now asks first — a small confirmation that names the entry, says it is kept 5 days, and tells you where Trash is (Settings → Trash)',
+      'The card delete button tooltip said "Delete permanently" — it never was; now reads "Move to Trash"'
+    ]
+  },
+  {
+    version: 'v1.7.9', date: 'August 17, 2026', latest: false,
     items: [
       'Sync-all button moved to sit right beside the search box (PC) / flush right of its row (phone), so the space kept for the list-only controls blends into the normal gap in Calendar view instead of reading as a hole'
     ]
@@ -5042,6 +5094,7 @@ document.getElementById('settings-unsaved-modal')?.addEventListener('click', (e)
 // Only the FIRST open layer closes per keypress — one Esc, one layer.
 const ESC_LAYERS = [
   ['settings-unsaved-modal', () => cancelUnsavedPrompt()],
+  ['trash-confirm-modal',    () => closeTrashConfirm()],
   ['creator-modal',          () => closeCreatorModal()],
   ['changelog-modal',        () => closeChangelog()],
   ['mode-switch-warn-modal', () => closeModeSwitchWarn()],
@@ -5150,7 +5203,7 @@ function executeAITool(name, args){
     if(name==='delete_entry'){
       const e = entries.find(x=>x.id===args.id);
       if(!e) return {ok:false, message:`No active entry with id ${args.id}`};
-      deleteEntry(args.id);
+      deleteEntry(args.id, true);
       return {ok:true, message:`Moved "${e.name}" to trash`};
     }
     if(name==='archive_entry'){
