@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.1 --><!DOCTYPE html>
+<!-- Work Log DEV v1.6.27 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -18,7 +18,7 @@
   --border2: #C8C6BC;
   --text: #1A1917;
   --text2: #6B6860;
-  --text3: #706D65;
+  --text3: #9C9A92;
   --accent: #1A1917;
   --accent-text: #FFFFFF;
   --success: #2D6A4F;
@@ -51,7 +51,7 @@
   --border2: #4D4945;
   --text: #F5F5F0;
   --text2: #B8B5AD;
-  --text3: #8F8C86;
+  --text3: #7C7973;
   --accent: #E8E4DE;
   --accent-text: #0F0E0C;
   --success: #5EE5A8;
@@ -79,9 +79,9 @@
   --border: #E8D5D1;
   --border2: #DCC0BA;
   --text: #3D2B28;
-  --text2: #7C625E;
-  --text3: #7F6A66;
-  --accent: #BC5165;
+  --text2: #8B6F6A;
+  --text3: #B8A3A0;
+  --accent: #C05C6F;
   --accent-text: #FFFFFF;
   --success: #5C7B5C;
   --success-bg: #D9E5D2;
@@ -108,7 +108,7 @@
   --border2: #57698F;
   --text: #E0E1DD;
   --text2: #A9ABA5;
-  --text3: #8F928A;
+  --text3: #7A7D75;
   --accent: #778DA9;
   --accent-text: #0D1B2A;
   --success: #6BBF9A;
@@ -136,7 +136,7 @@
   --border2: #57698F;
   --text: #E0E1DD;
   --text2: #A9ABA5;
-  --text3: #8F928A;
+  --text3: #7A7D75;
   --accent: #00E5FF;
   --accent-text: #06222B;
   --success: #4FE0B0;
@@ -164,8 +164,8 @@
   --border2: #ADA084;
   --text: #232C28;
   --text2: #5B564A;
-  --text3: #5F584C;
-  --accent: #976953;
+  --text3: #948C7A;
+  --accent: #A87860;
   --accent-text: #FFFFFF;
   --success: #4A6B47;
   --success-bg: #C9DBC0;
@@ -189,10 +189,6 @@ a{color:inherit;}
 .app{display:grid;grid-template-columns:320px 1fr;grid-template-rows:auto 1fr;min-height:100vh;}
 /* Calendar mode pins the shell to the viewport so the month grid can flex to fit any screen */
 body.cal-fit .app{height:100vh;}
-/* Desktop: pin the shell to the viewport in List view too, so the sidebar
-   and the entries list each scroll on their own instead of the whole page.
-   No page scrollbar in either view = nothing shifts on Calendar <-> List. */
-@media(min-width:701px){ .app{height:100vh;} }
 .topbar{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;}
 .topbar-logo{font-size:15px;font-weight:500;letter-spacing:-.3px;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;}
 .topbar-logo span{opacity:.4;}
@@ -205,13 +201,6 @@ body.cal-fit .app{height:100vh;}
 
 /* Sidebar */
 .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 20px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;}
-/* Mobile-only affordances — invisible on desktop, activated in the narrow
-   media query. Compound selector: .icon-btn's own display:flex appears later
-   in the stylesheet and would win a plain single-class display:none. */
-.icon-btn.sidebar-mobile-close{display:none;}
-.fab-add{display:none;position:fixed;right:20px;bottom:20px;width:56px;height:56px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-text);cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:85;transition:transform .15s;}
-.fab-add:hover{transform:scale(1.06);}
-.fab-add .icon{width:24px;height:24px;}
 .section-label{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
 label.field-label{display:block;font-size:13px;color:var(--text2);margin-bottom:5px;font-weight:400;}
 input[type=text],input[type=date],input[type=time],textarea,select{
@@ -238,7 +227,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 
 /* Main */
 .main{display:flex;flex-direction:column;overflow:hidden;}
-.main-header{padding:16px 24px 0;display:flex;flex-wrap:wrap;row-gap:8px;align-items:center;gap:10px;}
+.main-header{padding:16px 24px 0;display:flex;align-items:center;gap:10px;}
 .main-header h1{font-size:16px;font-weight:600;letter-spacing:-.2px;}
 .entry-count{font-size:12px;color:var(--text3);}
 .main-header-spacer{flex:1;}
@@ -392,16 +381,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .cal-mini-day.today{box-shadow:0 0 0 2px var(--accent);font-weight:600;}
 
 /* Sort bar */
-.sort-select{font-size:12px;height:28px;padding:0 24px 0 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;display:inline-block;width:auto;flex:0 0 auto;}
+.sort-select{font-size:12px;padding:4px 24px 4px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;display:inline-block;width:auto;flex:0 0 auto;}
 .sort-dir-btn{width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
 .sort-dir-btn:hover{border-color:var(--border2);color:var(--text);}
-/* Calendar view: list-only toolbar controls keep their footprint (both
-   breakpoints) so nothing above, beside or below them moves on switch */
-body.cal-tools #select-mode-btn,body.cal-tools #sort-select,body.cal-tools #sort-dir-btn{visibility:hidden;pointer-events:none;}
-/* Their hover rules use `transition:all`, which also animates visibility —
-   each control then vanished on its own schedule (staggered flicker on
-   switch). Limit the transition to colours so hide/show is instant. */
-#select-mode-btn,#sort-select,#sort-dir-btn{transition-property:background-color,border-color,color;}
 
 /* Settings overlay */
 .settings-overlay{position:fixed;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
@@ -412,7 +394,6 @@ body.no-scroll{overflow:hidden;}
    the mode-switch warning's Connect button */
 #gcal-modal{z-index:205;}
 #mode-switch-warn-modal{z-index:210;}
-#trash-confirm-modal{z-index:210;}
 .settings-topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px;flex-shrink:0;}
 .settings-topbar h2{font-size:15px;font-weight:500;flex:1;}
 .settings-body{flex:1;overflow-y:auto;padding:32px 24px;max-width:720px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:32px;}
@@ -785,92 +766,20 @@ svg.icon.sm{width:13px;height:13px;}
   transform: translateY(1px);
 }
 
-/* Reduced motion: keep every state change (open/close, slide-in, toast)
-   but land it instantly instead of animating there. */
-@media(prefers-reduced-motion:reduce){
-  .sidebar,.settings-overlay,.ai-panel,.modal-overlay,.toast,#creator-modal .modal{transition-duration:.01s !important;animation-duration:.01s !important;}
-}
 @media(max-width:700px){
   .app{grid-template-columns:1fr;}
-  /* The New Entry form leaves the page flow entirely: hidden behind a
-     floating + button, sliding in as a full-screen overlay when summoned
-     (kept below every modal at z-index 100+, so pickers/confirms stay on top) */
-  .sidebar{position:fixed;inset:0;z-index:90;border-right:none;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);padding-top:20px;}
-  .sidebar.mobile-open{transform:translateX(0);}
-  .icon-btn.sidebar-mobile-close{display:flex;position:absolute;top:14px;right:14px;}
-  .fab-add{display:flex;}
+  .sidebar{border-right:none;border-bottom:1px solid var(--border);}
   .ai-panel{width:100%;top:56px;}
-  /* Topbar at phone width: the title was wrapping onto three lines against
-     the logo. Keep the title on one line and shrink the right-hand controls
-     instead — GCal pill collapses to its status dot, Settings/AI buttons to
-     icons only. */
-  .topbar{padding:0 12px;gap:8px;}
-  .topbar-logo{white-space:nowrap;font-size:14px;}
-  .topbar-logo img{height:26px !important;}
-  .gcal-pill{padding:8px;gap:0;}
-  .gcal-pill #gcal-pill-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
-  .topbar .btn.btn-sm{padding:8px;margin-left:0 !important;min-width:40px;justify-content:center;}
-  .topbar .btn.btn-sm .btn-label{display:none;}
-  /* Touch targets: 30px icon buttons are fine under a mouse but below the
-     44px comfortable-tap floor on a phone. Grow the hit area, not the glyph. */
-  .icon-btn{width:40px;height:40px;}
-  .cal-nav-btn{min-width:40px;min-height:40px;}
-  /* Edit / quick-add forms: the Type | Start | End 3-up row can't fit three
-     native date pickers in a ~360px modal — Type squashed to a bare chevron
-     and End date ran off the right edge. Type takes its own line, dates pair
-     up underneath. */
-  .edit-row2{grid-template-columns:1fr 1fr;}
-  .edit-row2>:first-child{grid-column:1/-1;}
-  .edit-row2 input,.edit-row2 select{min-width:0;width:100%;}
-  /* The floating + sits over the bottom-right corner; give the list enough
-     bottom room that the last card's Save/Cancel can scroll clear of it. */
-  .entries{padding:12px;}
-  body:not(.cal-fit) .entries{padding-bottom:96px;}
-  /* Small buttons (due-alert Archive/Extend, chips' actions) were 28px tall —
-     under a thumb that's a miss. 36px is the compromise that keeps dense
-     rows dense. */
-  .btn{min-height:40px;}
-  .btn-sm{min-height:36px;}
   .theme-grid {
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
   /* Calendar: keep real day columns instead of squeezing to unreadable
      slivers — the grid scrolls horizontally, weekday header scrolls in sync. */
-  /* Header + toolbar at phone width. Real-phone finding: the filter chips
-     were squeezed into a sliver next to the search box and stacked under it;
-     the stat strip kept its desktop indent when it wrapped to its own line;
-     the header spacer split the buttons across two ragged rows; the bulk bar
-     wrapped "0 selected" onto two lines. Everything flows left, one thing per
-     row where it needs it, 12px gutters to match the list. */
-  .main-header{padding:12px 12px 0;gap:8px;}
-  .main-header-spacer{display:none;}
-  .stat-strip{margin-left:0;flex:1 1 100%;gap:12px;font-size:13px;}
-  .toolbar{flex-wrap:wrap;row-gap:8px;padding:8px 12px 10px;}
-  .filter-bar{flex:1 1 100%;}
-  /* Search keeps the same spot in both views: chips row, then a full-width
-     search row, then the list-only controls (Select / sort / direction) on
-     their own row underneath — that row simply disappears in Calendar view
-     without moving anything above it. */
-  .filter-bar{order:-2;}
-  .search-input{order:-1;flex:1 1 100%;min-width:0;height:36px;}
-  #select-mode-btn{height:36px !important;}
-  .sort-select{height:36px;}
-  .sort-dir-btn{width:36px;height:36px;}
-  .btn-sync-all{width:36px;height:36px;margin-left:auto;}
-  /* Fixed row heights: the toolbar's control rows must not change height
-     between Calendar and List, or everything below them shifts. */
-  .toolbar{align-items:stretch;}
-  .toolbar>*{align-self:center;}
-  .bulk-bar{flex-wrap:wrap;padding:10px 12px;gap:8px;}
-  .bulk-bar>span{flex:1 1 100%;}
-  .bulk-bar>div{display:none;}
+  .main-header,.toolbar{flex-wrap:wrap;row-gap:8px;}
   .cal-header{flex-wrap:wrap;row-gap:8px;}
   .cal-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .cal-weekdays,.cal-week-days{min-width:560px;}
   .cal-year-grid{grid-template-columns:1fr;}
-  /* Note: the sidebar is position:fixed here (out of the grid flow), so
-     cal-fit's base height:100vh + auto/1fr rows work correctly again —
-     topbar and main are the only flow children at this breakpoint. */
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -881,7 +790,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.8.1</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.6.27</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -889,19 +798,16 @@ svg.icon.sm{width:13px;height:13px;}
     </button>
     <button class="btn btn-sm" onclick="openSettings()" style="gap:5px;margin-left:8px;" title="Settings">
       <svg class="icon sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="btn-label">Settings</span>
+      Settings
     </button>
-    <button class="btn btn-sm" onclick="toggleAI()" id="ai-toggle-btn" style="gap:5px;margin-left:4px;" title="Ask AI">
+    <button class="btn btn-sm" onclick="toggleAI()" id="ai-toggle-btn" style="gap:5px;margin-left:4px;">
       <svg class="icon sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="btn-label">Ask AI</span>
+      Ask AI
     </button>
   </header>
 
   <!-- SIDEBAR: Add Entry Form -->
-  <aside class="sidebar" id="sidebar">
-    <button class="icon-btn sidebar-mobile-close" onclick="closeMobileSidebar()" title="Close" aria-label="Close">
-      <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+  <aside class="sidebar">
     <div>
       <div class="section-label">New entry</div>
       <div class="sync-mode-toggle">
@@ -1053,6 +959,10 @@ svg.icon.sm{width:13px;height:13px;}
       <span class="entry-count" id="entry-count">0</span>
       <div class="stat-strip" id="stat-strip"></div>
       <div class="main-header-spacer"></div>
+      <button class="btn btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="gap:5px;">
+        <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
+        Select
+      </button>
       <button class="btn btn-sm" id="view-toggle-btn" onclick="toggleView()" style="gap:5px;background:var(--surface);">
         <svg class="icon sm" viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>
         <span id="view-toggle-label">View Archive</span><span id="archive-count" style="font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:1px 7px;margin-left:2px;"></span>
@@ -1071,10 +981,10 @@ svg.icon.sm{width:13px;height:13px;}
     </div>
     <div class="toolbar">
       <div class="filter-bar" id="filter-bar"></div>
-      <button class="btn btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="gap:5px;height:28px;padding:0 10px;flex-shrink:0;" title="Select entries for bulk archive/delete">
-        <svg class="icon sm" viewBox="0 0 24 24"><rect x="3" y="5" width="4" height="4" rx="1"/><rect x="3" y="11" width="4" height="4" rx="1"/><rect x="3" y="17" width="4" height="4" rx="1"/><line x1="10" y1="7" x2="21" y2="7"/><line x1="10" y1="13" x2="21" y2="13"/><line x1="10" y1="19" x2="21" y2="19"/></svg>
-        Select
+      <button class="btn-sync-all" id="sync-all-btn" onclick="syncAllToGCal()" title="Sync all entries to Google Calendar" style="display:none;">
+        <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       </button>
+      <input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" oninput="setSearch(this.value)"/>
       <select class="sort-select" id="sort-select" onchange="setSortAndRender(this.value)">
         <option value="newest">Newest first</option>
         <option value="oldest">Oldest first</option>
@@ -1084,20 +994,10 @@ svg.icon.sm{width:13px;height:13px;}
       <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="Toggle sort direction">
         <svg class="icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
       </button>
-      <button class="btn-sync-all" id="sync-all-btn" onclick="syncAllToGCal()" title="Sync all entries to Google Calendar" style="display:none;">
-        <svg class="icon sm" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </button>
-      <input class="search-input" type="text" id="search-input" placeholder="Search name, date, or time…" oninput="setSearch(this.value)"/>
     </div>
     <div class="entries" id="entries-list"></div>
   </main>
 </div>
-
-<!-- Mobile-only floating add button: on narrow screens the sidebar form is
-     hidden until summoned, this opens it as a full-screen overlay -->
-<button class="fab-add" id="fab-add" onclick="openMobileSidebar()" title="New entry" aria-label="New entry">
-  <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-</button>
 
 <!-- Repeat Confirm Modal -->
 <div class="repeat-modal-overlay" id="repeat-modal-overlay">
@@ -1167,7 +1067,6 @@ svg.icon.sm{width:13px;height:13px;}
       <div id="gcal-token-section" style="display:none;">
         <p style="font-size:13px;color:var(--success);background:var(--success-bg);padding:8px 12px;border-radius:8px;margin:12px 0 8px;line-height:1.6;"><strong>✓ Popup opened.</strong> A Google sign-in window appeared. <strong>Just approve access</strong> — this page will automatically detect it and connect. No copy-paste needed!</p>
         <p style="font-size:12px;color:var(--text3);margin:12px 0 8px;line-height:1.5;"><em>If the popup was blocked or something goes wrong, you can manually paste the token as a fallback:</em></p>
-        <a id="gcal-auth-link" href="#" target="_blank" rel="noopener" style="display:none;font-size:12px;margin:0 0 12px;color:var(--accent);">Open Google sign-in in a new tab →</a>
         <div class="form-group"><label class="field-label">Access token (fallback only)</label><input type="text" id="gcal-token-input" placeholder="ya29.a0…"/></div>
       </div>
     </div>
@@ -1234,21 +1133,6 @@ svg.icon.sm{width:13px;height:13px;}
 </div>
 
 <!-- Mode Switch (Event/Task) disconnected warning -->
-<!-- Move to Trash confirmation (single + bulk) -->
-<div class="modal-overlay" id="trash-confirm-modal">
-  <div class="modal">
-    <h2 id="trash-confirm-title">Move to Trash?</h2>
-    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px;" id="trash-confirm-body"></p>
-    <p style="font-size:13px;color:var(--text2);line-height:1.6;">
-      Kept in <b>Trash</b> for <b>5 days</b> — restore any time before then from <b>Settings → Trash</b>.
-    </p>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeTrashConfirm()">Cancel</button>
-      <button class="btn btn-primary" id="trash-confirm-ok" onclick="trashConfirmOk()" style="background:var(--danger);border-color:var(--danger);color:#fff;">Move to Trash</button>
-    </div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="mode-switch-warn-modal">
   <div class="modal">
     <h2>Google Calendar not connected</h2>
@@ -1623,12 +1507,6 @@ new MutationObserver(muts => {
 // after ALL let/const state declarations, so nothing is accessed in its TDZ.
 function init(){
   a11yFixIconButtons(document.body);
-  // Every overlay is a dialog to assistive tech; label it from its heading.
-  document.querySelectorAll('.modal-overlay, .settings-overlay, .trash-overlay, .due-modal-overlay').forEach(ov => {
-    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
-    const h = ov.querySelector('h1,h2,h3,.modal-title,.settings-title');
-    if(h){ if(!h.id) h.id = ov.id + '-title'; ov.setAttribute('aria-labelledby', h.id); }
-  });
   document.getElementById('f-deadline').value = today();
   document.getElementById('f-deadline-task').value = today();
   // Sync sort direction button icon to default asc
@@ -1638,7 +1516,7 @@ function init(){
     document.getElementById('gcal-pill').classList.add('connected');
     document.getElementById('gcal-pill-text').textContent = 'Calendar connected';
     // Verify the stored token is actually live, then pull/push cross-device sync
-    verifyGCalToken().then(() => { if(!gcalExpired){ performSync(); fetchGCalColors(); } });
+    verifyGCalToken().then(() => { if(!gcalExpired) performSync(); });
   }
   populateTypeSelects();
   render();
@@ -1671,19 +1549,6 @@ function initializeEditTimePickers(entryId){
     if(next) parent.insertBefore(picker, next);
     else parent.appendChild(picker);
   });
-}
-
-// Mobile-only (≤700px): the sidebar form hides behind a floating + button
-// and slides in as a full-screen overlay. No-ops on desktop, where the
-// .mobile-open class has no effect (sidebar isn't position:fixed there).
-function openMobileSidebar(){
-  document.getElementById('sidebar').classList.add('mobile-open');
-  document.body.classList.add('no-scroll');
-  document.getElementById('f-name')?.focus();
-}
-function closeMobileSidebar(){
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.body.classList.remove('no-scroll');
 }
 
 function setSyncMode(mode){
@@ -1755,7 +1620,6 @@ function addEntry(){
 
   commitNewEntry(entry);
   clearForm();
-  closeMobileSidebar(); // narrow screens: return to the list/calendar after adding
 }
 
 // Shared add path: pushes a fully-built entry into the list, persists,
@@ -1766,21 +1630,6 @@ function commitNewEntry(entry){
   pinnedId = entry.id;
   save(); render();
   toast('Entry added.');
-  // In calendar month view the page itself can't scroll (body.cal-fit pins
-  // it to 100vh) — only the inner grid does, easy to miss on a narrow/short
-  // window, and a busy day can cap the new entry into "+N more" with no chip
-  // ever rendered to scroll to. Pop the day's full list open instead, which
-  // always shows the true set and is a fixed-position modal either way.
-  // Only when the calendar is actually on screen (not the Archive list, which
-  // keeps viewLayout='calendar' but renders a list) and the new entry passes
-  // the active filter/search — otherwise the popup would say "Nothing on
-  // this day" right after "Entry added".
-  const visibleInCal = viewMode === 'active'
-    && (selectedFilterTypes.length === 0 || selectedFilterTypes.includes(entry.type))
-    && matchesSearch(entry, searchQuery);
-  if(viewLayout === 'calendar' && calView === 'month' && entry.deadline && visibleInCal){
-    openCalDay(entry.deadline);
-  }
   if(gcalToken && entry.deadline){
     if(entry.syncMode === 'task') pushToGTask(entry);
     else pushToGCal(entry);
@@ -1788,40 +1637,14 @@ function commitNewEntry(entry){
   return entry;
 }
 
-// Pending trash action shown in the confirmation modal: {kind:'single', id}
-// or {kind:'bulk'}. Cleared on Cancel / Esc / backdrop click.
-let trashPending = null;
-function openTrashConfirm(pending, bodyText){
-  trashPending = pending;
-  document.getElementById('trash-confirm-body').innerHTML = bodyText;
-  document.getElementById('trash-confirm-modal').classList.add('open');
-}
-function closeTrashConfirm(){
-  trashPending = null;
-  document.getElementById('trash-confirm-modal').classList.remove('open');
-}
-function trashConfirmOk(){
-  const p = trashPending; closeTrashConfirm();
-  if(!p) return;
-  if(p.kind === 'single') deleteEntry(p.id, true);
-  else if(p.kind === 'bulk') bulkDelete(true);
-}
-document.getElementById('trash-confirm-modal')?.addEventListener('click', (ev)=>{
-  if(ev.target.id === 'trash-confirm-modal') closeTrashConfirm();
-});
-
-function deleteEntry(id, confirmed){
+function deleteEntry(id){
   const entry = entries.find(e=>e.id===id); if(!entry) return;
-  if(!confirmed){
-    openTrashConfirm({kind:'single', id}, `<b>${esc(entry.name)}</b> will be moved to Trash.`);
-    return;
-  }
   if(gcalToken) entry.syncMode==='task' ? deleteFromGTask(entry) : deleteFromGCal(entry);
   entry.deletedAt = new Date().toISOString();
   trash.unshift(entry);
   entries = entries.filter(e=>e.id!==id);
   saveTrash(); save(); render(); updateTrashBadge();
-  toast('Moved to Trash — restore from Settings → Trash within 5 days.');
+  toast('Moved to Trash. Restore within 5 days from Settings.');
 }
 
 function restoreFromTrash(id){
@@ -1895,33 +1718,19 @@ function startEdit(id){
 
 function cancelEdit(){ editingId = null; render(); }
 
-let saveEditInFlight = false;
 async function saveEdit(id){
-  // Re-entry guard: a double-click during the network verify below would
-  // otherwise pass both calls through and create two Google objects.
-  if(saveEditInFlight) return false;
-  const e0 = entries.find(x=>x.id===id); if(!e0) return false;
+  const e = entries.find(x=>x.id===id); if(!e) return false;
   const name = v('edit-name-'+id);
   if(!name){ toast('Name cannot be empty.'); return false; }
   const newMode = (v('edit-syncmode-'+id) === 'task') ? 'task' : 'event';
-  const modeChanged = newMode !== (e0.syncMode==='task' ? 'task' : 'event');
-  // Snapshot every field NOW. After the await the edit form may be gone
-  // (Cancel, a sync-driven re-render, a view toggle) and v() would return ''.
-  const snap = {
-    type: v('edit-type-'+id), time: v('edit-time-'+id), timeTo: v('edit-time-to-'+id),
-    remark: v('edit-remark-'+id),
-    deadline: newMode==='task' ? v('edit-deadline-task-'+id) : v('edit-deadline-'+id),
-    deadlineEnd: newMode==='task' ? '' : v('edit-deadline-end-'+id)
-  };
+  const modeChanged = newMode !== (e.syncMode==='task' ? 'task' : 'event');
   // Switching mode on an already-synced entry needs a LIVE Google connection
   // to clean up the old copy — a stored token may have expired hours ago, so
   // verify it now rather than trusting its presence. Disconnected or expired:
   // warn and abort the save (edit stays open).
-  if(modeChanged && (e0.gcalEventId || e0.gcalTaskId)){
+  if(modeChanged && (e.gcalEventId || e.gcalTaskId)){
     let liveStatus = 'disconnected';
-    saveEditInFlight = true;
-    try{ if(gcalToken && !gcalExpired) liveStatus = await verifyGCalToken(); }
-    finally{ saveEditInFlight = false; }
+    if(gcalToken && !gcalExpired) liveStatus = await verifyGCalToken();
     // Fail closed: offline ('network') counts as no live connection too —
     // proceeding would silently orphan the old copy on Google.
     if(!gcalToken || gcalExpired || liveStatus !== 'ok'){
@@ -1929,18 +1738,21 @@ async function saveEdit(id){
       return false;
     }
   }
-  // Re-resolve: a merge during the await may have swapped the object.
-  const e = entries.find(x=>x.id===id); if(!e) return false;
   e.name = name;
-  e.type = snap.type;
-  e.time = snap.time;
-  e.timeTo = snap.timeTo;
-  e.remark = snap.remark;
+  e.type = v('edit-type-'+id);
+  e.time = v('edit-time-'+id);
+  e.timeTo = v('edit-time-to-'+id);
+  e.remark = v('edit-remark-'+id);
   e.color = typeColors[e.type] || e.color || null;
   e.gcalColorId = typeGCalIds[e.type] || undefined;
   e.syncMode = newMode;
-  e.deadline = snap.deadline;
-  e.deadlineEnd = snap.deadlineEnd;
+  if(newMode==='task'){
+    e.deadline = v('edit-deadline-task-'+id);
+    e.deadlineEnd = '';
+  } else {
+    e.deadline = v('edit-deadline-'+id);
+    e.deadlineEnd = v('edit-deadline-end-'+id);
+  }
   touchEntry(e);
   editingId = null;
   if(modeChanged){
@@ -2309,13 +2121,10 @@ function updateBulkBar(){
   document.getElementById('bulk-count').textContent = `${count} selected`;
 }
 
-async function bulkDelete(confirmed){
+async function bulkDelete(){
   if(!selectedIds.size) return;
   const count = selectedIds.size;
-  if(!confirmed){
-    openTrashConfirm({kind:'bulk'}, `<b>${count} ${count===1?'entry':'entries'}</b> will be moved to Trash.`);
-    return;
-  }
+  if(!confirm(`Move ${count} ${count===1?'entry':'entries'} to Trash?`)) return;
   const toDelete = [...selectedIds].map(id=>entries.find(e=>e.id===id)).filter(Boolean);
   if(gcalToken){
     await Promise.all(toDelete.map(e=>e.syncMode==='task' ? deleteFromGTask(e,true) : deleteFromGCal(e,true)));
@@ -2546,7 +2355,6 @@ function confirmRepeatEntries(){
   document.getElementById('f-repeat').checked = false;
   toggleRepeatUI();
   clearForm();
-  closeMobileSidebar();
   toast(`${toAdd.length} repeated ${toAdd.length===1?'entry':'entries'} created.`);
   if(gcalToken){
     toAdd.forEach(e=>{ if(e.syncMode==='task') pushToGTask(e,true); else pushToGCal(e,true); });
@@ -2728,10 +2536,7 @@ function render(){
   }
 
   // Filter chips (chips only — sync/search/sort are static toolbar controls)
-  // Type name lives in a data attribute, not inside an inline JS string —
-  // esc() turns ' into &#39; which the HTML parser decodes right back to '
-  // inside onclick="…('…')", giving a SyntaxError for names like O'Brien.
-  fb.innerHTML = types.map(t=>`<button class="filter-chip${(t==='All'?selectedFilterTypes.length===0:selectedFilterTypes.includes(t))?' active':''}" data-type="${esc(t)}" onclick="toggleFilterType(this.dataset.type)">${esc(t)}</button>`).join('');
+  fb.innerHTML = types.map(t=>`<button class="filter-chip${(t==='All'?selectedFilterTypes.length===0:selectedFilterTypes.includes(t))?' active':''}" onclick="toggleFilterType('${esc(t)}')">${esc(t)}</button>`).join('');
   const syncAllEl = document.getElementById('sync-all-btn');
   if(syncAllEl) syncAllEl.style.display = (gcalToken && viewMode==='active') ? '' : 'none';
 
@@ -2748,13 +2553,12 @@ function render(){
     document.getElementById('layout-list-btn').classList.toggle('active', viewLayout==='list');
     document.getElementById('layout-cal-btn').classList.toggle('active', viewLayout==='calendar');
   }
-  // List-only controls (Select / sort / direction). Toggled via a body class
-  // so CSS hides them with visibility (space kept) — the chip area, search
-  // box and everything below stay put on every breakpoint.
-  document.body.classList.toggle('cal-tools', calMode);
-  // Mobile + button: adding is disabled while viewing the Archive
-  const fabEl = document.getElementById('fab-add');
-  if(fabEl) fabEl.style.display = viewMode==='archive' ? 'none' : '';
+  const sortSelEl = document.getElementById('sort-select');
+  if(sortSelEl) sortSelEl.style.display = calMode ? 'none' : '';
+  const sortDirEl = document.getElementById('sort-dir-btn');
+  if(sortDirEl) sortDirEl.style.display = calMode ? 'none' : '';
+  const selBtnEl = document.getElementById('select-mode-btn');
+  if(selBtnEl) selBtnEl.style.display = calMode ? 'none' : '';
   if(calMode){ renderCalendar(); return; }
   document.body.classList.remove('cal-fit');
 
@@ -2862,7 +2666,7 @@ function entryHTML(e, isArchived=false){
             :''}
             <button class="icon-btn" title="Edit entry" onclick="startEdit(${e.id})">${editIcon()}</button>
             <button class="icon-btn" title="Archive entry" onclick="archiveEntry(${e.id})" style="color:var(--text3);">${archiveIcon()}</button>
-            <button class="icon-btn del" title="Move to Trash" onclick="deleteEntry(${e.id})">${trashIcon()}</button>
+            <button class="icon-btn del" title="Delete permanently" onclick="deleteEntry(${e.id})">${trashIcon()}</button>
           `}
           ${selectCb}
         </div>
@@ -3061,9 +2865,7 @@ function calMonthHTML(dated, listHeight){
   // Height-aware chip capacity: each of the 6 week rows gets an equal share
   // of the grid, so compute how many 22px chips fit under the day number
   // (28px) per row. Bar lanes and the "+N more" line are subtracted per week.
-  // Constants measured from the live DOM (1400x1000): list padding + calendar
-  // header + weekday row = 102px of chrome above the 6 week rows.
-  const rowH = Math.max(78, ((listHeight || 560) - 102) / 6);
+  const rowH = Math.max(78, ((listHeight || 560) - 82) / 6);
 
   // 6 fixed week rows, with leading/trailing days from adjacent months
   const weeks = [];
@@ -3107,10 +2909,7 @@ function calMonthHTML(dated, listHeight){
 
     // Chips that fit below the day number and this week's bar lanes; when
     // not everything fits, one chip slot is traded for the "+N more" line.
-    // Cell = padding-top 28 (+ bar lanes) + chips + padding-bottom 4 + 1px
-    // border; each chip is 20.5px with a 2px flex gap (stride 22.5, no gap
-    // after the last). Undercounting these clipped the last chip on tall windows.
-    const fitAll = Math.max(0, Math.floor((rowH - 33 - barArea + 2) / 22.5));
+    const fitAll = Math.max(0, Math.floor((rowH - 26 - barArea) / 20));
     html += `<div class="cal-week"><div class="cal-week-days">` +
       days.map(day => {
         const other = day.m !== calMonth;
@@ -3654,14 +3453,7 @@ function checkGCalAuthExpired(res){
     pill.classList.remove('connected');
     pill.classList.add('expired');
     document.getElementById('gcal-pill-text').textContent = 'Reconnect Google Calendar';
-    // Surface the reconnect modal — but never on top of an in-progress
-    // reconnect (openGCalModal would reset the paste box / auth link and
-    // swap the buttons mid-flow) or over another modal the user is in.
-    // The pill has already turned red in those cases; that's enough.
-    const gcalModalOpen = document.getElementById('gcal-modal').classList.contains('open');
-    const otherModalOpen = !!document.querySelector('.modal-overlay.open:not(#gcal-modal), .settings-overlay.open, .trash-overlay.open, .due-modal-overlay.open');
-    if(!gcalModalOpen && !otherModalOpen) openGCalModal();
-    else if(!gcalModalOpen) toast('Google Calendar session expired — click the pill to reconnect.', 5000);
+    toast('Google Calendar session expired — click the pill to reconnect.', 5000);
   }
 }
 function clearGCalExpired(){
@@ -3675,12 +3467,7 @@ function clearGCalExpired(){
 async function verifyGCalToken(){
   if(!gcalToken) return 'disconnected';
   try{
-    // Must be an endpoint the `calendar.events` scope is allowed to hit.
-    // `GET calendars/primary` (calendars.get) needs the broader `calendar` /
-    // `calendar.readonly` scope and answered 403 with our token — which made
-    // this report 'error' for a perfectly live connection, so the Event/Task
-    // switch warned "not connected" no matter how many times you reconnected.
-    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1&fields=kind', {
+    const res = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary', {
       headers: {Authorization: `Bearer ${gcalToken}`}
     });
     checkGCalAuthExpired(res);
@@ -3700,8 +3487,6 @@ function openGCalModal(){
   document.getElementById('gcal-connected-section').style.display = connected ? 'block' : 'none';
   document.getElementById('gcal-setup-section').style.display = connected ? 'none' : 'block';
   document.getElementById('gcal-token-section').style.display = 'none';
-  const authLinkEl = document.getElementById('gcal-auth-link');
-  if(authLinkEl) authLinkEl.style.display = 'none';
   if(connected){
     const statusEl = document.getElementById('gcal-connected-status');
     if(gcalExpired){
@@ -3745,25 +3530,13 @@ function gcalAuthorise(){
   gcalClientId = cid; localStorage.setItem('wl2dev_gcal_client_id', cid);
   const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/drive.appdata');
   const redirect = encodeURIComponent('https://famelx.github.io/Work-Log/');
-  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(cid)}&redirect_uri=${redirect}&response_type=token&scope=${scope}&prompt=consent`;
-  const popup = window.open(authUrl,'gcal_oauth','width=520,height=620');
+  window.open(`https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(cid)}&redirect_uri=${redirect}&response_type=token&scope=${scope}&prompt=consent`,'gcal_oauth','width=520,height=620');
   // The popup will auto-send the token back via postMessage; show the manual
   // paste box only as a fallback in case the popup can't reach us.
   document.getElementById('gcal-setup-section').style.display='block';
   document.getElementById('gcal-connected-section').style.display='none';
   document.getElementById('gcal-token-section').style.display='block';
   document.getElementById('gcal-modal-actions').innerHTML=`<button class="btn" onclick="closeGCalModal()">Cancel</button><button class="btn btn-primary" onclick="gcalSaveToken()">Connect manually</button>`;
-  // Mobile browsers (esp. in-app/PWA contexts) frequently block or lose track
-  // of window.open popups — `popup` is null when blocked outright, and some
-  // browsers open it but sever window.opener so postMessage never arrives.
-  // Either way the manual-paste box above is already showing; just tell the
-  // user why, with a link they can open directly, instead of leaving them
-  // staring at a form with no explanation.
-  if(!popup || popup.closed){
-    const linkEl = document.getElementById('gcal-auth-link');
-    if(linkEl){ linkEl.href = authUrl; linkEl.style.display = 'inline'; }
-    toast('Pop-up blocked — use the link below to sign in, then paste the token back here.', 5000);
-  }
 }
 
 function gcalSaveToken(){
@@ -3781,7 +3554,6 @@ function gcalApplyToken(t){
   document.getElementById('gcal-pill-text').textContent='Calendar connected';
   closeGCalModal(); render();
   toast('Google Calendar connected!');
-  gcalColorsFetched = false; fetchGCalColors();
   // Cross-device sync FIRST — entries pulled from other devices may already
   // carry gcalEventIds, which keeps the GCal push below from duplicating them.
   setTimeout(async ()=>{
@@ -3790,18 +3562,11 @@ function gcalApplyToken(t){
     // creating duplicate calendar events.
     clearTimeout(syncDebounceTimer);
     for(let i = 0; i < 40 && syncInProgress; i++) await new Promise(r => setTimeout(r, 250));
-    let pulled = await performSync();
+    const pulled = await performSync();
     if(!pulled){
-      // One retry: most failures here are transient (first-load race, flaky
-      // network). If it still fails, say clearly WHY the push is on hold and
-      // that the Sync-all button (toolbar) does it manually. Never push blind:
-      // without a completed pull we can't know which entries already exist on
-      // Google, and pushing would create duplicates.
-      await new Promise(r => setTimeout(r, 1500));
-      pulled = await performSync();
-    }
-    if(!pulled){
-      toast('Cloud sync (Drive) did not finish, so the calendar push is on hold. Check the Drive permission was granted, or use the Sync-all button when ready.', 6000);
+      // Without a completed pull we can't know which entries already exist on
+      // Google — pushing now would create duplicates. Sync retries later.
+      toast('Cloud sync didn\'t finish — calendar push postponed to avoid duplicates.', 3500);
       return;
     }
     // Only push entries that have never been synced — entries with a gcalEventId
@@ -3888,9 +3653,6 @@ async function pushToGCal(entry, silent=false){
     if(res.ok){
       const created = await res.json();
       entry.gcalEventId = created.id;
-      // Bump the timestamp: without it the id can lose a merge tie to an
-      // id-less copy on another device, which then creates a duplicate event.
-      touchEntry(entry);
       save();
       if(!silent) toast(`"${entry.name}" added to Google Calendar.`);
     } else {
@@ -3972,7 +3734,7 @@ async function pushToGTask(entry, silent=false){
     checkGCalAuthExpired(res);
     if(res.ok){
       const created = await res.json();
-      entry.gcalTaskId = created.id; touchEntry(entry); save();
+      entry.gcalTaskId = created.id; save();
       if(!silent) toast(`"${entry.name}" added to Google Tasks.`);
     } else {
       const err = await res.json();
@@ -4192,21 +3954,8 @@ function mergeSync(remote){
   return {pulled, pushed, removed};
 }
 
-function editUiOpen(){
-  return editingId !== null || document.getElementById('cal-edit-modal')?.classList.contains('open');
-}
 async function performSync(manual = false){
   if(syncInProgress){ if(manual) toast('Sync already running.'); return false; }
-  // Never merge under an open edit (inline card OR calendar edit modal): the
-  // form is a snapshot, so Save would overwrite whatever the merge pulled in
-  // and stamp it newest — silently reverting the other device's change.
-  // Retry after the edit closes.
-  if(editUiOpen()){
-    if(manual){ toast('Finish the open edit first, then sync.'); return false; }
-    clearTimeout(syncDebounceTimer);
-    syncDebounceTimer = setTimeout(() => performSync(), 4000);
-    return false;
-  }
   if(!gcalToken || gcalExpired){
     if(manual) toast('Connect Google Calendar first — sync needs a live connection.');
     return false;
@@ -4230,19 +3979,12 @@ async function performSync(manual = false){
     // change since the last upload, merge-detected local-newer entries, or no
     // remote file yet. Pure pulls and no-op syncs skip the write entirely.
     if(syncDirty || stats.pushed > 0 || !syncFileId){
-      // Clear the flag BEFORE the upload starts, so a save that lands while
-      // the upload is in flight re-arms it and is picked up by the follow-up
-      // pass. Clearing after the await used to swallow those saves.
-      const wasDirty = syncDirty;
-      syncDirty = false;
-      const payload = buildSyncPayload();
-      let newId;
-      try{ newId = await driveUploadSync(syncFileId, payload); }
-      catch(err){ if(wasDirty) syncDirty = true; throw err; }
+      const newId = await driveUploadSync(syncFileId, buildSyncPayload());
       if(newId && newId !== syncFileId){
         syncFileId = newId;
         localStorage.setItem('wl2dev_sync_file_id', newId);
       }
+      syncDirty = false;
     }
     localStorage.setItem('wl2dev_last_sync', new Date().toISOString());
     if(stats.pulled || stats.removed){
@@ -4290,51 +4032,23 @@ function updateSyncStatusUI(override){
 }
 
 // ── Settings ───────────────────────────────────────────────────────────────
-// Google's official names for colour IDs 1-11 (the API only returns hex, not
-// names). Any id beyond 11 that Google adds gets a plain "Color N" label —
-// GCAL_COLOR_MAP/OPTIONS/NAMES are rebuilt from the live `colors` endpoint
-// (see fetchGCalColors below) instead of hardcoded, so a Google-side palette
-// expansion shows up automatically instead of silently missing new colours.
-const GCAL_COLOR_STATIC_NAMES = {
-  '1':'Lavender','2':'Sage','3':'Grape','4':'Flamingo','5':'Banana',
-  '6':'Tangerine','7':'Peacock','8':'Graphite','9':'Blueberry','10':'Basil','11':'Tomato'
-};
-const GCAL_COLOR_STATIC_HEX = {
+var GCAL_COLOR_OPTIONS = [
+  {id:'',label:'— None —'},
+  {id:'1',label:'1 · Lavender'},{id:'2',label:'2 · Sage'},{id:'3',label:'3 · Grape'},
+  {id:'4',label:'4 · Flamingo'},{id:'5',label:'5 · Banana'},{id:'6',label:'6 · Tangerine'},
+  {id:'7',label:'7 · Peacock'},{id:'8',label:'8 · Graphite'},{id:'9',label:'9 · Blueberry'},
+  {id:'10',label:'10 · Basil'},{id:'11',label:'11 · Tomato'}
+];
+var GCAL_COLOR_MAP = {
+  '':'transparent',
   '1':'#7986cb','2':'#33b679','3':'#8e24aa','4':'#e67c73','5':'#f6c026',
   '6':'#f5511d','7':'#039be5','8':'#616161','9':'#3f51b5','10':'#0b8043','11':'#d60000'
 };
-let GCAL_COLOR_OPTIONS, GCAL_COLOR_MAP, GCAL_COLOR_NAMES;
-function rebuildGCalColorTables(eventColors){
-  const ids = Object.keys(eventColors).sort((a,b)=>+a-+b);
-  const map = {'':'transparent'}, names = {}, options = [{id:'',label:'— None —'}];
-  ids.forEach(id=>{
-    map[id] = eventColors[id].background || eventColors[id];
-    const name = GCAL_COLOR_STATIC_NAMES[id] || ('Color '+id);
-    names[id] = name;
-    options.push({id, label:`${id} · ${name}`});
-  });
-  GCAL_COLOR_MAP = map; GCAL_COLOR_NAMES = names; GCAL_COLOR_OPTIONS = options;
-}
-rebuildGCalColorTables(GCAL_COLOR_STATIC_HEX);
 
-let gcalColorsFetched = false;
-// Live palette differs from the hardcoded 1-11 fallback the moment Google
-// adds colours on their end — fetch once per session while connected so the
-// Settings picker always reflects what's actually selectable via the API.
-async function fetchGCalColors(){
-  if(!gcalToken || gcalColorsFetched) return;
-  try{
-    const res = await fetch('https://www.googleapis.com/calendar/v3/colors', {
-      headers: {Authorization: `Bearer ${gcalToken}`}
-    });
-    if(!res.ok || !res.headers.get('content-type')?.includes('json')) return;
-    const data = await res.json();
-    if(!data.event || !Object.keys(data.event).length) return;
-    rebuildGCalColorTables(data.event);
-    gcalColorsFetched = true;
-    if(document.getElementById('settings-overlay')?.classList.contains('open')) buildSettingsUI();
-  }catch{ /* offline or blocked — static fallback already in place */ }
-}
+var GCAL_COLOR_NAMES = {
+  '1':'Lavender','2':'Sage','3':'Grape','4':'Flamingo','5':'Banana',
+  '6':'Tangerine','7':'Peacock','8':'Graphite','9':'Blueberry','10':'Basil','11':'Tomato'
+};
 
 let settingsSnapshot = null;
 let settingsDirty = false;
@@ -4559,19 +4273,8 @@ function saveSettings(){
   localStorage.setItem('wl2dev_custom_types', JSON.stringify(customTypes));
   localStorage.setItem('wl2dev_custom_type_order', JSON.stringify(customTypeOrder));
   localStorage.setItem('wl2dev_type_order', JSON.stringify(typeOrder));
-  // Only stamp settings_updated when the SYNCED part (types, order, colours,
-  // GCal ids) actually changed. Themes stay per-device, so a theme-only save
-  // must not advance the stamp — otherwise this device's possibly-stale type
-  // list wins "newest" on the next merge and deletes types added elsewhere.
-  // And mark data dirty, or a type-only change never uploads at all (the
-  // upload guard needs syncDirty || pushed || no file).
-  const typeFingerprint = () => JSON.stringify({customTypes, typeOrder, customTypeOrder, typeColors, typeGCalIds});
-  const before = settingsSnapshot ? JSON.stringify({customTypes:settingsSnapshot.customTypes, typeOrder:settingsSnapshot.typeOrder, customTypeOrder:settingsSnapshot.customTypeOrder, typeColors:settingsSnapshot.typeColors, typeGCalIds:settingsSnapshot.typeGCalIds}) : null;
-  if(before === null || before !== typeFingerprint()){
-    localStorage.setItem('wl2dev_settings_updated', new Date().toISOString());
-    syncDirty = true;
-    scheduleSync();
-  }
+  localStorage.setItem('wl2dev_settings_updated', new Date().toISOString());
+  scheduleSync();
 
   // Commit the previewed theme (deferred until Save)
   if(pendingCustomEdited){
@@ -4594,115 +4297,7 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.8.1', date: 'August 17, 2026', latest: true,
-    items: [
-      'Code review round 3 (10 fixes). Sync: saving an Event/Task switch can no longer save blank fields or create two Google copies (double-click / cancel mid-save); a freshly pushed Google id now wins on other devices instead of spawning a duplicate calendar event; adding a custom type alone now syncs, and a theme-only save can no longer overwrite newer types from another device; background sync waits while an edit (card or calendar popup) is open instead of pulling under it; Clear Trash during a sync now reaches other devices',
-      'Small: type names with an apostrophe work in the filter chips; the auto reconnect box no longer interrupts a reconnect already in progress or stacks over another dialog; adding an entry with a filter on (or from the Archive) no longer pops an empty day box; if Drive fails at connect it retries once and explains, instead of a silent skip; the last calendar chip is no longer clipped on tall windows'
-    ]
-  },
-  {
-    version: 'v1.8.0', date: 'August 17, 2026', latest: false,
-    items: [
-      'New: deleting an entry (single, from the calendar popup, or bulk-select) now asks first — a small confirmation that names the entry, says it is kept 5 days, and tells you where Trash is (Settings → Trash)',
-      'The card delete button tooltip said "Delete permanently" — it never was; now reads "Move to Trash"'
-    ]
-  },
-  {
-    version: 'v1.7.9', date: 'August 17, 2026', latest: false,
-    items: [
-      'Sync-all button moved to sit right beside the search box (PC) / flush right of its row (phone), so the space kept for the list-only controls blends into the normal gap in Calendar view instead of reading as a hole'
-    ]
-  },
-  {
-    version: 'v1.7.8', date: 'August 17, 2026', latest: false,
-    items: [
-      'Fix: Select / sort / direction now hide and show together in one go when switching views — they were fading out one after another because their hover animation was also animating the hide'
-    ]
-  },
-  {
-    version: 'v1.7.7', date: 'August 17, 2026', latest: false,
-    items: [
-      'Switching Calendar <-> List now moves nothing at all, PC and phone: the list-only controls (Select / sort / direction) keep their space instead of disappearing, every toolbar control has the same fixed height, and the sync button no longer drops down a few pixels in List view. Verified by measuring every header/toolbar/list element in both views, connected and disconnected, on both screen sizes'
-    ]
-  },
-  {
-    version: 'v1.7.6', date: 'August 17, 2026', latest: false,
-    items: [
-      'Phone: search box keeps the same spot in both views — full-width row right under the chips; Select / sort / direction sit on their own row beneath it and simply vanish in Calendar view'
-    ]
-  },
-  {
-    version: 'v1.7.5', date: 'August 17, 2026', latest: false,
-    items: [
-      'PC: the New Entry sidebar and the entries list each scroll on their own in List view (as Calendar already did) — the page itself never scrolls, so nothing shifts when switching views',
-      'PC: the search box is pinned to the far right of its row; the sort controls now sit to its left, so it stays put when they appear or disappear'
-    ]
-  },
-  {
-    version: 'v1.7.4', date: 'August 17, 2026', latest: false,
-    items: [
-      'Fix: the Event/Task switch warned "Google Calendar not connected" no matter how many times you reconnected — the liveness check was calling an endpoint our permission scope is not allowed to read (Google answered 403), so a live connection looked dead. Now checks via the events endpoint we do have access to. Affected PC and phone alike',
-      'Fix: switching Calendar <-> List no longer shifts the header — the Select button moved down beside the sort controls (all list-only tools together), and the page now reserves its scrollbar width so nothing jumps 15px sideways on PC'
-    ]
-  },
-  {
-    version: 'v1.7.3', date: 'August 17, 2026', latest: false,
-    items: [
-      'Phone (from real-device screenshots): filter chips no longer get squeezed under the search box — chips take their own row, search + sort share the next; header buttons flow left in one tidy wrap instead of splitting into ragged rows; stat strip loses its desktop indent; select-mode bar puts the count on its own line; list, calendar and header all share the same 12px side gutters'
-    ]
-  },
-  {
-    version: 'v1.7.2', date: 'August 17, 2026', latest: false,
-    items: [
-      'Phone (touch pass, found by driving the app with emulated finger taps and swipes): the Edit / Quick-add forms no longer overflow — Type gets its own line and the two dates pair up beneath it, instead of Type squashed to a bare arrow and End date running off the right edge',
-      'Phone: the floating + button no longer covers the Save/Cancel of the last card while editing — the list scrolls clear of it',
-      'Phone: small buttons (due-today alert Archive / Extend) grow to a comfortable tap height'
-    ]
-  },
-  {
-    version: 'v1.7.1', date: 'August 17, 2026', latest: false,
-    items: [
-      'Accessibility: faint grey helper text (section labels, counts, weekday headers, empty states) darkened in every theme to meet the WCAG AA 4.5:1 contrast floor; Dusty Pink secondary text too',
-      'Phone width: the topbar title no longer wraps into three lines — right-hand buttons collapse to icons and the calendar pill to its status dot instead; icon buttons grow to a 40px tap area',
-      'Keyboard: Esc now closes whatever is on top (any modal, Settings, Trash, the mobile form), one layer per press; Tab stays inside an open modal instead of wandering into the page behind it; every dialog announces itself to screen readers',
-      'Honours the system reduced-motion setting: panels and modals still open and close, just without the slide/fade'
-    ]
-  },
-  {
-    version: 'v1.7.0', date: 'August 17, 2026', latest: false,
-    items: [
-      'Google Calendar session expiry now pops up the reconnect modal directly (instead of a toast you could miss)',
-      'Type colour picker\'s Google Calendar colour list is now fetched live from Google instead of a hardcoded set of 11, so it stays current if Google adds more',
-      'If the Google sign-in popup is blocked, a direct link now appears in the Connect dialog with an explanation, instead of a form with no context'
-    ]
-  },
-  {
-    version: 'v1.6.31', date: 'August 13, 2026', latest: false,
-    items: [
-      'New (narrow screens only): the New Entry form now hides behind a floating + button instead of taking up the top of the page — tap + to open it full-screen, add your entry and it closes back to the list or calendar automatically. Desktop layout is completely unchanged. First step toward proper mobile support'
-    ]
-  },
-  {
-    version: 'v1.6.30', date: 'August 13, 2026', latest: false,
-    items: [
-      'Fix: the sidebar form (Work name, Type, Deadline, etc.) no longer disappears in Calendar view on a narrow screen — it was getting squeezed into a sliver by the calendar\'s full-height layout. Now it shows in full and scrolls with the page, same as List view, while the calendar keeps its own full-height space below it'
-    ]
-  },
-  {
-    version: 'v1.6.29', date: 'August 13, 2026', latest: false,
-    items: [
-      'From the technical audit: text fields show a clear accent-coloured ring when focused (was a barely-visible 6% shadow); icon-only buttons and calendar icons are now readable by screen readers; calendar date circles are bigger and easier to tap; search no longer causes a brief lag while typing; the calendar can scroll sideways on very narrow screens instead of squeezing unreadable'
-    ]
-  },
-  {
-    version: 'v1.6.28', date: 'August 13, 2026', latest: false,
-    items: [
-      'Fix: the List | Calendar toggle no longer disappears when the window isn\'t full-screen — the header now wraps to a second line instead of clipping it off-screen',
-      'Fix: adding an entry while the calendar is showing now opens that day\'s list automatically, so the new entry is never hard to find (previously only an inner area scrolled, easy to miss on a narrow or short window)'
-    ]
-  },
-  {
-    version: 'v1.6.27', date: 'August 13, 2026', latest: false,
+    version: 'v1.6.27', date: 'August 13, 2026', latest: true,
     items: [
       'Sync hardening (code review round 2): killed a loop that made the app re-sync to Drive every 4 seconds forever; no-op syncs no longer upload anything; editing a task from Work Log no longer reopens tasks you completed inside Google Tasks; "Extend to date" and bulk-archive now propagate to other devices; reconnecting mid-sync can no longer create duplicate calendar events',
       'Calendar fixes: the edit popup keeps your changes open when the name is empty instead of discarding them; quick-add no longer touches (or wipes) anything typed in the side form; the "today" circle now uses local time (it marked yesterday until 7 AM); resizing the window re-fits the grid; type names with apostrophes no longer break their filter chips; the Connect dialog opens above the edit popup',
@@ -5168,59 +4763,9 @@ document.getElementById('creator-modal')?.addEventListener('click', (e) => {
 document.getElementById('settings-unsaved-modal')?.addEventListener('click', (e) => {
   if(e.target.id === 'settings-unsaved-modal') cancelUnsavedPrompt();
 });
-// Escape closes whichever layer is on top. Ordered top-down by z-index so a
-// confirm modal (100+) sitting over Settings (150 — but its unsaved-changes
-// prompt is a modal-overlay above it) closes before the layer beneath it,
-// and the mobile sidebar (90) / AI panel go last. Each entry: [id, closer].
-// Only the FIRST open layer closes per keypress — one Esc, one layer.
-const ESC_LAYERS = [
-  ['settings-unsaved-modal', () => cancelUnsavedPrompt()],
-  ['trash-confirm-modal',    () => closeTrashConfirm()],
-  ['creator-modal',          () => closeCreatorModal()],
-  ['changelog-modal',        () => closeChangelog()],
-  ['mode-switch-warn-modal', () => closeModeSwitchWarn()],
-  ['cal-edit-modal',         () => closeCalEditModal()],
-  ['cal-quickadd-modal',     () => closeCalQuickAdd()],
-  ['cal-entry-modal',        () => closeCalEntry()],
-  ['cal-day-modal',          () => closeCalDay()],
-  ['gcal-modal',             () => closeGCalModal()],
-  ['repeat-modal-overlay',   () => closeRepeatModal()],
-  ['due-modal',              () => closeDueModal()],
-  ['trash-overlay',          () => closeTrash()],
-  ['settings-overlay',       () => closeSettings()],
-  ['sidebar',                () => closeMobileSidebar()],
-];
-function topOpenLayer(){
-  for(const [id, close] of ESC_LAYERS){
-    const el = document.getElementById(id);
-    if(!el) continue;
-    const open = id === 'sidebar' ? el.classList.contains('mobile-open') : el.classList.contains('open');
-    if(open) return {el, close};
-  }
-  return null;
-}
 document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape'){
-    // Don't steal Esc from an open <select> / datalist / the time picker
-    // dropdown — those need it to dismiss themselves first.
-    const tp = document.querySelector('.time-picker-modal.open');
-    if(tp){ tp.classList.remove('open'); return; }
-    const top = topOpenLayer();
-    if(top){ e.preventDefault(); top.close(); }
-    return;
-  }
-  // Focus trap: Tab inside an open modal cycles within it instead of
-  // escaping to the page underneath, which is invisible but still tabbable.
-  if(e.key === 'Tab'){
-    const top = topOpenLayer();
-    if(!top || top.el.id === 'sidebar') return;
-    const focusables = [...top.el.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
-      .filter(x => x.offsetParent !== null);
-    if(!focusables.length) return;
-    const first = focusables[0], last = focusables[focusables.length - 1];
-    if(!top.el.contains(document.activeElement)){ e.preventDefault(); first.focus(); return; }
-    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
-    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  if(e.key === 'Escape' && document.getElementById('creator-modal').classList.contains('open')){
+    closeCreatorModal();
   }
 });
 
@@ -5284,7 +4829,7 @@ function executeAITool(name, args){
     if(name==='delete_entry'){
       const e = entries.find(x=>x.id===args.id);
       if(!e) return {ok:false, message:`No active entry with id ${args.id}`};
-      deleteEntry(args.id, true);
+      deleteEntry(args.id);
       return {ok:true, message:`Moved "${e.name}" to trash`};
     }
     if(name==='archive_entry'){
