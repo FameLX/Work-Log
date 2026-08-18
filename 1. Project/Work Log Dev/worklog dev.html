@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.3 --><!doctype html>
+<!-- Work Log DEV v1.8.4 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -911,6 +911,19 @@
       .toast.show {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+      .toast-undo-btn {
+        background: none;
+        border: none;
+        color: inherit;
+        font: inherit;
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+        margin-left: 10px;
+        padding: 0;
       }
 
       /* Calendar view */
@@ -2600,7 +2613,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.3</span
+            >/ v1.8.4</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4574,7 +4587,9 @@
         save();
         render();
         updateTrashBadge();
-        toast("Moved to Trash — restore from Settings → Trash within 5 days.");
+        toastWithUndo(`Moved "${entry.name}" to Trash.`, () =>
+          restoreFromTrash(id),
+        );
       }
 
       function restoreFromTrash(id) {
@@ -5189,6 +5204,7 @@
         const toDelete = [...selectedIds]
           .map((id) => entries.find((e) => e.id === id))
           .filter(Boolean);
+        const idsForUndo = toDelete.map((e) => e.id);
         if (gcalToken) {
           await Promise.all(
             toDelete.map((e) =>
@@ -5213,8 +5229,9 @@
         saveTrash();
         updateTrashBadge();
         toggleSelectMode();
-        toast(
-          `${count} ${count === 1 ? "entry" : "entries"} moved to Trash. Restore within 5 days from Settings.`,
+        toastWithUndo(
+          `${count} ${count === 1 ? "entry" : "entries"} moved to Trash.`,
+          () => idsForUndo.forEach((id) => restoreFromTrash(id)),
         );
       }
 
@@ -6018,7 +6035,7 @@
             isArchived
               ? `
             <button class="icon-btn" title="Restore to active" onclick="restoreEntry(${e.id})" style="color:var(--success);">${restoreIcon()}</button>
-            <button class="icon-btn del" title="Delete permanently" onclick="deleteArchived(${e.id})">${trashIcon()}</button>
+            <button class="icon-btn del" title="Delete permanently" onclick="deleteArchived(${e.id})">${trashForeverIcon()}</button>
           `
               : `
             ${
@@ -6893,6 +6910,9 @@
       function trashIcon() {
         return `<svg class="icon sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
       }
+      function trashForeverIcon() {
+        return `<svg class="icon sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/><line x1="9.5" y1="11.5" x2="14.5" y2="16.5"/><line x1="14.5" y1="11.5" x2="9.5" y2="16.5"/></svg>`;
+      }
       function archiveIcon() {
         return `<svg class="icon sm" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`;
       }
@@ -7387,11 +7407,32 @@
       }
 
       // ── Toast ──────────────────────────────────────────────────────────────────
+      let toastHideTimer = null;
       function toast(msg, dur = 2400) {
         const el = document.getElementById("toast");
         el.textContent = msg;
         el.classList.add("show");
-        setTimeout(() => el.classList.remove("show"), dur);
+        clearTimeout(toastHideTimer);
+        toastHideTimer = setTimeout(() => el.classList.remove("show"), dur);
+      }
+
+      // Same as toast() but appends a clickable Undo action that runs undoFn once.
+      function toastWithUndo(msg, undoFn, dur = 6000) {
+        const el = document.getElementById("toast");
+        el.textContent = msg + " ";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "toast-undo-btn";
+        btn.textContent = "Undo";
+        btn.onclick = () => {
+          clearTimeout(toastHideTimer);
+          el.classList.remove("show");
+          undoFn();
+        };
+        el.appendChild(btn);
+        el.classList.add("show");
+        clearTimeout(toastHideTimer);
+        toastHideTimer = setTimeout(() => el.classList.remove("show"), dur);
       }
 
       // ── Google Calendar ────────────────────────────────────────────────────────
@@ -8785,9 +8826,18 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.3",
+          version: "v1.8.4",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Delete/Trash toast now has an Undo button — restores the entry (or entries) right back instead of digging through Settings → Trash",
+            "Archived-list permanent delete icon now visually distinct from the active-list soft-delete (Move to Trash) icon",
+          ],
+        },
+        {
+          version: "v1.8.3",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Polish (from the technical audit): swapped the bouncy easter-egg modal pop-in for a smoother deceleration curve",
           ],
