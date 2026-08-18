@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.7 --><!doctype html>
+<!-- Work Log DEV v1.8.8 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -1733,7 +1733,8 @@
         font-family: var(--font);
       }
       .time-picker-trigger:focus {
-        border-color: var(--border2);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
       }
       .time-picker-modal {
         position: absolute;
@@ -2055,6 +2056,51 @@
       }
       .repeat-options.open {
         display: flex;
+      }
+      /* Caret on the popover pointing back at the Repeat toggle (desktop) */
+      .repeat-caret {
+        display: none;
+        position: fixed;
+        z-index: 1201;
+        width: 12px;
+        height: 12px;
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        transform: rotate(45deg);
+        pointer-events: none;
+      }
+      .repeat-caret.show {
+        display: block;
+      }
+      .repeat-section.popover-open {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+      }
+      @media (max-width: 480px) {
+        .type-row {
+          flex-wrap: wrap;
+          row-gap: 6px;
+        }
+        .type-row .type-label {
+          flex: 1 1 55%;
+        }
+        .type-row .icon-btn.del {
+          order: 2;
+          margin-left: auto;
+        }
+        .type-row .color-input-wrap {
+          order: 3;
+        }
+        .type-row > div:has(.gcal-color-swatch) {
+          order: 4;
+          margin-left: auto;
+        }
+        .type-row .type-gcal-select {
+          order: 5;
+          flex: 1 1 100%;
+          min-width: 0;
+        }
       }
       .repeat-options input[type="number"] {
         font-family: var(--font);
@@ -2476,9 +2522,10 @@
       }
 
       .saved-theme-name:focus {
-        border-color: var(--border2);
+        border-color: var(--accent);
         background: var(--surface2);
         outline: none;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
       }
 
       .saved-empty {
@@ -2755,7 +2802,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.7</span
+            >/ v1.8.8</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4257,7 +4304,7 @@
       </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
       // ── One-time migration: dev/beta used to share the 'wl2_' keys with
@@ -5485,11 +5532,14 @@
           pop.style.top = "12px";
           pop.style.width = "auto";
           pop.style.maxHeight = "calc(100vh - 24px)";
+          getRepeatCaret().classList.remove("show");
           return;
         }
         pop.style.width = "";
         pop.style.maxHeight = "";
-        const gap = 8;
+        const caret = getRepeatCaret();
+        caret.classList.remove("show");
+        const gap = 12;
         let left = r.right + gap;
         const w = pop.offsetWidth || 340;
         if (left + w > vw - 12) left = Math.max(12, r.left);
@@ -5498,6 +5548,25 @@
         if (top + h > vh - 12) top = Math.max(12, vh - 12 - h);
         pop.style.left = left + "px";
         pop.style.top = top + "px";
+        // Aim the caret at the vertical centre of the toggle row
+        const tog = anchor.querySelector(".repeat-toggle");
+        const ty = tog ? tog.getBoundingClientRect().top + tog.offsetHeight / 2 : r.top + 18;
+        const ct = Math.min(Math.max(ty - 6, top + 10), top + h - 22);
+        if (left >= r.right) {
+          caret.style.left = left - 6 + "px";
+          caret.style.top = ct + "px";
+          caret.classList.add("show");
+        }
+      }
+      function getRepeatCaret() {
+        let c = document.getElementById("repeat-caret");
+        if (!c) {
+          c = document.createElement("div");
+          c.id = "repeat-caret";
+          c.className = "repeat-caret";
+          document.body.appendChild(c);
+        }
+        return c;
       }
       function openRepeatPopover() {
         const pop = document.getElementById("repeat-options");
@@ -5505,6 +5574,7 @@
         // would make position:fixed resolve against it and clip the popover.
         if (pop.parentElement !== document.body) document.body.appendChild(pop);
         pop.classList.add("open");
+        document.querySelector(".repeat-section")?.classList.add("popover-open");
         // Re-clamp whenever the popover grows (e.g. preview calendar appears).
         if (!pop._ro && window.ResizeObserver) {
           pop._ro = new ResizeObserver(() => {
@@ -5524,6 +5594,8 @@
       function closeRepeatPopover(silent) {
         const pop = document.getElementById("repeat-options");
         pop.classList.remove("open");
+        getRepeatCaret().classList.remove("show");
+        document.querySelector(".repeat-section")?.classList.remove("popover-open");
         document.removeEventListener("mousedown", repeatOutsideClose);
         document.removeEventListener("keydown", repeatEscClose);
         window.removeEventListener("resize", positionRepeatPopover);
@@ -9156,9 +9228,19 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.7",
+          version: "v1.8.8",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Repeat popover now shows a caret pointing at the Repeat checkbox and the checkbox box glows while it is open — clear which control it belongs to",
+            "Settings on phones: each Task Type now wraps onto two lines so the delete button is never cut off",
+            "Accessibility: toasts are announced by screen readers; time picker and saved-theme name fields get the same visible focus ring as other inputs",
+          ],
+        },
+        {
+          version: "v1.8.7",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Fix: repeat popover was clipped by the sidebar and could not scroll — now rendered above the page, scrolls inside itself, always fits the window",
           ],
