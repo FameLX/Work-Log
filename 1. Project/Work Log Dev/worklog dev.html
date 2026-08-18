@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.10 --><!doctype html>
+<!-- Work Log DEV v1.8.11 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,7 +25,7 @@
         --border2: #c8c6bc;
         --text: #1a1917;
         --text2: #6b6860;
-        --text3: #706d65;
+        --text3: #6a675f;
         --accent: #1a1917;
         --accent-text: #ffffff;
         --success: #2d6a4f;
@@ -87,7 +87,7 @@
         --border2: #dcc0ba;
         --text: #3d2b28;
         --text2: #7c625e;
-        --text3: #7f6a66;
+        --text3: #7a6460;
         --accent: #bc5165;
         --accent-text: #ffffff;
         --success: #5c7b5c;
@@ -115,7 +115,7 @@
         --border2: #57698f;
         --text: #e0e1dd;
         --text2: #a9aba5;
-        --text3: #8f928a;
+        --text3: #a8aba3;
         --accent: #778da9;
         --accent-text: #0d1b2a;
         --success: #6bbf9a;
@@ -143,7 +143,7 @@
         --border2: #57698f;
         --text: #e0e1dd;
         --text2: #a9aba5;
-        --text3: #8f928a;
+        --text3: #a8aba3;
         --accent: #00e5ff;
         --accent-text: #06222b;
         --success: #4fe0b0;
@@ -1353,6 +1353,16 @@
         grid-template-columns: repeat(7, 1fr);
         justify-items: center;
       }
+      /* Keyboard focus on the calendar's role="button" cells and chips */
+      .cal-day:focus-visible,
+      .cal-day-num:focus-visible,
+      .cal-chip:focus-visible,
+      .cal-more:focus-visible,
+      .cal-mini-day:focus-visible,
+      .cal-day-item:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
       .cal-mini-head div {
         font-size: 9px;
         font-weight: 600;
@@ -2154,14 +2164,23 @@
         margin-top: 4px;
         line-height: 1.35;
       }
+      /* Reduced motion: stop keyframe motion (spinners, pulses, slides) and
+         smooth scrolling, but keep short colour/opacity transitions — those are
+         state feedback (hover, focus ring, selection), not motion. Large moves
+         (sidebar, overlays, toast) are landed instantly in the block further down. */
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
         *::after {
           animation-duration: 0.01ms !important;
           animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
           scroll-behavior: auto !important;
+        }
+        [class*="popover"],
+        .repeat-options,
+        .time-picker-modal,
+        .cal-day-popover {
+          transition-duration: 0.01ms !important;
         }
       }
       .repeat-type-btns {
@@ -2650,6 +2669,24 @@
           min-width: 40px;
           min-height: 40px;
         }
+        /* Dense grids get finger-sized rows too: year-view day dots, day-popover
+     rows and the time-picker wheel cells (chips stay compact — the whole day
+     cell is the tap target and opens the day list). */
+        .cal-mini-day {
+          width: 36px;
+          height: 36px;
+          font-size: 12px;
+        }
+        .cal-mini-week {
+          gap: 2px;
+        }
+        .tp-btn {
+          padding: 10px 0;
+          font-size: 15px;
+        }
+        .cal-day-item {
+          min-height: 44px;
+        }
         /* Edit / quick-add forms: the Type | Start | End 3-up row can't fit three
      native date pickers in a ~360px modal — Type squashed to a bare chevron
      and End date ran off the right edge. Type takes its own line, dates pair
@@ -2809,7 +2846,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.10</span
+            >/ v1.8.11</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4516,12 +4553,20 @@
           svg.setAttribute("aria-hidden", "true");
         });
       }
+      // Coalesce a burst of mutations (one render() = many) into a single scan
+      // per animation frame, and scan only the subtrees that actually changed.
+      let a11yPending = null;
       new MutationObserver((muts) => {
+        if (!a11yPending) a11yPending = new Set();
         for (const m of muts)
-          if (m.addedNodes.length) {
-            a11yFixIconButtons(document.body);
-            return;
-          }
+          if (m.addedNodes.length) a11yPending.add(m.target);
+        if (a11yPending.size && !a11yFixIconButtons._raf)
+          a11yFixIconButtons._raf = requestAnimationFrame(() => {
+            a11yFixIconButtons._raf = 0;
+            const roots = a11yPending;
+            a11yPending = null;
+            roots.forEach((r) => r.isConnected && a11yFixIconButtons(r));
+          });
       }).observe(document.body, { childList: true, subtree: true });
 
       // ── Init ───────────────────────────────────────────────────────────────────
@@ -5612,7 +5657,16 @@
           document.addEventListener("mousedown", repeatOutsideClose);
           document.addEventListener("keydown", repeatEscClose);
         }, 0);
-        window.addEventListener("resize", positionRepeatPopover);
+        window.addEventListener("resize", repeatPopoverOnResize);
+      }
+      // rAF-throttled: one reposition per frame while the window is being dragged
+      let repeatResizeRaf = 0;
+      function repeatPopoverOnResize() {
+        if (repeatResizeRaf) return;
+        repeatResizeRaf = requestAnimationFrame(() => {
+          repeatResizeRaf = 0;
+          positionRepeatPopover();
+        });
       }
       function closeRepeatPopover(silent) {
         const pop = document.getElementById("repeat-options");
@@ -5623,7 +5677,7 @@
           ?.classList.remove("popover-open");
         document.removeEventListener("mousedown", repeatOutsideClose);
         document.removeEventListener("keydown", repeatEscClose);
-        window.removeEventListener("resize", positionRepeatPopover);
+        window.removeEventListener("resize", repeatPopoverOnResize);
         updateRepeatSummary(silent);
       }
       function repeatOutsideClose(e) {
@@ -6673,7 +6727,7 @@
         if (!isTask && !e.time) {
           // All-day event → solid band
           const fg = color ? calTextOn(color) : "var(--accent-text)";
-          return `<span class="cal-chip${overdue ? " overdue" : ""}${arch ? " arch" : ""}" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})" style="background:${esc(swatch)};color:${fg};"><span class="cal-chip-name">${esc(e.name)}</span></span>`;
+          return `<span class="cal-chip${overdue ? " overdue" : ""}${arch ? " arch" : ""}" role="button" tabindex="0" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})" style="background:${esc(swatch)};color:${fg};"><span class="cal-chip-name">${esc(e.name)}</span></span>`;
         }
 
         const t = e.time
@@ -6684,7 +6738,7 @@
             ? `<span class="cal-chip-task" style="color:${esc(swatch)};cursor:default;">${e.completed ? "✓" : ""}</span>`
             : `<span class="cal-chip-task" style="color:${esc(swatch)};" onclick="event.stopPropagation();toggleTaskDone(${e.id})" title="${e.completed ? "Mark as not done" : "Mark as done"}">${e.completed ? "✓" : ""}</span>`
           : `<span class="cal-chip-dot" style="background:${esc(swatch)};"></span>`;
-        return `<span class="cal-chip plain${overdue ? " overdue" : ""}${e.completed ? " done" : ""}${arch ? " arch" : ""}" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})">${marker}${t}<span class="cal-chip-name">${esc(e.name)}</span></span>`;
+        return `<span class="cal-chip plain${overdue ? " overdue" : ""}${e.completed ? " done" : ""}${arch ? " arch" : ""}" role="button" tabindex="0" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})">${marker}${t}<span class="cal-chip-name">${esc(e.name)}</span></span>`;
       }
 
       function renderCalendar() {
@@ -6874,10 +6928,10 @@
                     : Math.max(0, fitAll - 1);
                 const chips = daySingles.slice(0, maxChips);
                 const more = daySingles.length - chips.length;
-                return `<div class="cal-day${other ? " other-month" : ""}" onclick="calDayClick('${day.ds}')" style="padding-top:${28 + barArea}px;">
-          <span class="cal-day-num${day.ds === todayStr ? " today" : ""}" onclick="event.stopPropagation();openCalDay('${day.ds}')" title="Show everything on this day">${day.d}</span>
+                return `<div class="cal-day${other ? " other-month" : ""}" role="button" tabindex="0" aria-label="${fmtDate(day.ds)}" onclick="calDayClick('${day.ds}')" style="padding-top:${28 + barArea}px;">
+          <span class="cal-day-num${day.ds === todayStr ? " today" : ""}" role="button" tabindex="0" onclick="event.stopPropagation();openCalDay('${day.ds}')" title="Show everything on this day">${day.d}</span>
           ${chips.map(calChipHTML).join("")}
-          ${more > 0 ? `<span class="cal-more" onclick="event.stopPropagation();openCalDay('${day.ds}')">+${more} more</span>` : ""}
+          ${more > 0 ? `<span class="cal-more" role="button" tabindex="0" onclick="event.stopPropagation();openCalDay('${day.ds}')">+${more} more</span>` : ""}
         </div>`;
               })
               .join("") +
@@ -6944,7 +6998,7 @@
                 ? ` style="background:${esc(t.color)};color:${calTextOn(t.color)};"`
                 : ` style="background:var(--accent);color:var(--accent-text);"`
               : "";
-            out += `<div class="cal-mini-day${ds === todayStr ? " today" : ""}"${style} onclick="calOpenDayFromYear('${ds}')" title="${fmtDate(ds)}">${d}</div>`;
+            out += `<div class="cal-mini-day${ds === todayStr ? " today" : ""}" role="button" tabindex="0"${style} onclick="calOpenDayFromYear('${ds}')" title="${fmtDate(ds)}">${d}</div>`;
           }
           out += `</div></div>`;
         }
@@ -7032,7 +7086,7 @@
                 const t = e.time
                   ? `<span class="cal-day-item-time">${fmtTime(e.time)}${e.timeTo ? "–" + fmtTime(e.timeTo) : ""}</span>`
                   : "";
-                return `<div class="cal-day-item${arch ? " arch" : ""}" onclick="closeCalDay();openCalEntry(${e.id})"><span class="cal-day-dot" style="background:${esc(color)};"></span><span class="cal-day-item-name">${esc(e.name)}</span>${t}</div>`;
+                return `<div class="cal-day-item${arch ? " arch" : ""}" role="button" tabindex="0" onclick="closeCalDay();openCalEntry(${e.id})"><span class="cal-day-dot" style="background:${esc(color)};"></span><span class="cal-day-item-name">${esc(e.name)}</span>${t}</div>`;
               })
               .join("")
           : '<p style="font-size:13px;color:var(--text3);">Nothing on this day.</p>';
@@ -7198,6 +7252,22 @@
       // Re-fit the calendar's chip capacity when the window size changes — without
       // this, growing the window leaves stale "+N more" and shrinking silently
       // clips chips (the cells use overflow:hidden).
+      // Keyboard activation for the calendar's role="button" divs/spans (day
+      // cells, chips, "+N more", mini-year days, day-popover rows): Enter or
+      // Space fires their onclick, exactly as a native button would.
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        const t = e.target;
+        if (
+          !(t instanceof HTMLElement) ||
+          t.getAttribute("role") !== "button" ||
+          t.tagName === "BUTTON" ||
+          t.tagName === "INPUT"
+        )
+          return;
+        e.preventDefault();
+        t.click();
+      });
       let calResizeTimer = null;
       window.addEventListener("resize", () => {
         if (viewLayout !== "calendar" || viewMode !== "active") return;
@@ -9269,9 +9339,21 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.10",
+          version: "v1.8.11",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Keyboard: calendar day cells, chips, +N more, year-view days and day-list rows can be tabbed to and opened with Enter/Space",
+            "Contrast: muted text lifted in Ocean, Cyan, Light and Rose themes to meet WCAG AA",
+            "Phone: bigger tap targets for year-view days, time-picker rows and day-list rows",
+            "Reduced-motion: only large movement is disabled now — hover/focus/selection feedback stays",
+            "Performance: icon-button accessibility pass and Repeat popover repositioning are batched per frame",
+          ],
+        },
+        {
+          version: "v1.8.10",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Time fields: backspace now deletes through the auto-inserted colon smoothly instead of sticking on it; a colon you type yourself is kept",
           ],
