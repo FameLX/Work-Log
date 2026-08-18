@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.1 --><!DOCTYPE html>
+<!-- Work Log DEV v1.8.2 --><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -881,7 +881,7 @@ svg.icon.sm{width:13px;height:13px;}
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.8.1</span></div>
+    <div class="topbar-logo" id="topbar-logo-egg" onclick="easterEggClick()" style="display:flex;align-items:center;gap:8px;cursor:default;user-select:none;"><img src="ce-logo.png" alt="Carrier Engagement" style="height:32px;width:auto;display:block;"/>Work Log DEV <span id="version-pill" onclick="openChangelog()" style="cursor:pointer;text-decoration:none;user-select:none;" title="View changelog">/ v1.8.2</span></div>
     <div class="topbar-spacer"></div>
     <button class="gcal-pill" id="gcal-pill" onclick="openGCalModal()">
       <div class="gcal-dot"></div>
@@ -4594,7 +4594,13 @@ function saveSettings(){
 // ── Changelog ──────────────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v1.8.1', date: 'August 17, 2026', latest: true,
+    version: 'v1.8.2', date: 'August 17, 2026', latest: true,
+    items: [
+      'Accessibility (from the technical audit): Dusty Pink and Woodland theme accent colours darkened slightly to meet WCAG AA contrast on their buttons — same hue, no visible change to the palette identity'
+    ]
+  },
+  {
+    version: 'v1.8.1', date: 'August 17, 2026', latest: false,
     items: [
       'Code review round 3 (10 fixes). Sync: saving an Event/Task switch can no longer save blank fields or create two Google copies (double-click / cancel mid-save); a freshly pushed Google id now wins on other devices instead of spawning a duplicate calendar event; adding a custom type alone now syncs, and a theme-only save can no longer overwrite newer types from another device; background sync waits while an edit (card or calendar popup) is open instead of pulling under it; Clear Trash during a sync now reaches other devices',
       'Small: type names with an apostrophe work in the filter chips; the auto reconnect box no longer interrupts a reconnect already in progress or stacks over another dialog; adding an entry with a filter on (or from the Archive) no longer pops an empty day box; if Drive fails at connect it retries once and explains, instead of a silent skip; the last calendar chip is no longer clipped on tall windows'
