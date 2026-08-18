@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.11 --><!doctype html>
+<!-- Work Log DEV v1.8.12 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -1359,7 +1359,11 @@
       .cal-chip:focus-visible,
       .cal-more:focus-visible,
       .cal-mini-day:focus-visible,
-      .cal-day-item:focus-visible {
+      .cal-day-item:focus-visible,
+      .cal-chip-task:focus-visible,
+      .cal-undated:focus-visible,
+      .cal-bar:focus-visible,
+      .cal-mini-name:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 1px;
       }
@@ -2846,7 +2850,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.11</span
+            >/ v1.8.12</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -6736,7 +6740,7 @@
         const marker = isTask
           ? arch
             ? `<span class="cal-chip-task" style="color:${esc(swatch)};cursor:default;">${e.completed ? "✓" : ""}</span>`
-            : `<span class="cal-chip-task" style="color:${esc(swatch)};" onclick="event.stopPropagation();toggleTaskDone(${e.id})" title="${e.completed ? "Mark as not done" : "Mark as done"}">${e.completed ? "✓" : ""}</span>`
+            : `<span class="cal-chip-task" role="button" tabindex="0" aria-label="Toggle done" style="color:${esc(swatch)};" onclick="event.stopPropagation();toggleTaskDone(${e.id})" title="${e.completed ? "Mark as not done" : "Mark as done"}">${e.completed ? "✓" : ""}</span>`
           : `<span class="cal-chip-dot" style="background:${esc(swatch)};"></span>`;
         return `<span class="cal-chip plain${overdue ? " overdue" : ""}${e.completed ? " done" : ""}${arch ? " arch" : ""}" role="button" tabindex="0" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})">${marker}${t}<span class="cal-chip-name">${esc(e.name)}</span></span>`;
       }
@@ -6796,7 +6800,7 @@
         <button class="sync-mode-btn${calView === "month" ? " active" : ""}" onclick="calSetCalView('month')" style="padding:4px 12px;white-space:nowrap;">Month</button>
         <button class="sync-mode-btn${calView === "year" ? " active" : ""}" onclick="calSetCalView('year')" style="padding:4px 12px;white-space:nowrap;">Year</button>
       </div>
-      ${undatedCount ? `<span class="cal-undated" onclick="setViewLayout('list')">${undatedCount} undated ${undatedCount === 1 ? "entry" : "entries"} — view in list</span>` : ""}
+      ${undatedCount ? `<span class="cal-undated" role="button" tabindex="0" onclick="setViewLayout('list')">${undatedCount} undated ${undatedCount === 1 ? "entry" : "entries"} — view in list</span>` : ""}
     </div>`;
 
         html +=
@@ -6942,7 +6946,7 @@
                 const bg = color || "var(--accent)";
                 const fg = color ? calTextOn(color) : "var(--accent-text)";
                 const arch = calArchIdSet.has(b.e.id);
-                return `<div class="cal-bar${b.contL ? " cont-l" : ""}${b.contR ? " cont-r" : ""}${arch ? " arch" : ""}" onclick="openCalEntry(${b.e.id})" title="${esc(b.e.name)}" style="left:calc(${b.s}/7*100% + 3px);width:calc(${b.en - b.s + 1}/7*100% - 6px);top:${28 + b.lane * 24}px;background:${esc(bg)};color:${fg};">${esc(b.e.name)}</div>`;
+                return `<div class="cal-bar${b.contL ? " cont-l" : ""}${b.contR ? " cont-r" : ""}${arch ? " arch" : ""}" role="button" tabindex="0" onclick="openCalEntry(${b.e.id})" title="${esc(b.e.name)}" style="left:calc(${b.s}/7*100% + 3px);width:calc(${b.en - b.s + 1}/7*100% - 6px);top:${28 + b.lane * 24}px;background:${esc(bg)};color:${fg};">${esc(b.e.name)}</div>`;
               })
               .join("") +
             `</div></div>`;
@@ -6983,7 +6987,7 @@
         let out = '<div class="cal-year-grid">';
         for (let m = 0; m < 12; m++) {
           out += `<div class="cal-mini">
-      <div class="cal-mini-name" onclick="calOpenMonth(${m})" title="Open ${CAL_MONTHS[m]}">${CAL_MONTHS[m]}</div>
+      <div class="cal-mini-name" role="button" tabindex="0" onclick="calOpenMonth(${m})" title="Open ${CAL_MONTHS[m]}">${CAL_MONTHS[m]}</div>
       <div class="cal-mini-head">${["S", "M", "T", "W", "T", "F", "S"].map((c) => `<div>${c}</div>`).join("")}</div>
       <div class="cal-mini-week">`;
           const startDow = new Date(calYear, m, 1).getDay();
@@ -9339,9 +9343,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.11",
+          version: "v1.8.12",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Keyboard: multi-day event bars, task tick in chips, year-view month names and the undated-entries link are now tabbable and open with Enter/Space",
+          ],
+        },
+        {
+          version: "v1.8.11",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Keyboard: calendar day cells, chips, +N more, year-view days and day-list rows can be tabbed to and opened with Enter/Space",
             "Contrast: muted text lifted in Ocean, Cyan, Light and Rose themes to meet WCAG AA",
