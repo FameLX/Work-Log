@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.6 --><!doctype html>
+<!-- Work Log DEV v1.8.7 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2056,6 +2056,15 @@
       .repeat-options.open {
         display: flex;
       }
+      .repeat-options input[type="number"] {
+        font-family: var(--font);
+        font-size: 13px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 6px 8px;
+        color: var(--text);
+      }
       .repeat-popover-foot {
         display: flex;
         justify-content: flex-end;
@@ -2746,7 +2755,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.6</span
+            >/ v1.8.7</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -5492,7 +5501,17 @@
       }
       function openRepeatPopover() {
         const pop = document.getElementById("repeat-options");
+        // Portal to <body>: the sidebar is a scroll/transform container, which
+        // would make position:fixed resolve against it and clip the popover.
+        if (pop.parentElement !== document.body) document.body.appendChild(pop);
         pop.classList.add("open");
+        // Re-clamp whenever the popover grows (e.g. preview calendar appears).
+        if (!pop._ro && window.ResizeObserver) {
+          pop._ro = new ResizeObserver(() => {
+            if (pop.classList.contains("open")) positionRepeatPopover();
+          });
+          pop._ro.observe(pop);
+        }
         positionRepeatPopover();
         requestAnimationFrame(positionRepeatPopover);
         document.getElementById("repeat-summary").style.display = "none";
@@ -9137,9 +9156,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.6",
+          version: "v1.8.7",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Fix: repeat popover was clipped by the sidebar and could not scroll — now rendered above the page, scrolls inside itself, always fits the window",
+          ],
+        },
+        {
+          version: "v1.8.6",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Repeat builder now opens in a popover beside the sidebar — the form stays compact and a one-line summary (rule · until date · count) with Edit shows what you picked",
             "Validation errors now appear on the field itself (red ring + message) for name and end-before-start, in add, edit and calendar quick-add",
