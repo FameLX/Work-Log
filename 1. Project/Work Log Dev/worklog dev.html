@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.14 --><!doctype html>
+<!-- Work Log DEV v1.8.15 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2895,7 +2895,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.14</span
+            >/ v1.8.15</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4708,14 +4708,95 @@
           },
         });
 
+        // Segment helpers — day / month / year, like the native control:
+        // click a segment to select it, typing overwrites it and hops to the
+        // next one when full; backspace still just deletes characters.
+        const SEG_MAX = [2, 2, 4];
+        const segAt = (v, pos) => {
+          const parts = v.split("/");
+          let off = 0;
+          for (let i = 0; i < parts.length; i++) {
+            if (pos <= off + parts[i].length) return { i, off, parts };
+            off += parts[i].length + 1;
+          }
+          const i = parts.length - 1;
+          return { i, off: off - parts[i].length - 1, parts };
+        };
+        const selectSeg = (i) => {
+          const parts = text.value.split("/");
+          if (i >= parts.length || !parts[i]) return;
+          let off = 0;
+          for (let k = 0; k < i; k++) off += parts[k].length + 1;
+          text.setSelectionRange(off, off + parts[i].length);
+        };
+        text.addEventListener("mouseup", () => {
+          if (text.selectionStart !== text.selectionEnd) return;
+          selectSeg(segAt(text.value, text.selectionStart).i);
+        });
+        text.addEventListener("focus", () => {
+          setTimeout(() => {
+            if (
+              document.activeElement === text &&
+              text.selectionStart === text.selectionEnd &&
+              text.value
+            )
+              selectSeg(0);
+          }, 0);
+        });
+        let manualEdit = false;
+        text.addEventListener("beforeinput", (e) => {
+          if (e.inputType !== "insertText" || !/^\d$/.test(e.data || ""))
+            return;
+          const v = text.value,
+            s = text.selectionStart,
+            en = text.selectionEnd;
+          if (s === en && s === v.length) return; // appending: flow mode below
+          e.preventDefault();
+          const { i, off, parts } = segAt(v, s);
+          const local = s - off;
+          const selLen = s === en ? 0 : Math.min(en, off + parts[i].length) - s;
+          let seg = parts[i];
+          seg =
+            seg.slice(0, local) +
+            e.data +
+            seg.slice(local + Math.max(1, selLen));
+          seg = seg.slice(0, SEG_MAX[i]);
+          parts[i] = seg;
+          if (seg.length >= SEG_MAX[i] && i < 2 && parts.length <= i + 1)
+            parts.push("");
+          manualEdit = true;
+          text.value = parts.join("/");
+          text.dispatchEvent(
+            new InputEvent("input", {
+              inputType: "insertText",
+              data: e.data,
+              bubbles: true,
+            }),
+          );
+          manualEdit = false;
+          if (seg.length >= SEG_MAX[i] && i < 2) {
+            const ns = off + seg.length + 1;
+            text.setSelectionRange(ns, ns + (parts[i + 1] || "").length);
+          } else {
+            const c = off + Math.min(local + 1, seg.length);
+            text.setSelectionRange(c, c);
+          }
+        });
+
         text.addEventListener("input", (e) => {
           let v = text.value.replace(/[^\d/]/g, "");
           const deleting = e.inputType && e.inputType.startsWith("delete");
-          if (!deleting) {
-            const digits = v.replace(/\//g, "");
-            v = digits.slice(0, 2);
-            if (digits.length > 2) v += "/" + digits.slice(2, 4);
-            if (digits.length > 4) v += "/" + digits.slice(4, 8);
+          if (!deleting && !manualEdit) {
+            // Appending at the end: cap the last segment, spill overflow into
+            // the next one, and drop the slash in as soon as a segment fills.
+            const parts = v.split("/").slice(0, 3);
+            const i = parts.length - 1;
+            if (parts[i].length > SEG_MAX[i]) {
+              const extra = parts[i].slice(SEG_MAX[i]);
+              parts[i] = parts[i].slice(0, SEG_MAX[i]);
+              if (i < 2) parts.push(extra.slice(0, SEG_MAX[i + 1]));
+            } else if (parts[i].length === SEG_MAX[i] && i < 2) parts.push("");
+            v = parts.join("/");
           }
           if (v.length > 10) v = v.slice(0, 10);
           text.value = v;
@@ -9533,9 +9614,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.14",
+          version: "v1.8.15",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Date fields: click day, month or year to select that part and retype it — typing overwrites and hops to the next part when full, like the old control; backspace still flows through",
+          ],
+        },
+        {
+          version: "v1.8.14",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Date fields: type dd/mm/yyyy straight through — slashes auto-inserted, backspace flows across day/month/year instead of sticking in one segment; calendar button opens the picker",
             "Applies everywhere: entry form, task due date, repeat end, quick-add, edit forms and the due-alert extend field",
