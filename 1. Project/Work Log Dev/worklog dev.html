@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.15 --><!doctype html>
+<!-- Work Log DEV v1.8.16 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2895,7 +2895,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.15</span
+            >/ v1.8.16</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4729,11 +4729,19 @@
           for (let k = 0; k < i; k++) off += parts[k].length + 1;
           text.setSelectionRange(off, off + parts[i].length);
         };
+        let pointerFocus = false;
+        text.addEventListener("pointerdown", () => {
+          pointerFocus = true;
+        });
         text.addEventListener("mouseup", () => {
+          pointerFocus = false;
           if (text.selectionStart !== text.selectionEnd) return;
           selectSeg(segAt(text.value, text.selectionStart).i);
         });
+        // Keyboard focus (Tab) lands on the day; a click selects the part
+        // under the pointer instead (mouseup above), so leave that alone.
         text.addEventListener("focus", () => {
+          if (pointerFocus) return;
           setTimeout(() => {
             if (
               document.activeElement === text &&
@@ -9614,9 +9622,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.15",
+          version: "v1.8.16",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Date fields: clicking the year (or month) now selects that part — it no longer snaps back to the day",
+          ],
+        },
+        {
+          version: "v1.8.15",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Date fields: click day, month or year to select that part and retype it — typing overwrites and hops to the next part when full, like the old control; backspace still flows through",
           ],
