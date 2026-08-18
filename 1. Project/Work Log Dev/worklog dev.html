@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.13 --><!doctype html>
+<!-- Work Log DEV v1.8.14 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -404,6 +404,51 @@
       select:focus {
         border-color: var(--accent);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+      }
+      /* Date field: typed dd/mm/yyyy + calendar button (native picker) */
+      .date-field {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+      .date-field .date-field-text {
+        padding-right: 34px;
+      }
+      .date-field .date-field-text.invalid {
+        border-color: var(--danger);
+      }
+      .date-field .date-field-btn {
+        position: absolute;
+        top: 50%;
+        right: 4px;
+        transform: translateY(-50%);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--text3);
+        cursor: pointer;
+      }
+      .date-field .date-field-btn:hover {
+        color: var(--text);
+        background: color-mix(in srgb, var(--text) 8%, transparent);
+      }
+      .date-field input[type="date"] {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 1px;
+        padding: 0;
+        margin: 0;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
       }
       select {
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6860' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -2850,7 +2895,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.13</span
+            >/ v1.8.14</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4563,7 +4608,11 @@
       new MutationObserver((muts) => {
         if (!a11yPending) a11yPending = new Set();
         for (const m of muts)
-          if (m.addedNodes.length) a11yPending.add(m.target);
+          if (m.addedNodes.length) {
+            a11yPending.add(m.target);
+            for (const n of m.addedNodes)
+              if (n.nodeType === 1) enhanceDateInputs(n);
+          }
         if (a11yPending.size && !a11yFixIconButtons._raf)
           a11yFixIconButtons._raf = requestAnimationFrame(() => {
             a11yFixIconButtons._raf = 0;
@@ -4572,6 +4621,146 @@
             roots.forEach((r) => r.isConnected && a11yFixIconButtons(r));
           });
       }).observe(document.body, { childList: true, subtree: true });
+
+      // ── Date field (typed dd/mm/yyyy + native picker) ──────────────────────
+      // Every <input type="date"> is wrapped: a plain text box takes the typing
+      // (slashes auto-inserted forward, backspace flows straight through — the
+      // native control traps backspace inside one segment), and a calendar
+      // button opens the browser's own picker via showPicker(). The original
+      // input stays in the DOM (invisible) so getElementById()/.value keep
+      // working; its `value` property is patched so programmatic sets refresh
+      // the visible text.
+      const DATE_VALUE_DESC = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      );
+      function dateIsoToText(iso) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+        return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
+      }
+      function dateTextToIso(txt) {
+        const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((txt || "").trim());
+        if (!m) return null;
+        const d = +m[1],
+          mo = +m[2],
+          y = +m[3];
+        if (mo < 1 || mo > 12 || d < 1 || y < 1900) return null;
+        const dt = new Date(y, mo - 1, d);
+        if (dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+        return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      }
+      function enhanceDateInput(input) {
+        if (input.dataset.dateField || !input.isConnected) return;
+        input.dataset.dateField = "1";
+        const wrap = document.createElement("div");
+        wrap.className = "date-field";
+        wrap.style.cssText = input.style.cssText; // inherit inline width/flex
+        input.style.cssText = "";
+        if (input.title) wrap.title = input.title;
+
+        const text = document.createElement("input");
+        text.type = "text";
+        text.className = "date-field-text";
+        text.placeholder = "dd/mm/yyyy";
+        text.inputMode = "numeric";
+        text.autocomplete = "off";
+        text.maxLength = 10;
+        text.setAttribute(
+          "aria-label",
+          input.getAttribute("aria-label") || "Date (day/month/year)",
+        );
+        text.value = dateIsoToText(DATE_VALUE_DESC.get.call(input));
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "date-field-btn";
+        btn.title = "Open calendar";
+        btn.setAttribute("aria-label", "Open calendar");
+        btn.tabIndex = -1;
+        btn.innerHTML =
+          '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(text);
+        wrap.appendChild(btn);
+        wrap.appendChild(input);
+
+        let committing = false;
+        const commit = (iso, fire) => {
+          DATE_VALUE_DESC.set.call(input, iso || "");
+          if (fire) {
+            committing = true;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            committing = false;
+          }
+        };
+
+        Object.defineProperty(input, "value", {
+          configurable: true,
+          get() {
+            return DATE_VALUE_DESC.get.call(this);
+          },
+          set(v) {
+            DATE_VALUE_DESC.set.call(this, v);
+            text.value = dateIsoToText(DATE_VALUE_DESC.get.call(this));
+            text.classList.remove("invalid");
+          },
+        });
+
+        text.addEventListener("input", (e) => {
+          let v = text.value.replace(/[^\d/]/g, "");
+          const deleting = e.inputType && e.inputType.startsWith("delete");
+          if (!deleting) {
+            const digits = v.replace(/\//g, "");
+            v = digits.slice(0, 2);
+            if (digits.length > 2) v += "/" + digits.slice(2, 4);
+            if (digits.length > 4) v += "/" + digits.slice(4, 8);
+          }
+          if (v.length > 10) v = v.slice(0, 10);
+          text.value = v;
+          text.classList.remove("invalid");
+          const iso = dateTextToIso(v);
+          if (iso) commit(iso, true);
+          else if (DATE_VALUE_DESC.get.call(input)) commit("", true); // partial text = no date yet
+        });
+        text.addEventListener("blur", () => {
+          const v = text.value.trim();
+          if (v === "") {
+            if (DATE_VALUE_DESC.get.call(input)) commit("", true);
+            return;
+          }
+          const iso = dateTextToIso(v);
+          if (iso) {
+            text.value = dateIsoToText(iso);
+            commit(iso, false);
+          } else {
+            commit("", true);
+            text.classList.add("invalid");
+          }
+        });
+        // Picker result (or any native change) → mirror into the text box
+        input.addEventListener("change", () => {
+          if (committing) return; // our own commit — text already right
+          text.value = dateIsoToText(DATE_VALUE_DESC.get.call(input));
+          text.classList.remove("invalid");
+        });
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          try {
+            input.showPicker();
+          } catch (_) {
+            input.focus();
+            input.click();
+          }
+        });
+      }
+      function enhanceDateInputs(root) {
+        (root.querySelectorAll ? root : document)
+          .querySelectorAll('input[type="date"]:not([data-date-field])')
+          .forEach(enhanceDateInput);
+      }
 
       // ── Init ───────────────────────────────────────────────────────────────────
       // NOTE: init() is invoked at the very END of the script (see bottom of file),
@@ -4617,6 +4806,7 @@
         updateTrashBadge();
         checkDueOverdue();
         initializeTimePickers();
+        enhanceDateInputs(document);
       }
 
       function initializeTimePickers() {
@@ -9343,9 +9533,18 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.13",
+          version: "v1.8.14",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Date fields: type dd/mm/yyyy straight through — slashes auto-inserted, backspace flows across day/month/year instead of sticking in one segment; calendar button opens the picker",
+            "Applies everywhere: entry form, task due date, repeat end, quick-add, edit forms and the due-alert extend field",
+          ],
+        },
+        {
+          version: "v1.8.13",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Polish: breathing room between the Repeat box and the Add entry button in the sidebar form",
           ],
