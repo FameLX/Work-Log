@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.17 --><!doctype html>
+<!-- Work Log DEV v1.8.18 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -1063,6 +1063,9 @@
       .toast.show {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+        pointer-events: none; /* taps pass through to whatever is underneath (FAB) */
+      }
+      .toast.show .toast-undo-btn {
         pointer-events: auto;
       }
       .toast-undo-btn {
@@ -2694,6 +2697,20 @@
         .app {
           grid-template-columns: 1fr;
         }
+        /* Phone: toast at top, clear of the floating + button */
+        .toast {
+          bottom: auto;
+          top: 72px;
+          transform: translateX(-50%) translateY(-16px);
+          width: max-content;
+          max-width: calc(100vw - 32px);
+          white-space: normal;
+          text-align: center;
+          box-sizing: border-box;
+        }
+        .toast.show {
+          transform: translateX(-50%) translateY(0);
+        }
         /* The New Entry form leaves the page flow entirely: hidden behind a
      floating + button, sliding in as a full-screen overlay when summoned
      (kept below every modal at z-index 100+, so pickers/confirms stay on top) */
@@ -2952,7 +2969,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.17</span
+            >/ v1.8.18</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -9672,9 +9689,18 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.17",
+          version: "v1.8.18",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Toasts no longer block taps — the + button and anything under a toast now work immediately (Undo link still tappable)",
+            "Phone: toasts show at the top of the screen, clear of the + button",
+          ],
+        },
+        {
+          version: "v1.8.17",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Date fields: day, month and year are now locked blocks like the native picker — click a block to select it, type to overwrite, Backspace clears the whole block (empty block hops back), and cleared blocks show a grey dd / mm / yyyy placeholder without shifting the rest",
           ],
