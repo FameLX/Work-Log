@@ -1,19 +1,29 @@
-# Office and PDF documents
+# ── PUBLIC REPO: Work Log only ─────────────────────────────────────────
+# This repo serves famelx.github.io/Work-Log (origin) and /Work-Log-Beta (beta).
+# Both are PUBLIC. Only Work Log files may live here. Everything else is
+# ignored below so it can never be committed by accident.
+
+# Allow only these top-level items
+/*
+!/.gitignore
+!/index.html
+!/1. Project/
+!/PROJECT_BACKUP/
+
+# Inside 1. Project/ — only Work Log folders
+/1. Project/*
+!/1. Project/Work Log/
+!/1. Project/Work Log Dev/
+!/1. Project/Work Log Shared/
+!/1. Project/Work Log AI Proxy/
+
+# Inside PROJECT_BACKUP/ — only worklog backups
+/PROJECT_BACKUP/*
+!/PROJECT_BACKUP/*worklog*
+
+# Office / PDF documents never
 *.pdf
 *.xlsx
 *.docx
 *.pptx
 *.doc
-
-# Project folder — ignore everything except worklog.html
-Project/*
-!Project/worklog.html
-
-# Reference folder
-REF/
-
-# Test Project folder
-Test Project/
-
-# Settings
-.claude/settings.local.json
