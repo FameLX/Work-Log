@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.8 --><!doctype html>
+<!-- Work Log DEV v1.8.9 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2579,16 +2579,23 @@
           border-right: none;
           transform: translateX(-100%);
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          padding-top: 20px;
+          padding-top: 68px;
         }
         .sidebar.mobile-open {
           transform: translateX(0);
         }
+        /* Own row above the form: 44px target, bordered, clear of the
+           Event/Task toggle so a thumb aimed at "Task" never closes the sheet */
         .icon-btn.sidebar-mobile-close {
           display: flex;
           position: absolute;
-          top: 14px;
-          right: 14px;
+          top: 12px;
+          right: 12px;
+          width: 44px;
+          height: 44px;
+          border: 1px solid var(--border);
+          background: var(--surface);
+          border-radius: 12px;
         }
         .fab-add {
           display: flex;
@@ -2802,7 +2809,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.8</span
+            >/ v1.8.9</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -5207,6 +5214,7 @@
         trigger.className = "time-picker-trigger";
         trigger.placeholder = input.placeholder || "HH:MM";
         trigger.readOnly = false;
+        trigger.inputMode = "numeric";
         trigger.value = input.value || "";
 
         const modal = document.createElement("div");
@@ -5286,6 +5294,13 @@
 
         trigger.addEventListener("click", (e) => {
           e.stopPropagation();
+          // Phone: the soft keyboard (numeric) is the picker — the scroll-wheel
+          // dropdown would only fight it for screen space.
+          if (
+            window.innerWidth <= 700 &&
+            window.matchMedia("(pointer:coarse)").matches
+          )
+            return;
           document.querySelectorAll(".time-picker-modal.open").forEach((m) => {
             if (m !== modal) m.classList.remove("open");
           });
@@ -5550,7 +5565,9 @@
         pop.style.top = top + "px";
         // Aim the caret at the vertical centre of the toggle row
         const tog = anchor.querySelector(".repeat-toggle");
-        const ty = tog ? tog.getBoundingClientRect().top + tog.offsetHeight / 2 : r.top + 18;
+        const ty = tog
+          ? tog.getBoundingClientRect().top + tog.offsetHeight / 2
+          : r.top + 18;
         const ct = Math.min(Math.max(ty - 6, top + 10), top + h - 22);
         if (left >= r.right) {
           caret.style.left = left - 6 + "px";
@@ -5574,7 +5591,9 @@
         // would make position:fixed resolve against it and clip the popover.
         if (pop.parentElement !== document.body) document.body.appendChild(pop);
         pop.classList.add("open");
-        document.querySelector(".repeat-section")?.classList.add("popover-open");
+        document
+          .querySelector(".repeat-section")
+          ?.classList.add("popover-open");
         // Re-clamp whenever the popover grows (e.g. preview calendar appears).
         if (!pop._ro && window.ResizeObserver) {
           pop._ro = new ResizeObserver(() => {
@@ -5595,7 +5614,9 @@
         const pop = document.getElementById("repeat-options");
         pop.classList.remove("open");
         getRepeatCaret().classList.remove("show");
-        document.querySelector(".repeat-section")?.classList.remove("popover-open");
+        document
+          .querySelector(".repeat-section")
+          ?.classList.remove("popover-open");
         document.removeEventListener("mousedown", repeatOutsideClose);
         document.removeEventListener("keydown", repeatEscClose);
         window.removeEventListener("resize", positionRepeatPopover);
@@ -6551,8 +6572,10 @@
         const n = new Date();
         calYear = n.getFullYear();
         calMonth = n.getMonth();
+        calScrollToToday = true;
         render();
       }
+      let calScrollToToday = false;
       function calSetMonth(m) {
         calMonth = parseInt(m);
         render();
@@ -6723,7 +6746,21 @@
             ? calYearHTML(dated)
             : calMonthHTML(dated.concat(archDated), list.clientHeight);
         html += `</div>`;
+        const prevYearScroll =
+          list.querySelector(".cal-year-grid")?.scrollTop || 0;
         list.innerHTML = html;
+        // Year grid re-renders from January: keep the reader's place across
+        // re-renders (resize, filter), and on "Today" bring the current month up.
+        if (calView === "year") {
+          const grid = list.querySelector(".cal-year-grid");
+          if (calScrollToToday) {
+            calScrollToToday = false;
+            grid
+              ?.querySelector(".cal-mini-day.today")
+              ?.closest(".cal-mini")
+              ?.scrollIntoView({ block: "start" });
+          } else if (grid && prevYearScroll) grid.scrollTop = prevYearScroll;
+        }
       }
 
       function calMonthHTML(dated, listHeight) {
@@ -9228,9 +9265,19 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.8",
+          version: "v1.8.9",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Phone: New Entry close button now sits on its own row above the form, larger and bordered — no more accidental close when tapping Task",
+            "Phone: time fields open the numeric keyboard directly instead of the scroll-wheel dropdown",
+            "Calendar year view: Today now scrolls the current month into view instead of jumping to January",
+          ],
+        },
+        {
+          version: "v1.8.8",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Repeat popover now shows a caret pointing at the Repeat checkbox and the checkbox box glows while it is open — clear which control it belongs to",
             "Settings on phones: each Task Type now wraps onto two lines so the delete button is never cut off",
