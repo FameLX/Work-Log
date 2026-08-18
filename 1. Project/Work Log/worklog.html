@@ -4,6 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Work Log</title>
+    <script>
+      // Apply the stored theme before first paint so there is no flash of the
+      // default palette. loadTheme() at the end of the main script re-applies
+      // the same thing with full state (saved-theme lookup etc.).
+      (function () {
+        try {
+          var cur = localStorage.getItem("wl2_current_theme") || "default";
+          var root = document.documentElement;
+          var tokens = null;
+          if (cur === "custom") {
+            tokens = JSON.parse(
+              localStorage.getItem("wl2_custom_tokens") || "{}",
+            );
+          } else if (cur.indexOf("saved:") === 0) {
+            var list = JSON.parse(
+              localStorage.getItem("wl2_saved_themes") || "[]",
+            );
+            for (var i = 0; i < list.length; i++)
+              if ("saved:" + list[i].id === cur) tokens = list[i].tokens;
+          }
+          if (tokens) {
+            root.className = "theme-custom";
+            for (var k in tokens)
+              if (tokens[k]) root.style.setProperty("--" + k, tokens[k]);
+          } else if (cur !== "default" && cur.indexOf("saved:") !== 0) {
+            root.className = "theme-" + cur;
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
