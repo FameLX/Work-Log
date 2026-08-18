@@ -1,4 +1,4 @@
-# ── PUBLIC REPO: Work Log only ─────────────────────────────────────────
+﻿# โ”€โ”€ PUBLIC REPO: Work Log only โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€โ”€
 # This repo serves famelx.github.io/Work-Log (origin) and /Work-Log-Beta (beta).
 # Both are PUBLIC. Only Work Log files may live here. Everything else is
 # ignored below so it can never be committed by accident.
@@ -10,14 +10,14 @@
 !/1. Project/
 !/PROJECT_BACKUP/
 
-# Inside 1. Project/ — only Work Log folders
+# Inside 1. Project/ โ€” only Work Log folders
 /1. Project/*
 !/1. Project/Work Log/
 !/1. Project/Work Log Dev/
 !/1. Project/Work Log Shared/
 !/1. Project/Work Log AI Proxy/
 
-# Inside PROJECT_BACKUP/ — only worklog backups
+# Inside PROJECT_BACKUP/ โ€” only worklog backups
 /PROJECT_BACKUP/*
 !/PROJECT_BACKUP/*worklog*
 
