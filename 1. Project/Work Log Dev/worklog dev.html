@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.18 --><!doctype html>
+<!-- Work Log DEV v1.8.19 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -494,6 +494,11 @@
       .date-field .date-field-btn:hover {
         color: var(--text);
         background: color-mix(in srgb, var(--text) 8%, transparent);
+      }
+      .date-field .date-field-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+        color: var(--text);
       }
       .date-field input[type="date"] {
         position: absolute;
@@ -2697,6 +2702,15 @@
         .app {
           grid-template-columns: 1fr;
         }
+        /* Phone: 40px picker tap target (button is absolutely positioned; box pads for it) */
+        .date-field .date-field-btn {
+          width: 40px;
+          height: 40px;
+          right: 2px;
+        }
+        .date-field .date-field-box {
+          padding-right: 42px;
+        }
         /* Phone: toast at top, clear of the floating + button */
         .toast {
           bottom: auto;
@@ -2969,7 +2983,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.18</span
+            >/ v1.8.19</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4738,6 +4752,18 @@
         // Empty blocks show their grey placeholder and never shift position.
         const box = document.createElement("div");
         box.className = "date-field-box";
+        box.setAttribute("role", "group");
+        // Field context for screen readers: explicit aria-label wins, else the
+        // nearest .field-label in the same form group, else the input's own id.
+        const ctxLabel =
+          input.getAttribute("aria-label") ||
+          (
+            input.closest(".form-group")?.querySelector(".field-label")
+              ?.textContent || ""
+          ).trim() ||
+          (input.labels && input.labels[0]?.textContent.trim()) ||
+          "Date";
+        box.setAttribute("aria-label", ctxLabel);
         const SEGS = [
           { ph: "dd", max: 2, min: 1, hi: 31 },
           { ph: "mm", max: 2, min: 1, hi: 12 },
@@ -4753,10 +4779,7 @@
           el.maxLength = s.max;
           el.setAttribute(
             "aria-label",
-            ["Day", "Month", "Year"][i] +
-              (input.getAttribute("aria-label")
-                ? " — " + input.getAttribute("aria-label")
-                : ""),
+            ctxLabel + ", " + ["Day", "Month", "Year"][i],
           );
           if (i) {
             const sep = document.createElement("span");
@@ -4774,7 +4797,11 @@
         btn.className = "date-field-btn";
         btn.title = "Open calendar";
         btn.setAttribute("aria-label", "Open calendar");
-        btn.tabIndex = -1;
+        // Keyboard: segments are the primary control; the picker button stays
+        // reachable, the invisible native input is skipped.
+        btn.tabIndex = 0;
+        input.tabIndex = -1;
+        input.setAttribute("aria-hidden", "true");
         btn.innerHTML =
           '<svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 
@@ -9689,9 +9716,18 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.18",
+          version: "v1.8.19",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Date fields: keyboard Tab skips the invisible native input and reaches the calendar button; screen readers hear the field name with each block (e.g. Deadline, Day)",
+            "Phone: bigger calendar-button tap target in date fields",
+          ],
+        },
+        {
+          version: "v1.8.18",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Toasts no longer block taps — the + button and anything under a toast now work immediately (Undo link still tappable)",
             "Phone: toasts show at the top of the screen, clear of the + button",
