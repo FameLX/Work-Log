@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.5 --><!doctype html>
+<!-- Work Log DEV v1.8.6 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2037,10 +2037,77 @@
         height: 15px;
       }
       .repeat-options {
-        margin-top: 10px;
-        display: flex;
+        display: none;
         flex-direction: column;
         gap: 10px;
+        position: fixed;
+        z-index: 1200;
+        width: min(340px, calc(100vw - 24px));
+        max-height: min(80vh, 640px);
+        overflow-y: auto;
+        padding: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow:
+          0 12px 32px -8px rgba(0, 0, 0, 0.35),
+          0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+      .repeat-options.open {
+        display: flex;
+      }
+      .repeat-popover-foot {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 4px;
+        border-top: 1px solid var(--border);
+      }
+      .repeat-summary {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--text2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .link-btn {
+        background: none;
+        border: 0;
+        padding: 0;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent);
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .link-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 3px;
+      }
+      /* Inline field validation */
+      .field-invalid {
+        border-color: var(--danger) !important;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 30%, transparent) !important;
+      }
+      .field-error {
+        font-size: 11.5px;
+        color: var(--danger);
+        margin-top: 4px;
+        line-height: 1.35;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
       }
       .repeat-type-btns {
         display: flex;
@@ -2679,7 +2746,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.5</span
+            >/ v1.8.6</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -2836,11 +2903,7 @@
               />
               Repeat this entry
             </label>
-            <div
-              class="repeat-options"
-              id="repeat-options"
-              style="display: none"
-            >
+            <div class="repeat-options" id="repeat-options">
               <div>
                 <label class="field-label"
                   >End date <span style="color: var(--danger)">*</span></label
@@ -3085,6 +3148,29 @@
                   "
                 ></div>
               </div>
+              <div class="repeat-popover-foot">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  onclick="closeRepeatPopover()"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+            <div
+              class="repeat-summary"
+              id="repeat-summary"
+              style="display: none"
+            >
+              <span id="repeat-summary-text"></span>
+              <button
+                type="button"
+                class="link-btn"
+                onclick="openRepeatPopover()"
+              >
+                Edit
+              </button>
             </div>
           </div>
 
@@ -4527,7 +4613,7 @@
         const type = v("f-type");
         const remark = v("f-remark");
         if (!name) {
-          toast("Enter a work name.");
+          fieldError("f-name", "Enter a work name.");
           return;
         }
         const time = v("f-time");
@@ -4536,8 +4622,10 @@
         const deadline = isTask ? v("f-deadline-task") : v("f-deadline");
         const deadlineEnd = isTask ? "" : v("f-deadline-end");
         if (deadlineEnd && deadline && deadlineEnd < deadline) {
-          toast("End date can't be before the start date.");
-          document.getElementById("f-deadline-end")?.focus();
+          fieldError(
+            "f-deadline-end",
+            "End date can't be before the start date.",
+          );
           return;
         }
         const color = typeColors[type] || null;
@@ -4793,7 +4881,7 @@
         if (!e0) return false;
         const name = v("edit-name-" + id);
         if (!name) {
-          toast("Name cannot be empty.");
+          fieldError("edit-name-" + id, "Name cannot be empty.");
           return false;
         }
         const newMode = v("edit-syncmode-" + id) === "task" ? "task" : "event";
@@ -4817,8 +4905,10 @@
           snap.deadline &&
           snap.deadlineEnd < snap.deadline
         ) {
-          toast("End date can't be before the start date.");
-          document.getElementById("edit-deadline-end-" + id)?.focus();
+          fieldError(
+            "edit-deadline-end-" + id,
+            "End date can't be before the start date.",
+          );
           return false;
         }
         // Switching mode on an already-synced entry needs a LIVE Google connection
@@ -5355,16 +5445,114 @@
 
       function toggleRepeatUI() {
         const checked = document.getElementById("f-repeat").checked;
-        document.getElementById("repeat-options").style.display = checked
-          ? "flex"
-          : "none";
         if (checked) {
           updateMonthlyHint();
           refreshRepeatPreview();
+          openRepeatPopover();
         } else {
+          closeRepeatPopover(true);
           document.getElementById("repeat-calendar-wrap").style.display =
             "none";
         }
+      }
+
+      // Repeat builder lives in a popover anchored to the repeat toggle
+      // (progressive disclosure: sidebar stays compact; summary line shows
+      // the chosen rule with an Edit link).
+      function positionRepeatPopover() {
+        const pop = document.getElementById("repeat-options");
+        const anchor = document.querySelector(".repeat-section");
+        if (!pop || !anchor) return;
+        const r = anchor.getBoundingClientRect();
+        const vw = window.innerWidth,
+          vh = window.innerHeight;
+        pop.style.left = "";
+        pop.style.right = "";
+        pop.style.top = "";
+        pop.style.bottom = "";
+        if (vw < 700) {
+          pop.style.left = "12px";
+          pop.style.right = "12px";
+          pop.style.top = "12px";
+          pop.style.width = "auto";
+          pop.style.maxHeight = "calc(100vh - 24px)";
+          return;
+        }
+        pop.style.width = "";
+        pop.style.maxHeight = "";
+        const gap = 8;
+        let left = r.right + gap;
+        const w = pop.offsetWidth || 340;
+        if (left + w > vw - 12) left = Math.max(12, r.left);
+        let top = r.top;
+        const h = pop.offsetHeight || 400;
+        if (top + h > vh - 12) top = Math.max(12, vh - 12 - h);
+        pop.style.left = left + "px";
+        pop.style.top = top + "px";
+      }
+      function openRepeatPopover() {
+        const pop = document.getElementById("repeat-options");
+        pop.classList.add("open");
+        positionRepeatPopover();
+        requestAnimationFrame(positionRepeatPopover);
+        document.getElementById("repeat-summary").style.display = "none";
+        setTimeout(() => {
+          document.addEventListener("mousedown", repeatOutsideClose);
+          document.addEventListener("keydown", repeatEscClose);
+        }, 0);
+        window.addEventListener("resize", positionRepeatPopover);
+      }
+      function closeRepeatPopover(silent) {
+        const pop = document.getElementById("repeat-options");
+        pop.classList.remove("open");
+        document.removeEventListener("mousedown", repeatOutsideClose);
+        document.removeEventListener("keydown", repeatEscClose);
+        window.removeEventListener("resize", positionRepeatPopover);
+        updateRepeatSummary(silent);
+      }
+      function repeatOutsideClose(e) {
+        const pop = document.getElementById("repeat-options");
+        if (pop.contains(e.target)) return;
+        if (e.target.closest && e.target.closest(".repeat-toggle")) return;
+        closeRepeatPopover();
+      }
+      function repeatEscClose(e) {
+        if (e.key === "Escape") closeRepeatPopover();
+      }
+      function updateRepeatSummary(hide) {
+        const box = document.getElementById("repeat-summary");
+        const txt = document.getElementById("repeat-summary-text");
+        const on = document.getElementById("f-repeat").checked;
+        if (!on || hide) {
+          box.style.display = "none";
+          return;
+        }
+        const end = document.getElementById("f-repeat-end")?.value;
+        const map = {
+          daily: "Daily",
+          weekly: "Weekly",
+          monthly: "Monthly",
+          yearly: "Yearly",
+          custom: "Custom dates",
+        };
+        let s = map[repeatType] || "Repeat";
+        if (repeatType === "daily") {
+          const n = +document.getElementById("f-repeat-days")?.value || 1;
+          if (n > 1) s = `Every ${n} days`;
+        }
+        if (repeatType === "weekly") {
+          const days = [
+            ...document.querySelectorAll("#repeat-weekly-opts .active"),
+          ]
+            .map((b) => b.textContent.trim())
+            .join(", ");
+          if (days) s += ` · ${days}`;
+        }
+        s += end ? ` · until ${fmtDate(end)}` : " · end date required";
+        const cnt = document.getElementById("repeat-cal-count")?.textContent;
+        if (cnt) s += ` · ${cnt}`;
+        txt.textContent = s;
+        box.style.display = "flex";
       }
 
       function setRepeatType(type) {
@@ -6367,7 +6555,7 @@
         if (!isTask && !e.time) {
           // All-day event → solid band
           const fg = color ? calTextOn(color) : "var(--accent-text)";
-          return `<span class="cal-chip${overdue ? " overdue" : ""}${arch ? " arch" : ""}" onclick="event.stopPropagation();openCalEntry(${e.id})" style="background:${esc(swatch)};color:${fg};"><span class="cal-chip-name">${esc(e.name)}</span></span>`;
+          return `<span class="cal-chip${overdue ? " overdue" : ""}${arch ? " arch" : ""}" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})" style="background:${esc(swatch)};color:${fg};"><span class="cal-chip-name">${esc(e.name)}</span></span>`;
         }
 
         const t = e.time
@@ -6378,7 +6566,7 @@
             ? `<span class="cal-chip-task" style="color:${esc(swatch)};cursor:default;">${e.completed ? "✓" : ""}</span>`
             : `<span class="cal-chip-task" style="color:${esc(swatch)};" onclick="event.stopPropagation();toggleTaskDone(${e.id})" title="${e.completed ? "Mark as not done" : "Mark as done"}">${e.completed ? "✓" : ""}</span>`
           : `<span class="cal-chip-dot" style="background:${esc(swatch)};"></span>`;
-        return `<span class="cal-chip plain${overdue ? " overdue" : ""}${e.completed ? " done" : ""}${arch ? " arch" : ""}" onclick="event.stopPropagation();openCalEntry(${e.id})">${marker}${t}<span class="cal-chip-name">${esc(e.name)}</span></span>`;
+        return `<span class="cal-chip plain${overdue ? " overdue" : ""}${e.completed ? " done" : ""}${arch ? " arch" : ""}" title="${esc(e.name)}" onclick="event.stopPropagation();openCalEntry(${e.id})">${marker}${t}<span class="cal-chip-name">${esc(e.name)}</span></span>`;
       }
 
       function renderCalendar() {
@@ -6672,7 +6860,7 @@
       function calQuickAddSubmit() {
         const name = document.getElementById("qa-name").value.trim();
         if (!name) {
-          toast("Name cannot be empty.");
+          fieldError("qa-name", "Name cannot be empty.");
           return;
         }
         const isTask = calQuickAddMode === "task";
@@ -7504,6 +7692,33 @@
 
       // ── Toast ──────────────────────────────────────────────────────────────────
       let toastHideTimer = null;
+      // Inline field validation: red ring + message under the field, cleared on
+      // next input. Falls back to a toast if the field is not in the DOM.
+      function fieldError(id, msg) {
+        const el = document.getElementById(id);
+        if (!el) {
+          toast(msg);
+          return;
+        }
+        el.classList.add("field-invalid");
+        el.setAttribute("aria-invalid", "true");
+        let m = el.parentElement.querySelector(".field-error");
+        if (!m) {
+          m = document.createElement("div");
+          m.className = "field-error";
+          m.setAttribute("role", "alert");
+          el.insertAdjacentElement("afterend", m);
+        }
+        m.textContent = msg;
+        el.focus();
+        const clear = () => {
+          el.classList.remove("field-invalid");
+          el.removeAttribute("aria-invalid");
+          m.remove();
+        };
+        el.addEventListener("input", clear, { once: true });
+        el.addEventListener("change", clear, { once: true });
+      }
       function toast(msg, dur = 2400) {
         const el = document.getElementById("toast");
         el.textContent = msg;
@@ -8922,9 +9137,20 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.5",
+          version: "v1.8.6",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Repeat builder now opens in a popover beside the sidebar — the form stays compact and a one-line summary (rule · until date · count) with Edit shows what you picked",
+            "Validation errors now appear on the field itself (red ring + message) for name and end-before-start, in add, edit and calendar quick-add",
+            "Calendar: hover any month chip to see the full entry name",
+            "Accessibility: honours the OS reduce-motion setting — animations and transitions switch off",
+          ],
+        },
+        {
+          version: "v1.8.5",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Fix: the due-TODAY deadline chip no longer scatters into ragged text on phones — wraps as one clean sentence",
             "Calendar: overdue entries with a type colour now carry a red ! badge so they stand out regardless of the colour",
