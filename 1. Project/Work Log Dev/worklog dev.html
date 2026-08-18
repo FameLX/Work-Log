@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.9 --><!doctype html>
+<!-- Work Log DEV v1.8.10 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2809,7 +2809,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.9</span
+            >/ v1.8.10</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -5317,9 +5317,13 @@
         });
 
         // Auto-insert colon after 2 digits
-        trigger.addEventListener("input", () => {
+        // Auto-insert the colon while typing forward only; on delete, let it
+        // go (and take the digit before it) so backspace never sticks on ":".
+        trigger.addEventListener("input", (e) => {
           let val = trigger.value.replace(/[^\d:]/g, "");
-          if (val.length === 2 && !val.includes(":")) val = val + ":";
+          const deleting = e.inputType && e.inputType.startsWith("delete");
+          if (!deleting && !val.includes(":") && val.length >= 2)
+            val = val.slice(0, 2) + ":" + val.slice(2);
           if (val.length > 5) val = val.slice(0, 5);
           trigger.value = val;
         });
@@ -9265,9 +9269,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
-          version: "v1.8.9",
+          version: "v1.8.10",
           date: "August 18, 2026",
           latest: true,
+          items: [
+            "Time fields: backspace now deletes through the auto-inserted colon smoothly instead of sticking on it; a colon you type yourself is kept",
+          ],
+        },
+        {
+          version: "v1.8.9",
+          date: "August 18, 2026",
+          latest: false,
           items: [
             "Phone: New Entry close button now sits on its own row above the form, larger and bordered — no more accidental close when tapping Task",
             "Phone: time fields open the numeric keyboard directly instead of the scroll-wheel dropdown",
