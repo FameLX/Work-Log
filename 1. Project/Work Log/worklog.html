@@ -1,4 +1,4 @@
-<!-- Work Log v2.0.0 --><!doctype html>
+<!-- Work Log v2.0.1 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -3013,7 +3013,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v2.0.0</span
+            >/ v2.0.1</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -4520,9 +4520,7 @@
     <script>
       // ── State ──────────────────────────────────────────────────────────────────
       let entries = JSON.parse(localStorage.getItem("wl2_entries") || "[]");
-      let archived = JSON.parse(
-        localStorage.getItem("wl2_archived") || "[]",
-      );
+      let archived = JSON.parse(localStorage.getItem("wl2_archived") || "[]");
       let trash = JSON.parse(localStorage.getItem("wl2_trash") || "[]");
       // Migration: add updated field to old entries that don't have it
       entries.forEach((e) => {
@@ -8885,26 +8883,20 @@
       let tombstones = JSON.parse(
         localStorage.getItem("wl2_tombstones") || "[]",
       ); // [{id, ts}]
+      let typeTombstones = JSON.parse(
+        localStorage.getItem("wl2_type_tombstones") || "[]",
+      ); // [{name, ts}] — deleted custom types, so a union merge doesn't resurrect them
+      function saveTypeTombstones() {
+        localStorage.setItem(
+          "wl2_type_tombstones",
+          JSON.stringify(typeTombstones),
+        );
+      }
       let syncFileId = localStorage.getItem("wl2_sync_file_id") || null;
       let syncInProgress = false;
       let syncDebounceTimer = null;
       let syncPendingAgain = false; // a save happened while a sync was in flight
       let syncDirty = false; // local data changed since the last successful upload
-
-      // Devices that customized types BEFORE the settings stamp existed would lose
-      // them to any stamped remote in the wholesale settings merge — stamp them now.
-      // Fresh devices stay unstamped so they adopt remote settings on first sync.
-      if (
-        !localStorage.getItem("wl2_settings_updated") &&
-        (customTypes.length ||
-          Object.keys(typeColors).length ||
-          Object.keys(typeGCalIds).length)
-      ) {
-        localStorage.setItem(
-          "wl2_settings_updated",
-          new Date().toISOString(),
-        );
-      }
 
       function saveTombstones() {
         localStorage.setItem("wl2_tombstones", JSON.stringify(tombstones));
@@ -8940,12 +8932,12 @@
         return {
           version: 1,
           savedAt: new Date().toISOString(),
-          settingsUpdatedAt:
-            localStorage.getItem("wl2_settings_updated") || "",
+          settingsUpdatedAt: localStorage.getItem("wl2_settings_updated") || "",
           entries,
           archived,
           trash,
           tombstones,
+          typeTombstones,
           customTypes,
           typeColors,
           typeGCalIds,
@@ -9108,27 +9100,94 @@
           .filter((id) => tombMap[id] > Date.now() - 30 * 86400000) // prune old tombstones
           .map((id) => ({ id: Number(id) || id, ts: tombMap[id] }));
 
-        // Type settings: whichever side changed them more recently wins wholesale.
+        // Type settings: UNION by name — a type known to either side survives,
+        // instead of one side's whole list replacing the other's (that wholesale
+        // swap is what let a stale/empty device wipe out real customisations).
+        // Per-field conflicts (colour, GCal id, order) are settled by whichever
+        // side has the newer settings stamp. Deletions travel via typeTombstones
+        // so a union merge doesn't resurrect a type someone removed on purpose.
         const localTs = localStorage.getItem("wl2_settings_updated") || "";
         const remoteTs = remote.settingsUpdatedAt || "";
-        if (
-          remoteTs &&
-          remoteTs > localTs &&
-          Array.isArray(remote.customTypes)
-        ) {
-          customTypes = remote.customTypes;
-          typeColors = remote.typeColors || {};
-          typeGCalIds = remote.typeGCalIds || {};
-          customTypeOrder = remote.customTypeOrder || [];
-          typeOrder = remote.typeOrder || [];
-          localStorage.setItem(
-            "wl2_custom_types",
-            JSON.stringify(customTypes),
+        if (Array.isArray(remote.customTypes)) {
+          const remoteNewer = remoteTs > localTs;
+
+          const typeTombMap = {};
+          typeTombstones.forEach((t) => {
+            if (t && t.name)
+              typeTombMap[t.name] = Math.max(typeTombMap[t.name] || 0, t.ts);
+          });
+          (remote.typeTombstones || []).forEach((t) => {
+            if (t && t.name)
+              typeTombMap[t.name] = Math.max(typeTombMap[t.name] || 0, t.ts);
+          });
+
+          const nameSet = new Set([...customTypes, ...remote.customTypes]);
+          nameSet.forEach((n) => {
+            if (typeTombMap[n]) nameSet.delete(n);
+          });
+          customTypes = [...nameSet];
+
+          const remoteColors = remote.typeColors || {};
+          const remoteGCalIds = remote.typeGCalIds || {};
+          const mergedColors = { ...typeColors };
+          const mergedGCalIds = { ...typeGCalIds };
+          [
+            ...new Set([
+              ...Object.keys(typeColors),
+              ...Object.keys(remoteColors),
+            ]),
+          ].forEach((n) => {
+            if (remoteColors[n] && (remoteNewer || !typeColors[n]))
+              mergedColors[n] = remoteColors[n];
+          });
+          [
+            ...new Set([
+              ...Object.keys(typeGCalIds),
+              ...Object.keys(remoteGCalIds),
+            ]),
+          ].forEach((n) => {
+            if (
+              remoteGCalIds[n] != null &&
+              (remoteNewer || typeGCalIds[n] == null)
+            )
+              mergedGCalIds[n] = remoteGCalIds[n];
+          });
+          Object.keys(mergedColors).forEach((n) => {
+            if (typeTombMap[n]) delete mergedColors[n];
+          });
+          Object.keys(mergedGCalIds).forEach((n) => {
+            if (typeTombMap[n]) delete mergedGCalIds[n];
+          });
+          typeColors = mergedColors;
+          typeGCalIds = mergedGCalIds;
+
+          // Order: newer side's ordering leads, any type it doesn't mention
+          // (only known to the older side) is appended at the end.
+          const orderBase = remoteNewer ? remote.typeOrder || [] : typeOrder;
+          const coBase = remoteNewer
+            ? remote.customTypeOrder || []
+            : customTypeOrder;
+          const finish = (base, all) => {
+            const kept = base.filter((n) => all.includes(n));
+            all.forEach((n) => {
+              if (!kept.includes(n)) kept.push(n);
+            });
+            return kept;
+          };
+          typeOrder = finish(orderBase, [...allTypes(), ...customTypes]).filter(
+            (n, i, a) => a.indexOf(n) === i,
           );
-          localStorage.setItem(
-            "wl2_type_colors",
-            JSON.stringify(typeColors),
+          customTypeOrder = finish(coBase, customTypes).filter(
+            (n, i, a) => a.indexOf(n) === i,
           );
+
+          typeTombstones = Object.keys(typeTombMap)
+            .filter((n) => typeTombMap[n] > Date.now() - 30 * 86400000)
+            .map((n) => ({ name: n, ts: typeTombMap[n] }));
+          saveTypeTombstones();
+
+          localStorage.setItem("wl2_custom_types", JSON.stringify(customTypes));
+          localStorage.setItem("wl2_type_colors", JSON.stringify(typeColors));
           localStorage.setItem(
             "wl2_type_gcal_ids",
             JSON.stringify(typeGCalIds),
@@ -9138,7 +9197,8 @@
             JSON.stringify(customTypeOrder),
           );
           localStorage.setItem("wl2_type_order", JSON.stringify(typeOrder));
-          localStorage.setItem("wl2_settings_updated", remoteTs);
+          if (remoteNewer)
+            localStorage.setItem("wl2_settings_updated", remoteTs);
           populateTypeSelects();
         }
 
@@ -9393,8 +9453,7 @@
           savedThemes: JSON.stringify(savedThemes),
         };
         settingsDirty = false;
-        pendingTheme =
-          localStorage.getItem("wl2_current_theme") || "default";
+        pendingTheme = localStorage.getItem("wl2_current_theme") || "default";
         pendingCustomEdited = false;
         buildSettingsUI();
         document.getElementById("settings-overlay").classList.add("open");
@@ -9427,10 +9486,7 @@
         BUILTIN_TYPES.length = 0;
         BUILTIN_TYPES.push(...settingsSnapshot.builtinTypes);
         savedThemes = JSON.parse(settingsSnapshot.savedThemes);
-        localStorage.setItem(
-          "wl2_saved_themes",
-          JSON.stringify(savedThemes),
-        );
+        localStorage.setItem("wl2_saved_themes", JSON.stringify(savedThemes));
         pendingTheme = null;
         pendingCustomEdited = false;
         loadTheme();
@@ -9600,8 +9656,11 @@
           const idx = BUILTIN_TYPES.indexOf(name);
           if (idx > -1) BUILTIN_TYPES.splice(idx, 1);
         } else {
-          // Remove custom type
+          // Remove custom type. Tombstone it so a union merge with another
+          // device's still-stale copy of this type doesn't bring it back.
           customTypes = customTypes.filter((t) => t !== name);
+          typeTombstones.push({ name, ts: Date.now() });
+          saveTypeTombstones();
         }
         // Always remove from order arrays
         customTypeOrder = customTypeOrder.filter((t) => t !== name);
@@ -9631,14 +9690,8 @@
           if (gcalEl) typeGCalIds[t] = gcalEl.value;
         });
         localStorage.setItem("wl2_type_colors", JSON.stringify(typeColors));
-        localStorage.setItem(
-          "wl2_type_gcal_ids",
-          JSON.stringify(typeGCalIds),
-        );
-        localStorage.setItem(
-          "wl2_custom_types",
-          JSON.stringify(customTypes),
-        );
+        localStorage.setItem("wl2_type_gcal_ids", JSON.stringify(typeGCalIds));
+        localStorage.setItem("wl2_custom_types", JSON.stringify(customTypes));
         localStorage.setItem(
           "wl2_custom_type_order",
           JSON.stringify(customTypeOrder),
@@ -9703,9 +9756,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
+          version: "v2.0.1",
+          date: "August 21, 2026",
+          latest: true,
+          items: [
+            "Fixed: syncing across devices could wipe out custom task types and colours — cross-device type sync now merges both devices' types together instead of one side's list replacing the other's",
+          ],
+        },
+        {
           version: "v2.0.0",
           date: "August 18, 2026",
-          latest: true,
+          latest: false,
           items: [
             "Work Log 2.0 — a fresh start. Everything from the v1.8 beta line is now in production:",
             "Calendar view (month / year) alongside the list, with quick add, day and entry popups, multi-day bars",
@@ -11367,10 +11428,7 @@
         const tokens = readCurrentTokens();
         const id = "t" + Date.now();
         savedThemes.push({ id, name, tokens });
-        localStorage.setItem(
-          "wl2_saved_themes",
-          JSON.stringify(savedThemes),
-        );
+        localStorage.setItem("wl2_saved_themes", JSON.stringify(savedThemes));
         nameInput.value = "";
         applySavedTheme(id);
         toast('Theme "' + name + '" saved');
@@ -11392,10 +11450,7 @@
 
       function deleteSavedTheme(id) {
         savedThemes = savedThemes.filter((t) => t.id !== id);
-        localStorage.setItem(
-          "wl2_saved_themes",
-          JSON.stringify(savedThemes),
-        );
+        localStorage.setItem("wl2_saved_themes", JSON.stringify(savedThemes));
         if (activeThemeName() === "saved:" + id) {
           switchTheme("default");
         }
@@ -11407,10 +11462,7 @@
         const th = savedThemes.find((t) => t.id === id);
         if (!th) return;
         th.name = (value || "").trim() || th.name;
-        localStorage.setItem(
-          "wl2_saved_themes",
-          JSON.stringify(savedThemes),
-        );
+        localStorage.setItem("wl2_saved_themes", JSON.stringify(savedThemes));
       }
 
       function renderSavedThemes() {
