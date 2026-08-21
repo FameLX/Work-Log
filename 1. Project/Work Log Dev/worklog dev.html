@@ -1,4 +1,4 @@
-<!-- Work Log DEV v1.8.19 --><!doctype html>
+<!-- Work Log DEV v1.8.20 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -3013,7 +3013,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v1.8.19</span
+            >/ v1.8.20</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -8928,26 +8928,20 @@
       let tombstones = JSON.parse(
         localStorage.getItem("wl2dev_tombstones") || "[]",
       ); // [{id, ts}]
+      let typeTombstones = JSON.parse(
+        localStorage.getItem("wl2dev_type_tombstones") || "[]",
+      ); // [{name, ts}] — deleted custom types, so a union merge doesn't resurrect them
+      function saveTypeTombstones() {
+        localStorage.setItem(
+          "wl2dev_type_tombstones",
+          JSON.stringify(typeTombstones),
+        );
+      }
       let syncFileId = localStorage.getItem("wl2dev_sync_file_id") || null;
       let syncInProgress = false;
       let syncDebounceTimer = null;
       let syncPendingAgain = false; // a save happened while a sync was in flight
       let syncDirty = false; // local data changed since the last successful upload
-
-      // Devices that customized types BEFORE the settings stamp existed would lose
-      // them to any stamped remote in the wholesale settings merge — stamp them now.
-      // Fresh devices stay unstamped so they adopt remote settings on first sync.
-      if (
-        !localStorage.getItem("wl2dev_settings_updated") &&
-        (customTypes.length ||
-          Object.keys(typeColors).length ||
-          Object.keys(typeGCalIds).length)
-      ) {
-        localStorage.setItem(
-          "wl2dev_settings_updated",
-          new Date().toISOString(),
-        );
-      }
 
       function saveTombstones() {
         localStorage.setItem("wl2dev_tombstones", JSON.stringify(tombstones));
@@ -8989,6 +8983,7 @@
           archived,
           trash,
           tombstones,
+          typeTombstones,
           customTypes,
           typeColors,
           typeGCalIds,
@@ -9151,19 +9146,88 @@
           .filter((id) => tombMap[id] > Date.now() - 30 * 86400000) // prune old tombstones
           .map((id) => ({ id: Number(id) || id, ts: tombMap[id] }));
 
-        // Type settings: whichever side changed them more recently wins wholesale.
+        // Type settings: UNION by name — a type known to either side survives,
+        // instead of one side's whole list replacing the other's (that wholesale
+        // swap is what let a stale/empty device wipe out real customisations).
+        // Per-field conflicts (colour, GCal id, order) are settled by whichever
+        // side has the newer settings stamp. Deletions travel via typeTombstones
+        // so a union merge doesn't resurrect a type someone removed on purpose.
         const localTs = localStorage.getItem("wl2dev_settings_updated") || "";
         const remoteTs = remote.settingsUpdatedAt || "";
-        if (
-          remoteTs &&
-          remoteTs > localTs &&
-          Array.isArray(remote.customTypes)
-        ) {
-          customTypes = remote.customTypes;
-          typeColors = remote.typeColors || {};
-          typeGCalIds = remote.typeGCalIds || {};
-          customTypeOrder = remote.customTypeOrder || [];
-          typeOrder = remote.typeOrder || [];
+        if (Array.isArray(remote.customTypes)) {
+          const remoteNewer = remoteTs > localTs;
+
+          const typeTombMap = {};
+          typeTombstones.forEach((t) => {
+            if (t && t.name)
+              typeTombMap[t.name] = Math.max(typeTombMap[t.name] || 0, t.ts);
+          });
+          (remote.typeTombstones || []).forEach((t) => {
+            if (t && t.name)
+              typeTombMap[t.name] = Math.max(typeTombMap[t.name] || 0, t.ts);
+          });
+
+          const nameSet = new Set([
+            ...customTypes,
+            ...remote.customTypes,
+          ]);
+          nameSet.forEach((n) => {
+            if (typeTombMap[n]) nameSet.delete(n);
+          });
+          customTypes = [...nameSet];
+
+          const remoteColors = remote.typeColors || {};
+          const remoteGCalIds = remote.typeGCalIds || {};
+          const mergedColors = { ...typeColors };
+          const mergedGCalIds = { ...typeGCalIds };
+          [...new Set([...Object.keys(typeColors), ...Object.keys(remoteColors)])].forEach(
+            (n) => {
+              if (remoteColors[n] && (remoteNewer || !typeColors[n]))
+                mergedColors[n] = remoteColors[n];
+            },
+          );
+          [...new Set([...Object.keys(typeGCalIds), ...Object.keys(remoteGCalIds)])].forEach(
+            (n) => {
+              if (remoteGCalIds[n] != null && (remoteNewer || typeGCalIds[n] == null))
+                mergedGCalIds[n] = remoteGCalIds[n];
+            },
+          );
+          Object.keys(mergedColors).forEach((n) => {
+            if (typeTombMap[n]) delete mergedColors[n];
+          });
+          Object.keys(mergedGCalIds).forEach((n) => {
+            if (typeTombMap[n]) delete mergedGCalIds[n];
+          });
+          typeColors = mergedColors;
+          typeGCalIds = mergedGCalIds;
+
+          // Order: newer side's ordering leads, any type it doesn't mention
+          // (only known to the older side) is appended at the end.
+          const orderBase = remoteNewer
+            ? remote.typeOrder || []
+            : typeOrder;
+          const coBase = remoteNewer
+            ? remote.customTypeOrder || []
+            : customTypeOrder;
+          const finish = (base, all) => {
+            const kept = base.filter((n) => all.includes(n));
+            all.forEach((n) => {
+              if (!kept.includes(n)) kept.push(n);
+            });
+            return kept;
+          };
+          typeOrder = finish(orderBase, [...allTypes(), ...customTypes]).filter(
+            (n, i, a) => a.indexOf(n) === i,
+          );
+          customTypeOrder = finish(coBase, customTypes).filter(
+            (n, i, a) => a.indexOf(n) === i,
+          );
+
+          typeTombstones = Object.keys(typeTombMap)
+            .filter((n) => typeTombMap[n] > Date.now() - 30 * 86400000)
+            .map((n) => ({ name: n, ts: typeTombMap[n] }));
+          saveTypeTombstones();
+
           localStorage.setItem(
             "wl2dev_custom_types",
             JSON.stringify(customTypes),
@@ -9181,7 +9245,8 @@
             JSON.stringify(customTypeOrder),
           );
           localStorage.setItem("wl2dev_type_order", JSON.stringify(typeOrder));
-          localStorage.setItem("wl2dev_settings_updated", remoteTs);
+          if (remoteNewer)
+            localStorage.setItem("wl2dev_settings_updated", remoteTs);
           populateTypeSelects();
         }
 
@@ -9643,8 +9708,11 @@
           const idx = BUILTIN_TYPES.indexOf(name);
           if (idx > -1) BUILTIN_TYPES.splice(idx, 1);
         } else {
-          // Remove custom type
+          // Remove custom type. Tombstone it so a union merge with another
+          // device's still-stale copy of this type doesn't bring it back.
           customTypes = customTypes.filter((t) => t !== name);
+          typeTombstones.push({ name, ts: Date.now() });
+          saveTypeTombstones();
         }
         // Always remove from order arrays
         customTypeOrder = customTypeOrder.filter((t) => t !== name);
@@ -9746,9 +9814,17 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
+          version: "v1.8.20",
+          date: "August 21, 2026",
+          latest: true,
+          items: [
+            "Fixed: syncing across devices could wipe out custom task types and colours — cross-device type sync now merges both devices' types together instead of one side's list replacing the other's",
+          ],
+        },
+        {
           version: "v1.8.19",
           date: "August 18, 2026",
-          latest: true,
+          latest: false,
           items: [
             "Date fields: keyboard Tab skips the invisible native input and reaches the calendar button; screen readers hear the field name with each block (e.g. Deadline, Day)",
             "Phone: bigger calendar-button tap target in date fields",
