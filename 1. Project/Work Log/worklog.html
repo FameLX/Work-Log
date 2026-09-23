@@ -1,4 +1,4 @@
-<!-- Work Log v2.0.1 --><!doctype html>
+<!-- Work Log v2.1.0 --><!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -2974,7 +2974,9 @@
           -webkit-overflow-scrolling: touch;
         }
         .cal-weekdays,
-        .cal-week-days {
+        .cal-week-days,
+        .cal-week,
+        .cal-week-bars {
           min-width: 560px;
         }
         .cal-year-grid {
@@ -3013,7 +3015,7 @@
             onclick="openChangelog()"
             style="cursor: pointer; text-decoration: none; user-select: none"
             title="View changelog"
-            >/ v2.0.1</span
+            >/ v2.1.0</span
           >
         </div>
         <div class="topbar-spacer"></div>
@@ -3586,6 +3588,9 @@
         <div class="bulk-bar" id="bulk-bar">
           <span id="bulk-count">0 selected</span>
           <div style="flex: 1"></div>
+          <button class="btn" onclick="openBulkMoveModal()">
+            Move selected
+          </button>
           <button class="btn" onclick="bulkArchive()">Archive selected</button>
           <button class="btn btn-danger" onclick="bulkDelete()">
             Delete selected
@@ -4058,6 +4063,29 @@
           >
             Move to Trash
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="bulk-move-modal">
+      <div class="modal">
+        <h2>Move selected entries</h2>
+        <p
+          style="
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.6;
+            margin-bottom: 10px;
+          "
+          id="bulk-move-body"
+        ></p>
+        <div>
+          <label class="field-label">New date</label>
+          <input type="date" id="bulk-move-date" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn" onclick="closeBulkMoveModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="bulkMoveOk()">Move</button>
         </div>
       </div>
     </div>
@@ -5473,6 +5501,7 @@
         const e = archived.find((x) => x.id === id);
         if (!e) return;
         delete e.archivedAt;
+        if (e.syncMode === "task") e.completed = false;
         // Same sync rule as restoreFromTrash: newest timestamp must be the restore.
         touchEntry(e);
         entries.unshift(e);
@@ -5480,6 +5509,8 @@
         save();
         render();
         toast("Entry restored to active.");
+        if (e.syncMode === "task" && gcalToken && e.gcalTaskId)
+          patchGTask(e, true);
       }
 
       function deleteArchived(id) {
@@ -5819,6 +5850,29 @@
       let selectMode = false;
       let selectedIds = new Set();
 
+      // Mobile entry point into select mode: hold a card ~500ms to enter select
+      // mode with that card already checked, mirroring the desktop Select button.
+      let longPressTimer = null;
+      let longPressFired = false;
+      const LONG_PRESS_MS = 500;
+      function entryTouchStart(id) {
+        longPressFired = false;
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(() => {
+          longPressFired = true;
+          if (!selectMode) toggleSelectMode();
+          if (!selectedIds.has(id)) toggleEntrySelect(id);
+          if (navigator.vibrate) navigator.vibrate(15);
+        }, LONG_PRESS_MS);
+      }
+      function entryTouchEnd(ev) {
+        clearTimeout(longPressTimer);
+        if (longPressFired && ev) ev.preventDefault();
+      }
+      function entryTouchMove() {
+        clearTimeout(longPressTimer);
+      }
+
       function toggleSelectMode() {
         selectMode = !selectMode;
         selectedIds.clear();
@@ -5919,6 +5973,62 @@
         save();
         toggleSelectMode();
         toast(`${count} ${count === 1 ? "entry" : "entries"} archived.`);
+      }
+
+      function openBulkMoveModal() {
+        if (!selectedIds.size) return;
+        const count = selectedIds.size;
+        document.getElementById("bulk-move-body").innerHTML =
+          `<b>${count} ${count === 1 ? "entry" : "entries"}</b> will move to the date you pick. Multi-day spans keep their length.`;
+        document.getElementById("bulk-move-date").value = "";
+        document.getElementById("bulk-move-modal").classList.add("open");
+      }
+      function closeBulkMoveModal() {
+        document.getElementById("bulk-move-modal").classList.remove("open");
+      }
+      document
+        .getElementById("bulk-move-modal")
+        ?.addEventListener("click", (ev) => {
+          if (ev.target.id === "bulk-move-modal") closeBulkMoveModal();
+        });
+      function bulkMoveOk() {
+        const dateStr = v("bulk-move-date");
+        if (!dateStr) {
+          fieldError("bulk-move-date", "Pick a date.");
+          return;
+        }
+        closeBulkMoveModal();
+        bulkMove(dateStr);
+      }
+      function bulkMove(dateStr) {
+        if (!selectedIds.size) return;
+        const count = selectedIds.size;
+        const moved = [];
+        selectedIds.forEach((id) => {
+          const e = entries.find((x) => x.id === id);
+          if (!e || !e.deadline) return;
+          if (e.deadlineEnd) {
+            const spanDays = Math.round(
+              (new Date(e.deadlineEnd) - new Date(e.deadline)) / 86400000,
+            );
+            const newEnd = new Date(dateStr);
+            newEnd.setDate(newEnd.getDate() + spanDays);
+            e.deadlineEnd = newEnd.toISOString().slice(0, 10);
+          }
+          e.deadline = dateStr;
+          touchEntry(e);
+          moved.push(e);
+        });
+        selectedIds.clear();
+        save();
+        toggleSelectMode();
+        toast(`${count} ${count === 1 ? "entry" : "entries"} moved.`);
+        if (gcalToken) {
+          moved.forEach((e) => {
+            if (e.syncMode === "task" && e.gcalTaskId) patchGTask(e);
+            else if (e.syncMode !== "task" && e.gcalEventId) patchGCal(e);
+          });
+        }
       }
 
       // ── Repeat Entry ──────────────────────────────────────────────────────────────
@@ -6833,9 +6943,12 @@
           selectMode && !isArchived
             ? ` onclick="toggleEntrySelect(${e.id})"`
             : "";
+        const longPressAttrs = isArchived
+          ? ""
+          : ` ontouchstart="entryTouchStart(${e.id})" ontouchend="entryTouchEnd(event)" ontouchmove="entryTouchMove()"`;
 
         return `
-    <div class="entry-card" id="card-${e.id}"${colorStyle}${cardClick}>
+    <div class="entry-card" id="card-${e.id}"${colorStyle}${cardClick}${longPressAttrs}>
       <div class="entry-top">
         <div class="entry-body">
           <div class="entry-name">${highlight(e.name, searchQuery)}</div>
@@ -7036,10 +7149,25 @@
       // Task checkbox on calendar chips — marks the task done/not-done and mirrors
       // the state to Google Tasks when connected.
       function toggleTaskDone(id) {
-        const e = entries.find((x) => x.id === id);
+        const inEntries = entries.some((x) => x.id === id);
+        const e = inEntries
+          ? entries.find((x) => x.id === id)
+          : archived.find((x) => x.id === id);
         if (!e || e.syncMode !== "task") return;
+        const wasCompleted = e.completed;
         e.completed = !e.completed;
         touchEntry(e);
+        if (e.completed && !wasCompleted && inEntries) {
+          e.archivedAt = new Date().toISOString();
+          archived.unshift(e);
+          entries = entries.filter((x) => x.id !== id);
+          toast("Task completed and archived.");
+        } else if (!e.completed && wasCompleted && !inEntries) {
+          delete e.archivedAt;
+          archived = archived.filter((x) => x.id !== id);
+          entries.unshift(e);
+          toast("Task restored.");
+        }
         save();
         render();
         if (gcalToken && e.gcalTaskId) patchGTask(e, true);
@@ -7266,31 +7394,35 @@
                 contR: e.deadlineEnd > weekEnd,
               });
             });
-          const laneCount = lanes.length;
-          const barArea = laneCount * 24;
-
-          // Chips that fit below the day number and this week's bar lanes; when
-          // not everything fits, one chip slot is traded for the "+N more" line.
-          // Cell = padding-top 28 (+ bar lanes) + chips + padding-bottom 4 + 1px
-          // border; each chip is 20.5px with a 2px flex gap (stride 22.5, no gap
-          // after the last). Undercounting these clipped the last chip on tall windows.
-          const fitAll = Math.max(
-            0,
-            Math.floor((rowH - 33 - barArea + 2) / 22.5),
+          // Per-day bar clearance: only days a bar actually spans need padding
+          // for it, so an unaffected day in the same row keeps its full chip
+          // capacity instead of losing space to a bar drawn over its neighbours.
+          const dayBarArea = days.map(
+            (_, i) => bars.filter((b) => b.s <= i && b.en >= i).length * 24,
           );
+
+          // Chips that fit below the day number and that day's own bar lanes;
+          // when not everything fits, one chip slot is traded for the "+N more"
+          // line. Cell = padding-top 28 (+ that day's bar lanes) + chips +
+          // padding-bottom 4 + 1px border; each chip is 20.5px with a 2px flex
+          // gap (stride 22.5, no gap after the last). Undercounting these
+          // clipped the last chip on tall windows.
+          const fitAllForDay = (barAreaForDay) =>
+            Math.max(0, Math.floor((rowH - 33 - barAreaForDay + 2) / 22.5));
           html +=
             `<div class="cal-week"><div class="cal-week-days">` +
             days
-              .map((day) => {
+              .map((day, i) => {
                 const other = day.m !== calMonth;
                 const daySingles = singlesByDay[day.ds] || [];
+                const fitAll = fitAllForDay(dayBarArea[i]);
                 const maxChips =
                   daySingles.length <= fitAll
                     ? fitAll
                     : Math.max(0, fitAll - 1);
                 const chips = daySingles.slice(0, maxChips);
                 const more = daySingles.length - chips.length;
-                return `<div class="cal-day${other ? " other-month" : ""}" role="button" tabindex="0" aria-label="${fmtDate(day.ds)}" onclick="calDayClick('${day.ds}')" style="padding-top:${28 + barArea}px;">
+                return `<div class="cal-day${other ? " other-month" : ""}" role="button" tabindex="0" aria-label="${fmtDate(day.ds)}" onclick="calDayClick('${day.ds}')" style="padding-top:${28 + dayBarArea[i]}px;">
           <span class="cal-day-num${day.ds === todayStr ? " today" : ""}" role="button" tabindex="0" onclick="event.stopPropagation();openCalDay('${day.ds}')" title="Show everything on this day">${day.d}</span>
           ${chips.map(calChipHTML).join("")}
           ${more > 0 ? `<span class="cal-more" role="button" tabindex="0" onclick="event.stopPropagation();openCalDay('${day.ds}')">+${more} more</span>` : ""}
@@ -7605,11 +7737,8 @@
         ?.addEventListener("click", (ev) => {
           if (ev.target.id === "cal-quickadd-modal") closeCalQuickAdd();
         });
-      document
-        .getElementById("cal-edit-modal")
-        ?.addEventListener("click", (ev) => {
-          if (ev.target.id === "cal-edit-modal") closeCalEditModal();
-        });
+      // No click-outside-to-close on cal-edit-modal (v1.9.1) — an edit in
+      // progress should only close via Cancel/Save/Escape, not a stray click.
 
       // Re-fit the calendar's chip capacity when the window size changes — without
       // this, growing the window leaves stale "+N more" and shrinking silently
@@ -8619,15 +8748,14 @@
           const endTime = padHM(entry.timeTo) || time;
           start = { dateTime: `${entry.deadline}T${time}:00`, timeZone: tz };
           end = { dateTime: `${endDate}T${endTime}:00`, timeZone: tz };
-        } else if (entry.deadlineEnd) {
-          // Multi-day all-day event: GCal end date is exclusive, so add 1 day
-          const endExclusive = new Date(entry.deadlineEnd);
+        } else {
+          // All-day event: GCal end date is exclusive, so add 1 day. Without
+          // this a single-day event is zero-duration and iOS's Calendar
+          // widget filters it out entirely.
+          const endExclusive = new Date(entry.deadlineEnd || entry.deadline);
           endExclusive.setDate(endExclusive.getDate() + 1);
           start = { date: entry.deadline };
           end = { date: endExclusive.toISOString().split("T")[0] };
-        } else {
-          start = { date: entry.deadline };
-          end = { date: entry.deadline };
         }
         return {
           summary: entry.name,
@@ -8711,7 +8839,10 @@
             if (res.status === 400 && /invalid start time/i.test(msg)) {
               // The event on GCal's side is stuck in a state PATCH can't reconcile
               // (e.g. it was created as an all-day event and can't be converted to
-              // a timed one in place) — clear the stale ID and create fresh instead.
+              // a timed one in place) — delete the stuck event first, THEN create
+              // fresh. Without the delete, the old event is orphaned on Google's
+              // side and shows up as a duplicate alongside the new one.
+              await deleteFromGCal(entry, true);
               entry.gcalEventId = null;
               save();
               await pushToGCal(entry, silent);
@@ -9756,9 +9887,24 @@
       // ── Changelog ──────────────────────────────────────────────────────────────
       const CHANGELOG = [
         {
+          version: "v2.1.0",
+          date: "September 23, 2026",
+          latest: true,
+          items: [
+            "Calendar: checking a task's checkbox now automatically archives it; unchecking a task in the archive restores it to active",
+            "Fixed: restoring a completed task from the archive left it stuck marked done, and unchecking it afterward created a duplicate — restoring a task now clears its done state properly",
+            "Fixed: on mobile, multi-day calendar entries (e.g. an event spanning two days) could appear shifted under the wrong date column until you scrolled the calendar sideways — the entry bar now scrolls in lockstep with the day columns",
+            'Fixed: a day could show "+N more" with none of its own entries visible, even with just 2-3 entries — caused by a multi-day event elsewhere in the same week eating into every day\'s space; unrelated days now keep their full room',
+            "List view: hold down an entry to select it (mobile) alongside the existing Select button (desktop); selected entries can now be moved to a new date, in addition to archive/delete",
+            "Fixed: the calendar edit modal closed if you clicked outside it, easy to trigger by accident mid-edit — it now only closes via Cancel, Save, or Escape",
+            "Fixed: switching an entry from all-day to a specific time could leave a duplicate leftover event on Google Calendar instead of updating it in place",
+            "Fixed: all-day entries synced to Google Calendar were created with no duration, so they never appeared in the iOS Calendar widget (they did show inside the Google Calendar app) — single-day all-day entries now cover a full day",
+          ],
+        },
+        {
           version: "v2.0.1",
           date: "August 21, 2026",
-          latest: true,
+          latest: false,
           items: [
             "Fixed: syncing across devices could wipe out custom task types and colours — cross-device type sync now merges both devices' types together instead of one side's list replacing the other's",
           ],
